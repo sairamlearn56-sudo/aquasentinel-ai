@@ -23,11 +23,11 @@ export default function InvestigationSection({
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay }}
-      className="premium-card p-6"
+      className="premium-card p-7"
     >
-      <div className="flex items-center gap-3 mb-4">
+      <div className="flex items-center gap-3 mb-5">
         {number && (
-          <span className="text-xs font-bold text-muted-foreground/50 tabular-nums">
+          <span className="text-xs font-semibold text-muted-foreground/40 tabular-nums">
             {String(number).padStart(2, "0")}
           </span>
         )}
@@ -36,7 +36,7 @@ export default function InvestigationSection({
         </div>
         <h2 className="font-heading font-semibold text-lg">{title}</h2>
       </div>
-      <div className="text-sm text-foreground/80 leading-relaxed space-y-3">{children}</div>
+      <div className="text-sm text-foreground/80 leading-relaxed space-y-4">{children}</div>
     </motion.div>
   );
 }
