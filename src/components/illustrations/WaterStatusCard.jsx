@@ -1,5 +1,6 @@
 import React from "react";
 import HealthScoreRing from "@/components/HealthScoreRing";
+import TiltCard from "@/components/TiltCard";
 
 /**
  * Premium illustrated water status card with shield, landscape scene,
@@ -30,7 +31,7 @@ export default function WaterStatusCard({ status, score, date }) {
   const c = config[status] || config.safe;
 
   return (
-    <div className={`rounded-3xl overflow-hidden shadow-xl ${c.bgClass}`}>
+    <TiltCard className={`rounded-3xl overflow-hidden shadow-xl ${c.bgClass}`} intensity={3}>
       <div className="relative h-44 sm:h-52">{c.scene}</div>
       <div className="bg-white dark:bg-card px-5 py-4 flex items-center gap-4 sm:gap-5">
         <HealthScoreRing score={score} riskLevel={status} size={80} stroke={7} />
@@ -40,7 +41,7 @@ export default function WaterStatusCard({ status, score, date }) {
           {date && <p className="text-xs text-muted-foreground mt-1.5">{date}</p>}
         </div>
       </div>
-    </div>
+    </TiltCard>
   );
 }
 

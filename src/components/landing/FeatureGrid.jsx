@@ -1,6 +1,7 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { BrainCircuit, Mic, Globe, Radio } from "lucide-react";
+import TiltCard from "@/components/TiltCard";
 
 const features = [
   {
@@ -45,13 +46,14 @@ export default function FeatureGrid() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-50px" }}
             transition={{ duration: 0.4, delay: i * 0.1 }}
-            className="premium-card p-6 group"
           >
-            <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110 ${f.bgClass}`}>
-              <Icon className={`w-6 h-6 ${f.iconClass}`} />
-            </div>
-            <h3 className="font-bold text-base mb-2">{f.title}</h3>
-            <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
+            <TiltCard className="premium-card p-6 group" intensity={5}>
+              <div className={`w-12 h-12 rounded-2xl flex items-center justify-center mb-4 transition-transform group-hover:scale-110 ${f.bgClass}`}>
+                <Icon className={`w-6 h-6 ${f.iconClass}`} />
+              </div>
+              <h3 className="font-bold text-base mb-2">{f.title}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{f.desc}</p>
+            </TiltCard>
           </motion.div>
         );
       })}

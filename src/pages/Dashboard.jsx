@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight, Activity, ShieldCheck, Globe, Sparkles } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageContext";
-import LandingLogo from "@/components/landing/LandingLogo";
+import WaterDrop3D from "@/components/WaterDrop3D";
 import FeatureGrid from "@/components/landing/FeatureGrid";
 import WhyAquaSentinel from "@/components/landing/WhyAquaSentinel";
 import WorkflowSection from "@/components/landing/WorkflowSection";
@@ -19,42 +19,10 @@ export default function Dashboard() {
         {/* Deep gradient background */}
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-primary/5 via-background to-teal/5" />
 
-        {/* Floating gradient orbs */}
+        {/* Soft gradient orbs */}
         <div className="absolute inset-0 -z-10 overflow-hidden">
-          <div className="absolute top-10 left-1/4 w-72 h-72 bg-primary/10 rounded-full blur-3xl animate-pulse-soft" />
-          <div className="absolute bottom-10 right-1/4 w-96 h-96 bg-teal/8 rounded-full blur-3xl animate-pulse-soft" style={{ animationDelay: "1.5s" }} />
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 bg-aqua/5 rounded-full blur-3xl animate-pulse-soft" style={{ animationDelay: "0.8s" }} />
-        </div>
-
-        {/* Expanding ripple circles */}
-        <div className="absolute inset-0 -z-10 flex items-center justify-center overflow-hidden pointer-events-none">
-          {[0, 1, 2, 3].map((i) => (
-            <motion.div
-              key={i}
-              className="absolute rounded-full border border-primary/8"
-              style={{ width: 200, height: 200 }}
-              animate={{ scale: [1, 7], opacity: [0.3, 0] }}
-              transition={{ duration: 8, repeat: Infinity, delay: i * 2, ease: "easeOut" }}
-            />
-          ))}
-        </div>
-
-        {/* Floating bubbles */}
-        <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
-          {[...Array(15)].map((_, i) => (
-            <div
-              key={`bubble-${i}`}
-              className="absolute rounded-full bg-primary/10 animate-float-up"
-              style={{
-                width: `${4 + (i % 3) * 3}px`,
-                height: `${4 + (i % 3) * 3}px`,
-                left: `${(i * 6.7) % 100}%`,
-                bottom: "0",
-                animationDelay: `${i * 0.9}s`,
-                animationDuration: `${10 + (i % 5) * 2}s`,
-              }}
-            />
-          ))}
+          <div className="absolute top-10 left-1/4 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
+          <div className="absolute bottom-10 right-1/4 w-96 h-96 bg-teal/5 rounded-full blur-3xl" />
         </div>
 
         {/* Center content */}
@@ -68,7 +36,7 @@ export default function Dashboard() {
           >
             <div className="absolute inset-0 blur-3xl bg-primary/20 rounded-full" />
             <div className="relative">
-              <LandingLogo />
+              <WaterDrop3D size={160} />
             </div>
           </motion.div>
 

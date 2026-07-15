@@ -13,7 +13,7 @@ export default function ScanWelcome({ isConnected, onStart }) {
             key={i}
             className="absolute rounded-full border border-primary/8"
             style={{ width: 200, height: 200 }}
-            animate={{ scale: [1, 8], opacity: [0.3, 0] }}
+            animate={{ scale: [1, 6], opacity: [0.15, 0] }}
             transition={{ duration: 8, repeat: Infinity, delay: i * 2, ease: "easeOut" }}
           />
         ))}
@@ -21,7 +21,7 @@ export default function ScanWelcome({ isConnected, onStart }) {
 
       {/* Floating blue particles */}
       <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
-        {[...Array(20)].map((_, i) => (
+        {[...Array(10)].map((_, i) => (
           <div
             key={i}
             className="absolute rounded-full bg-primary/10 animate-float-up"
