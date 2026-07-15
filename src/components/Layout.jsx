@@ -11,8 +11,8 @@ export default function Layout() {
     <div className="min-h-screen relative overflow-hidden">
       <WaterRippleBackground />
       <Sidebar />
-      <main className="lg:ml-64 pt-20 lg:pt-0 relative z-10">
-        <div className="p-4 sm:p-6 lg:p-10 max-w-6xl mx-auto">
+      <main className="lg:ml-[17rem] pt-20 lg:pt-6 relative z-10">
+        <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto">
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}
