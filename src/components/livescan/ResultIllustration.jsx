@@ -37,7 +37,7 @@ export default function ResultIllustration({ riskLevel }) {
             key={src}
             src={src}
             alt={`Water safety illustration — ${riskLevel}`}
-            className="w-40 h-40 sm:w-48 sm:h-48 object-cover"
+            className="w-48 h-48 sm:w-56 sm:h-56 lg:w-60 lg:h-60 object-cover"
             initial={{ opacity: 0, scale: 1.05 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.95 }}

@@ -2,15 +2,16 @@ import React from "react";
 import { motion } from "framer-motion";
 import { CheckCircle2, AlertTriangle } from "lucide-react";
 import { RecIconBoilWater, RecIconDoctor, RecIconEmergency } from "@/components/illustrations/RecommendationIcons";
+import { HEALTHCARE_IMAGES } from "@/lib/resultImages";
 
 export default function ResultChecklist({ recommendations, riskLevel }) {
   const { immediatePrecautions, waterTreatment, whenToVisitDoctor, emergencyAdvice } = recommendations;
 
   const sections = [
-    { title: "Immediate Precautions", icon: AlertTriangle, items: immediatePrecautions, color: riskLevel === "safe" ? "text-emerald-400" : "text-amber-400", accent: "from-amber-500/10 to-orange-500/5" },
-    { title: "Water Treatment", RecIcon: RecIconBoilWater, items: waterTreatment, color: "text-cyan-400", accent: "from-cyan-500/10 to-blue-500/5" },
-    { title: "When to Visit a Doctor", RecIcon: RecIconDoctor, items: [whenToVisitDoctor], color: "text-emerald-400", accent: "from-emerald-500/10 to-teal-500/5" },
-    { title: "Emergency Advice", RecIcon: RecIconEmergency, items: [emergencyAdvice], color: "text-rose-400", accent: "from-rose-500/10 to-red-500/5" },
+    { title: "Immediate Precautions", icon: AlertTriangle, items: immediatePrecautions, color: riskLevel === "safe" ? "text-emerald-400" : "text-amber-400", accent: "from-amber-500/10 to-orange-500/5", image: HEALTHCARE_IMAGES.boilingWater },
+    { title: "Water Treatment", RecIcon: RecIconBoilWater, items: waterTreatment, color: "text-cyan-400", accent: "from-cyan-500/10 to-blue-500/5", image: HEALTHCARE_IMAGES.waterFilter },
+    { title: "When to Visit a Doctor", RecIcon: RecIconDoctor, items: [whenToVisitDoctor], color: "text-emerald-400", accent: "from-emerald-500/10 to-teal-500/5", image: HEALTHCARE_IMAGES.medicalHelp },
+    { title: "Emergency Advice", RecIcon: RecIconEmergency, items: [emergencyAdvice], color: "text-rose-400", accent: "from-rose-500/10 to-red-500/5", image: HEALTHCARE_IMAGES.cleanWater },
   ];
 
   return (
@@ -23,12 +24,11 @@ export default function ResultChecklist({ recommendations, riskLevel }) {
           transition={{ duration: 0.4, delay: idx * 0.1 }}
           className={`premium-card p-5 bg-gradient-to-r ${section.accent}`}
         >
-          <div className="flex items-center gap-2 mb-3">
-            {section.RecIcon ? (
-              <section.RecIcon className={`w-5 h-5 ${section.color}`} />
-            ) : (
-              <section.icon className={`w-5 h-5 ${section.color}`} />
-            )}
+          <div className="flex items-center gap-3 mb-3">
+            <div className="relative w-11 h-11 rounded-xl overflow-hidden flex-shrink-0 border border-border/30 shadow-sm">
+              <img src={section.image} alt={section.title} className="w-full h-full object-cover" draggable={false} />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent" />
+            </div>
             <h3 className="font-heading font-semibold text-sm">{section.title}</h3>
           </div>
           <ul className="space-y-2">

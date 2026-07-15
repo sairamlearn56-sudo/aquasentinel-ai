@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { getDiseaseConfig } from "@/components/illustrations/DiseaseIllustrations";
 import { classifyParameter } from "@/lib/waterAnalysis";
+import { DISEASE_IMAGES, DISEASE_PREVENTION_TIPS } from "@/lib/resultImages";
+import { Lightbulb } from "lucide-react";
 import TiltCard from "@/components/TiltCard";
 
 function getDiseaseConfidence(risk) {
@@ -67,8 +69,9 @@ export default function ResultDiseaseCards({ diseaseRisks, waterData, t }) {
 
 function DiseaseCard({ name, risk, waterData, delay, t }) {
   const config = getDiseaseConfig(name);
-  const Illustration = config.Illustration;
   const [animatedRisk, setAnimatedRisk] = useState(0);
+  const imageUrl = DISEASE_IMAGES[name];
+  const preventionTip = DISEASE_PREVENTION_TIPS[name] || "Practice good water hygiene and sanitation.";
 
   const confidence = getDiseaseConfidence(risk);
   const reason = getDiseaseReason(name, waterData);
@@ -91,6 +94,7 @@ function DiseaseCard({ name, risk, waterData, delay, t }) {
   const riskColor = risk < 15 ? "text-safe" : risk < 40 ? "text-warning" : "text-danger";
   const riskBg = risk < 15 ? "bg-safe" : risk < 40 ? "bg-warning" : "bg-danger";
   const riskLabel = risk < 15 ? "Low Risk" : risk < 40 ? "Moderate" : "High Risk";
+  const riskTextOnImage = risk < 15 ? "text-emerald-300" : risk < 40 ? "text-amber-300" : "text-rose-300";
 
   return (
     <motion.div
@@ -98,48 +102,60 @@ function DiseaseCard({ name, risk, waterData, delay, t }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: delay / 1000 }}
     >
-      <TiltCard
-        className="premium-card p-5 hover:border-purple-500/20"
-        intensity={5}
-      >
-        <div className="flex items-center gap-3 mb-3">
-          <motion.div
-            className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0"
-            style={{
-              backgroundColor: config.color + "15",
-              color: config.color,
-              boxShadow: `0 4px 16px ${config.color}20`,
-            }}
-            animate={{ scale: [1, 1.08, 1], rotate: [0, 3, 0, -3, 0] }}
-            transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: delay / 1000 }}
-          >
-            <Illustration className="w-8 h-8" />
-          </motion.div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold truncate">{t(name)}</p>
-            <p className={`text-xs font-medium ${riskColor}`}>{riskLabel}</p>
-          </div>
-          <span className={`text-2xl font-bold ${riskColor}`}>{animatedRisk}%</span>
-        </div>
-
-        {/* Animated risk bar */}
-        <div className="h-2.5 rounded-full bg-muted overflow-hidden mb-3">
-          <motion.div
-            className={`h-full ${riskBg} rounded-full`}
-            initial={{ width: 0 }}
-            animate={{ width: `${risk}%` }}
-            transition={{ duration: 1, delay: delay / 1000, ease: "easeOut" }}
-            style={{ boxShadow: `0 0 8px ${config.color}60` }}
+      <TiltCard className="premium-card overflow-hidden hover:border-purple-500/20" intensity={5}>
+        {/* Large 3D illustration (40-50% of card) */}
+        <div className="relative h-40 overflow-hidden">
+          <motion.img
+            src={imageUrl}
+            alt={t(name)}
+            className="w-full h-full object-cover"
+            initial={{ scale: 1.1 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.6, delay: delay / 1000 }}
+            draggable={false}
           />
+          {/* Gradient overlay for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
+
+          {/* Risk % badge */}
+          <div className="absolute top-3 right-3">
+            <span className={`text-2xl font-bold ${riskColor} drop-shadow-lg`}>{animatedRisk}%</span>
+          </div>
+
+          {/* Disease name + risk label on image */}
+          <div className="absolute bottom-3 left-3">
+            <p className="text-sm font-bold text-white drop-shadow-lg">{t(name)}</p>
+            <p className={`text-xs font-medium ${riskTextOnImage}`}>{riskLabel}</p>
+          </div>
         </div>
 
-        {/* Confidence + Reason */}
-        <div className="space-y-1.5 pt-2 border-t border-border/50">
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-muted-foreground">Confidence</span>
-            <span className="font-medium text-foreground">{confidence}%</span>
+        {/* Card body */}
+        <div className="p-4 space-y-3">
+          {/* Animated risk bar */}
+          <div className="h-2 rounded-full bg-muted overflow-hidden">
+            <motion.div
+              className={`h-full ${riskBg} rounded-full`}
+              initial={{ width: 0 }}
+              animate={{ width: `${risk}%` }}
+              transition={{ duration: 1, delay: delay / 1000, ease: "easeOut" }}
+              style={{ boxShadow: `0 0 8px ${config.color}60` }}
+            />
           </div>
-          <p className="text-xs text-muted-foreground leading-relaxed">{reason}</p>
+
+          {/* AI Confidence + explanation */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">AI Confidence</span>
+              <span className="font-medium text-foreground">{confidence}%</span>
+            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed">{reason}</p>
+          </div>
+
+          {/* Prevention tip */}
+          <div className="flex items-start gap-2 pt-2 border-t border-border/50">
+            <Lightbulb className="w-3.5 h-3.5 text-amber-400 flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-foreground/70 leading-relaxed">{preventionTip}</p>
+          </div>
         </div>
       </TiltCard>
     </motion.div>
