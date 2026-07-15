@@ -3,12 +3,12 @@ import { motion } from "framer-motion";
 import { Droplet, Cpu, Brain, Activity, Volume2, ShieldCheck, ChevronRight, ChevronDown } from "lucide-react";
 
 const steps = [
-  { icon: Droplet, label: "Water Sample", color: "text-primary", bg: "bg-primary/10" },
-  { icon: Cpu, label: "ESP32 Sensors", color: "text-warning", bg: "bg-warning/10" },
-  { icon: Brain, label: "AI Analysis", color: "text-violet-400", bg: "bg-violet-500/10" },
-  { icon: Activity, label: "Disease Prediction", color: "text-danger", bg: "bg-danger/10" },
-  { icon: Volume2, label: "Voice Guidance", color: "text-teal", bg: "bg-teal/10" },
-  { icon: ShieldCheck, label: "Stay Safe", color: "text-safe", bg: "bg-safe/10" },
+  { icon: Droplet, label: "Water Sample", color: "text-cyan-400", bg: "bg-cyan-500/10" },
+  { icon: Cpu, label: "ESP32 Sensors", color: "text-amber-400", bg: "bg-amber-500/10" },
+  { icon: Brain, label: "AI Analysis", color: "text-purple-400", bg: "bg-purple-500/10" },
+  { icon: Activity, label: "Disease Prediction", color: "text-rose-400", bg: "bg-rose-500/10" },
+  { icon: Volume2, label: "Voice Guidance", color: "text-teal-400", bg: "bg-teal-500/10" },
+  { icon: ShieldCheck, label: "Stay Safe", color: "text-emerald-400", bg: "bg-emerald-500/10" },
 ];
 
 export default function WorkflowSection() {

@@ -10,10 +10,10 @@ import HistoryTimelineCard from "@/components/history/HistoryTimelineCard";
 import moment from "moment";
 
 const FILTERS = [
-  { key: "all", label: "All" },
-  { key: "safe", label: "Safe" },
-  { key: "moderate", label: "Moderate" },
-  { key: "danger", label: "Danger" },
+  { key: "all", label: "All", color: "from-cyan-500 to-blue-500" },
+  { key: "safe", label: "Safe", color: "from-emerald-500 to-teal-500" },
+  { key: "moderate", label: "Moderate", color: "from-amber-500 to-orange-500" },
+  { key: "danger", label: "Danger", color: "from-rose-500 to-red-500" },
 ];
 
 export default function History() {
@@ -63,7 +63,7 @@ export default function History() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="w-8 h-8 border-4 border-muted border-t-primary rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-emerald-500/20 border-t-emerald-500 rounded-full animate-spin" />
       </div>
     );
   }
@@ -77,7 +77,7 @@ export default function History() {
         action={
           <Link
             to="/monitor"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold hover:shadow-lg hover:shadow-emerald-500/25 transition-all"
           >
             <TrendingUp className="w-5 h-5" />
             {t("startMonitoring")}
@@ -89,19 +89,21 @@ export default function History() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      {/* Header with Calendar icon */}
+      {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
         className="flex items-center justify-between"
       >
-        <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <TrendingUp className="w-6 h-6 text-primary" />
-            {t("historyTitle")}
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">{scans.length} scans recorded</p>
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/25">
+            <TrendingUp className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-heading font-bold">{t("historyTitle")}</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">{scans.length} scans recorded</p>
+          </div>
         </div>
         {/* Calendar icon */}
         <div className="relative">
@@ -109,7 +111,7 @@ export default function History() {
             onClick={() => setShowDatePicker(!showDatePicker)}
             className={`p-2.5 rounded-xl glass border transition-colors ${
               showDatePicker || selectedDate
-                ? "border-primary/40 text-primary"
+                ? "border-emerald-500/40 text-emerald-400"
                 : "border-border hover:bg-muted/50"
             }`}
             title="Filter by date"
@@ -158,9 +160,9 @@ export default function History() {
           <button
             key={f.key}
             onClick={() => setFilter(f.key)}
-            className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
               filter === f.key
-                ? "bg-primary text-primary-foreground"
+                ? `bg-gradient-to-r ${f.color} text-white shadow-lg`
                 : "glass text-muted-foreground hover:text-foreground"
             }`}
           >

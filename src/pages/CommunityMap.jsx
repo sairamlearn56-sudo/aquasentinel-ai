@@ -64,28 +64,32 @@ export default function CommunityMap() {
   const normalize = (val, min, max) => ((val - min) / (max - min)) * 80 + 10;
 
   const colorMap = {
-    safe: "bg-safe",
-    moderate: "bg-warning",
-    danger: "bg-danger",
+    safe: "bg-emerald-500",
+    moderate: "bg-amber-500",
+    danger: "bg-rose-500",
   };
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <MapPin className="w-6 h-6 text-primary" />
-          {t("communityMapTitle")}
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1">
-          Real-time water quality across your community
-        </p>
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/25">
+            <MapPin className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-heading font-bold">{t("communityMapTitle")}</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Real-time water quality across your community
+            </p>
+          </div>
+        </div>
       </motion.div>
 
       {/* Legend */}
       <div className="flex gap-4 flex-wrap">
-        <LegendItem color="bg-safe" label={t("safeZone")} />
-        <LegendItem color="bg-warning" label={t("cautionZone")} />
-        <LegendItem color="bg-danger" label={t("dangerZone")} />
+        <LegendItem color="bg-emerald-500" label={t("safeZone")} />
+        <LegendItem color="bg-amber-500" label={t("cautionZone")} />
+        <LegendItem color="bg-rose-500" label={t("dangerZone")} />
       </div>
 
       {/* Stylized Map */}
@@ -93,12 +97,12 @@ export default function CommunityMap() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.1 }}
-        className="glass rounded-3xl p-2 overflow-hidden relative"
+        className="premium-card p-2 overflow-hidden relative"
       >
         <div
           className="relative w-full rounded-2xl overflow-hidden"
           style={{
-            background: "linear-gradient(135deg, hsl(195, 30%, 92%) 0%, hsl(185, 25%, 88%) 50%, hsl(175, 20%, 90%) 100%)",
+            background: "linear-gradient(135deg, hsl(160 84% 45% / 0.08) 0%, hsl(189 94% 50% / 0.06) 50%, hsl(217 91% 60% / 0.08) 100%)",
             minHeight: "400px",
           }}
         >
@@ -106,7 +110,7 @@ export default function CommunityMap() {
           <svg className="absolute inset-0 w-full h-full opacity-20" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="hsl(185, 40%, 40%)" strokeWidth="0.5" />
+                <path d="M 40 0 L 0 0 0 40" fill="none" stroke="hsl(var(--primary))" strokeWidth="0.5" />
               </pattern>
             </defs>
             <rect width="100%" height="100%" fill="url(#grid)" />
@@ -114,14 +118,14 @@ export default function CommunityMap() {
 
           {/* Decorative roads */}
           <svg className="absolute inset-0 w-full h-full opacity-30" xmlns="http://www.w3.org/2000/svg">
-            <path d="M 0 60 Q 50 40 100 70" fill="none" stroke="hsl(185, 30%, 70%)" strokeWidth="3" />
-            <path d="M 20 0 Q 40 50 30 100" fill="none" stroke="hsl(185, 30%, 70%)" strokeWidth="2" />
-            <path d="M 0 30 Q 60 50 100 35" fill="none" stroke="hsl(185, 30%, 70%)" strokeWidth="2" />
+            <path d="M 0 60 Q 50 40 100 70" fill="none" stroke="hsl(var(--primary) / 0.3)" strokeWidth="3" />
+            <path d="M 20 0 Q 40 50 30 100" fill="none" stroke="hsl(var(--primary) / 0.3)" strokeWidth="2" />
+            <path d="M 0 30 Q 60 50 100 35" fill="none" stroke="hsl(var(--primary) / 0.3)" strokeWidth="2" />
           </svg>
 
           {/* River */}
           <svg className="absolute inset-0 w-full h-full opacity-40" xmlns="http://www.w3.org/2000/svg">
-            <path d="M 0 80 Q 30 75 50 78 T 100 72" fill="none" stroke="hsl(200, 60%, 60%)" strokeWidth="8" strokeLinecap="round" opacity="0.5" />
+            <path d="M 0 80 Q 30 75 50 78 T 100 72" fill="none" stroke="hsl(200 80% 60%)" strokeWidth="8" strokeLinecap="round" opacity="0.4" />
           </svg>
 
           {/* Markers */}
@@ -143,7 +147,7 @@ export default function CommunityMap() {
                     <MapPin className="w-3 h-3 text-white" />
                   </div>
                 </div>
-                <span className="absolute top-7 left-1/2 -translate-x-1/2 text-[10px] font-medium whitespace-nowrap bg-white/80 backdrop-blur px-2 py-0.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
+                <span className="absolute top-7 left-1/2 -translate-x-1/2 text-[10px] font-medium whitespace-nowrap glass px-2 py-0.5 rounded-md opacity-0 group-hover:opacity-100 transition-opacity">
                   {loc.name}
                 </span>
               </button>
@@ -160,12 +164,12 @@ export default function CommunityMap() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 10 }}
             transition={{ duration: 0.3 }}
-            className="glass rounded-3xl p-6"
+            className="premium-card p-6"
           >
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-primary" />
-                <h2 className="font-semibold text-lg">{selected.name}</h2>
+                <MapPin className="w-5 h-5 text-emerald-400" />
+                <h2 className="font-heading font-semibold text-lg">{selected.name}</h2>
               </div>
               <button onClick={() => setSelected(null)} className="w-8 h-8 rounded-full hover:bg-muted/50 flex items-center justify-center transition-colors">
                 <X className="w-4 h-4" />
@@ -174,7 +178,7 @@ export default function CommunityMap() {
 
             <div className="flex items-center gap-4 mb-4">
               <div className="flex flex-col items-center">
-                <span className="text-3xl font-bold text-primary">{selected.score}</span>
+                <span className="text-3xl font-heading font-bold text-emerald-400">{selected.score}</span>
                 <span className="text-xs text-muted-foreground">{t("score")}</span>
               </div>
               <RiskBadge level={selected.risk} label={t(selected.risk)} size="lg" />
@@ -182,10 +186,10 @@ export default function CommunityMap() {
 
             <p className="text-xs text-muted-foreground mb-3">{t("latestReading")}</p>
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <ReadingCard icon={FlaskConical} label={t("pH")} value={selected.ph} />
-              <ReadingCard icon={Droplets} label={t("tds")} value={`${selected.tds} ppm`} />
-              <ReadingCard icon={Thermometer} label={t("temperature")} value={`${selected.temp}°C`} />
-              <ReadingCard icon={Activity} label={t("turbidity")} value={`${selected.turb} NTU`} />
+              <ReadingCard icon={FlaskConical} label={t("pH")} value={selected.ph} color="text-purple-400" bg="bg-purple-500/10" />
+              <ReadingCard icon={Droplets} label={t("tds")} value={`${selected.tds} ppm`} color="text-cyan-400" bg="bg-cyan-500/10" />
+              <ReadingCard icon={Thermometer} label={t("temperature")} value={`${selected.temp}°C`} color="text-amber-400" bg="bg-amber-500/10" />
+              <ReadingCard icon={Activity} label={t("turbidity")} value={`${selected.turb} NTU`} color="text-rose-400" bg="bg-rose-500/10" />
             </div>
           </motion.div>
         )}
@@ -203,12 +207,14 @@ function LegendItem({ color, label }) {
   );
 }
 
-function ReadingCard({ icon: Icon, label, value }) {
+function ReadingCard({ icon: Icon, label, value, color, bg }) {
   return (
-    <div className="p-3 rounded-xl bg-muted/30">
-      <Icon className="w-4 h-4 text-primary mb-1" />
+    <div className="p-3 rounded-xl bg-muted/20">
+      <div className={`w-8 h-8 rounded-lg ${bg} ${color} flex items-center justify-center mb-1`}>
+        <Icon className="w-4 h-4" />
+      </div>
       <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="text-sm font-bold">{value}</p>
+      <p className="text-sm font-heading font-bold">{value}</p>
     </div>
   );
 }

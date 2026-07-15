@@ -10,9 +10,9 @@ const ICONS = {
 };
 
 const COLOR_MAP = {
-  safe: { text: "text-safe", bg: "bg-safe/5", border: "border-safe/20", ring: "ring-safe/20" },
-  moderate: { text: "text-warning", bg: "bg-warning/5", border: "border-warning/20", ring: "ring-warning/20" },
-  danger: { text: "text-danger", bg: "bg-danger/5", border: "border-danger/20", ring: "ring-danger/20" },
+  safe: { text: "text-emerald-400", bg: "bg-emerald-500/10", border: "border-emerald-500/20", glow: "shadow-emerald-500/10" },
+  moderate: { text: "text-amber-400", bg: "bg-amber-500/10", border: "border-amber-500/20", glow: "shadow-amber-500/10" },
+  danger: { text: "text-rose-400", bg: "bg-rose-500/10", border: "border-rose-500/20", glow: "shadow-rose-500/10" },
 };
 
 export default function SensorCard({ type, value, label, delay = 0, explanation }) {
@@ -22,7 +22,7 @@ export default function SensorCard({ type, value, label, delay = 0, explanation 
   if (type === "ph" && (value === -1 || value === "-1")) {
     return (
       <div
-        className="glass rounded-3xl p-5 border border-muted animate-fade-in-up"
+        className="premium-card p-5 border border-muted animate-fade-in-up"
         style={{ animationDelay: `${delay}ms` }}
       >
         <div className="flex items-center justify-between mb-4">
@@ -51,7 +51,7 @@ export default function SensorCard({ type, value, label, delay = 0, explanation 
 
   return (
     <div
-      className={`glass rounded-3xl p-5 border ${colors.border} animate-fade-in-up`}
+      className={`premium-card p-5 border ${colors.border} animate-fade-in-up hover:${colors.glow}`}
       style={{ animationDelay: `${delay}ms` }}
     >
       <div className="flex items-center justify-between mb-4">
@@ -62,9 +62,9 @@ export default function SensorCard({ type, value, label, delay = 0, explanation 
           {status === "safe" ? "✓ Safe" : status === "moderate" ? "⚠ Caution" : "✕ Danger"}
         </span>
       </div>
-      <p className="text-sm text-muted-foreground mb-1">{label}</p>
+      <p className="text-sm text-muted-foreground mb-1 font-medium">{label}</p>
       <div className="flex items-baseline gap-1">
-        <span className={`text-3xl font-bold ${colors.text}`}>{value}</span>
+        <span className={`text-3xl font-heading font-bold ${colors.text}`}>{value}</span>
         <span className="text-sm text-muted-foreground">{unit}</span>
       </div>
       <div className="mt-3 pt-3 border-t border-border/50">

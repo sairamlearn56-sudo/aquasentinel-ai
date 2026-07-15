@@ -30,7 +30,7 @@ export default function AIAnalysis() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="w-8 h-8 border-4 border-muted border-t-primary rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin" />
       </div>
     );
   }
@@ -43,7 +43,7 @@ export default function AIAnalysis() {
         action={
           <Link
             to="/monitor"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-purple-500 to-violet-600 text-white font-medium hover:shadow-lg hover:shadow-purple-500/25 transition-all"
           >
             <Radio className="w-5 h-5" />
             {t("startMonitoring")}
@@ -68,11 +68,11 @@ export default function AIAnalysis() {
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-primary to-aqua flex items-center justify-center shadow-lg shadow-primary/20">
-            <FileSearch className="w-5 h-5 text-white" />
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center shadow-lg shadow-purple-500/25">
+            <FileSearch className="w-6 h-6 text-white" />
           </div>
           <div>
-            <h1 className="text-2xl font-heading font-semibold">AI Water Investigation</h1>
+            <h1 className="text-2xl font-heading font-bold">AI Water Investigation</h1>
             <p className="text-sm text-muted-foreground mt-0.5">
               Select a scan to generate a detailed AI investigation report
             </p>

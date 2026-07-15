@@ -49,7 +49,7 @@ export default function WaterTracker() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="w-8 h-8 border-4 border-muted border-t-primary rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin" />
       </div>
     );
   }
@@ -63,18 +63,20 @@ export default function WaterTracker() {
         transition={{ duration: 0.4 }}
         className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4"
       >
-        <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Droplets className="w-6 h-6 text-primary" />
-            Water Tracker
-          </h1>
-          <p className="text-sm text-muted-foreground mt-1">
-            Track the improvement of water sources over time
-          </p>
+        <div className="flex items-center gap-3">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/25">
+            <Droplets className="w-6 h-6 text-white" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-heading font-bold">Water Tracker</h1>
+            <p className="text-sm text-muted-foreground mt-0.5">
+              Track the improvement of water sources over time
+            </p>
+          </div>
         </div>
         <button
           onClick={() => setShowAdd(true)}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-primary text-primary-foreground font-medium hover:bg-primary/90 transition-colors shadow-lg shadow-primary/20"
+          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-medium hover:shadow-lg hover:shadow-cyan-500/25 transition-all"
         >
           <Plus className="w-4 h-4" />
           Add Water Source
@@ -87,18 +89,20 @@ export default function WaterTracker() {
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.1 }}
-          className="glass rounded-3xl p-6"
+          className="premium-card p-6"
         >
           <div className="flex items-center gap-2 mb-4">
-            <TrendingUp className="w-5 h-5 text-primary" />
-            <h2 className="font-semibold">{t("trendGraph")}</h2>
+            <div className="w-9 h-9 rounded-xl bg-cyan-500/15 flex items-center justify-center">
+              <TrendingUp className="w-5 h-5 text-cyan-400" />
+            </div>
+            <h2 className="font-heading font-semibold">{t("trendGraph")}</h2>
           </div>
           <ResponsiveContainer width="100%" height={220}>
             <LineChart data={chartData}>
               <defs>
                 <linearGradient id="trackerLineGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="hsl(194 100% 50%)" stopOpacity={0.3} />
-                  <stop offset="100%" stopColor="hsl(194 100% 50%)" stopOpacity={0} />
+                  <stop offset="0%" stopColor="hsl(189 94% 50%)" stopOpacity={0.3} />
+                  <stop offset="100%" stopColor="hsl(189 94% 50%)" stopOpacity={0} />
                 </linearGradient>
               </defs>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
@@ -123,15 +127,16 @@ export default function WaterTracker() {
                   border: "1px solid hsl(var(--border))",
                   borderRadius: "12px",
                   fontSize: "12px",
+                  backdropFilter: "blur(20px)",
                 }}
               />
               <Line
                 type="monotone"
                 dataKey="score"
-                stroke="hsl(194 100% 50%)"
+                stroke="hsl(189 94% 50%)"
                 strokeWidth={2.5}
-                dot={{ fill: "hsl(194 100% 50%)", r: 4 }}
-                activeDot={{ r: 6 }}
+                dot={{ fill: "hsl(189 94% 50%)", r: 4, strokeWidth: 2, stroke: "hsl(var(--card))" }}
+                activeDot={{ r: 6, fill: "hsl(217 91% 60%)" }}
                 fill="url(#trackerLineGrad)"
               />
             </LineChart>
@@ -148,7 +153,7 @@ export default function WaterTracker() {
           action={
             <button
               onClick={() => setShowAdd(true)}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white font-semibold hover:shadow-lg hover:shadow-cyan-500/25 transition-all"
             >
               <Plus className="w-5 h-5" />
               Add Water Source
@@ -157,7 +162,7 @@ export default function WaterTracker() {
         />
       ) : (
         <div>
-          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wide mb-4">
+          <h2 className="text-sm font-heading font-semibold text-muted-foreground uppercase tracking-wide mb-4">
             Your Water Sources ({sources.length})
           </h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">

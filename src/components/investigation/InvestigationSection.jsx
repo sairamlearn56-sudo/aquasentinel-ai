@@ -2,12 +2,12 @@ import React from "react";
 import { motion } from "framer-motion";
 
 const COLOR_MAP = {
-  primary: "text-primary bg-primary/10",
-  safe: "text-safe bg-safe/10",
-  warning: "text-warning bg-warning/10",
-  danger: "text-danger bg-danger/10",
-  teal: "text-teal bg-teal/10",
-  purple: "text-purple bg-purple/10",
+  primary: "text-cyan-400 bg-cyan-500/10",
+  safe: "text-emerald-400 bg-emerald-500/10",
+  warning: "text-amber-400 bg-amber-500/10",
+  danger: "text-rose-400 bg-rose-500/10",
+  teal: "text-teal-400 bg-teal-500/10",
+  purple: "text-purple-400 bg-purple-500/10",
 };
 
 export default function InvestigationSection({
@@ -23,18 +23,18 @@ export default function InvestigationSection({
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay }}
-      className="glass rounded-3xl p-6"
+      className="premium-card p-6"
     >
       <div className="flex items-center gap-3 mb-4">
         {number && (
-          <span className="text-xs font-bold text-muted-foreground/60 tabular-nums">
+          <span className="text-xs font-bold text-muted-foreground/50 tabular-nums">
             {String(number).padStart(2, "0")}
           </span>
         )}
         <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${COLOR_MAP[color] || COLOR_MAP.primary}`}>
           <Icon className="w-5 h-5" />
         </div>
-        <h2 className="font-semibold text-lg">{title}</h2>
+        <h2 className="font-heading font-semibold text-lg">{title}</h2>
       </div>
       <div className="text-sm text-foreground/80 leading-relaxed space-y-3">{children}</div>
     </motion.div>

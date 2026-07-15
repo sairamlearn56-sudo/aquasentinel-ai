@@ -10,7 +10,7 @@ export default function ScanCard({ scan, onAnalyze, t, index = 0 }) {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: Math.min(index * 0.04, 0.4) }}
-      className="glass rounded-2xl p-5 border border-border hover:border-primary/25 transition-all hover:shadow-lg hover:shadow-primary/5"
+      className="premium-card p-5 hover:border-purple-500/25"
     >
       <div className="flex items-start justify-between gap-3 mb-3">
         <div className="min-w-0 flex-1">
@@ -49,7 +49,7 @@ export default function ScanCard({ scan, onAnalyze, t, index = 0 }) {
 
       <button
         onClick={() => onAnalyze(scan)}
-        className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-primary/10 text-primary text-sm font-medium hover:bg-primary/20 transition-colors"
+        className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-purple-500/10 text-purple-400 text-sm font-medium hover:bg-purple-500/20 transition-colors"
       >
         Analyze
         <ChevronRight className="w-4 h-4" />

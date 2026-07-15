@@ -29,33 +29,44 @@ export default function ResultTrendGraph({ currentScore }) {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
-      className="glass rounded-3xl p-6"
+      className="premium-card p-6"
     >
       <div className="flex items-center gap-2 mb-4">
-        <TrendingUp className="w-5 h-5 text-primary" />
-        <h2 className="font-semibold text-lg">Water Quality Trend</h2>
+        <div className="w-9 h-9 rounded-xl bg-cyan-500/15 flex items-center justify-center">
+          <TrendingUp className="w-5 h-5 text-cyan-400" />
+        </div>
+        <h2 className="font-heading font-semibold text-lg">Water Quality Trend</h2>
       </div>
       <div style={{ width: "100%", height: 200 }}>
         <ResponsiveContainer>
           <LineChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" stroke="hsl(213 35% 22%)" />
-            <XAxis dataKey="name" stroke="hsl(213 27% 84%)" fontSize={12} />
-            <YAxis domain={[0, 100]} stroke="hsl(213 27% 84%)" fontSize={12} />
+            <defs>
+              <linearGradient id="trendLineGrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="hsl(189 94% 50%)" stopOpacity={0.3} />
+                <stop offset="100%" stopColor="hsl(189 94% 50%)" stopOpacity={0} />
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
+            <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} />
+            <YAxis domain={[0, 100]} stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} width={30} />
             <Tooltip
               contentStyle={{
-                backgroundColor: "hsl(219 42% 11%)",
-                border: "1px solid hsl(213 35% 22%)",
+                background: "hsl(var(--card))",
+                border: "1px solid hsl(var(--border))",
                 borderRadius: "12px",
-                color: "hsl(210 40% 98%)",
+                fontSize: "12px",
+                color: "hsl(var(--foreground))",
+                backdropFilter: "blur(20px)",
               }}
             />
             <Line
               type="monotone"
               dataKey="score"
-              stroke="hsl(194 100% 50%)"
+              stroke="hsl(189 94% 50%)"
               strokeWidth={3}
-              dot={{ fill: "hsl(194 100% 50%)", r: 4 }}
-              activeDot={{ r: 6 }}
+              dot={{ fill: "hsl(189 94% 50%)", r: 4, strokeWidth: 2, stroke: "hsl(var(--card))" }}
+              activeDot={{ r: 6, fill: "hsl(217 91% 60%)" }}
+              fill="url(#trendLineGrad)"
             />
           </LineChart>
         </ResponsiveContainer>

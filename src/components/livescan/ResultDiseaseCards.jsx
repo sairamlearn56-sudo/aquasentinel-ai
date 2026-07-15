@@ -99,7 +99,7 @@ function DiseaseCard({ name, risk, waterData, delay, t }) {
       transition={{ duration: 0.4, delay: delay / 1000 }}
     >
       <TiltCard
-        className="glass rounded-2xl p-5 border border-border hover:border-primary/20 transition-colors"
+        className="premium-card p-5 hover:border-purple-500/20"
         intensity={5}
       >
         <div className="flex items-center gap-3 mb-3">
