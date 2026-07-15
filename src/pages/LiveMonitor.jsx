@@ -5,6 +5,7 @@ import { Radio, ArrowRight, RotateCcw, Brain, Volume2, VolumeX } from "lucide-re
 import { base44 } from "@/api/base44Client";
 import { useLanguage } from "@/lib/LanguageContext";
 import { useVoice } from "@/lib/VoiceContext";
+import { useAqua } from "@/lib/AquaContext";
 import { generateSensorData, analyzeWater } from "@/lib/waterAnalysis";
 import FamilyMemberSelector from "@/components/FamilyMemberSelector";
 import ScanSequence from "@/components/ScanSequence";
@@ -16,6 +17,7 @@ import DiseaseRiskCard from "@/components/DiseaseRiskCard";
 export default function LiveMonitor() {
   const { t, lang, prefs } = useLanguage();
   const { speak, isSpeaking, stop } = useVoice();
+  const { startAnalysis, speakAnalysisStep, completeAnalysis, replayResult } = useAqua();
   const navigate = useNavigate();
   const [phase, setPhase] = useState("select"); // select | scanning | results
   const [familyMember, setFamilyMember] = useState("adult");
@@ -27,6 +29,20 @@ export default function LiveMonitor() {
       setFamilyMember(prefs.default_family_member);
     }
   }, [prefs]);
+
+  // Aqua AI Guide — speaks during scanning
+  useEffect(() => {
+    if (phase === "scanning") {
+      startAnalysis();
+      const timers = [
+        setTimeout(() => speakAnalysisStep("connecting"), 300),
+        setTimeout(() => speakAnalysisStep("collecting"), 2800),
+        setTimeout(() => speakAnalysisStep("analyzing"), 5500),
+        setTimeout(() => speakAnalysisStep("preparing"), 7500),
+      ];
+      return () => timers.forEach(clearTimeout);
+    }
+  }, [phase, startAnalysis, speakAnalysisStep]);
 
   const scanSteps = [
     t("scanSteps.connecting"),
@@ -70,24 +86,19 @@ export default function LiveMonitor() {
     voicePlayedRef.current = false;
   };
 
-  // Play voice after results are shown
+  // Aqua reacts to results
   useEffect(() => {
     if (phase === "results" && result && !voicePlayedRef.current) {
       voicePlayedRef.current = true;
-      const voiceEnabled = prefs?.voice_enabled !== false;
-      if (voiceEnabled) {
-        setTimeout(() => {
-          const voiceKey = `voice${result.risk_level.charAt(0).toUpperCase() + result.risk_level.slice(1)}`;
-          speak(t(voiceKey), lang, prefs?.voice_speed || 0.9);
-        }, 800);
-      }
+      setTimeout(() => {
+        completeAnalysis(result.risk_level, result);
+      }, 800);
     }
-  }, [phase, result, prefs, lang, speak, t]);
+  }, [phase, result, completeAnalysis]);
 
   const handleReplayVoice = () => {
     if (!result) return;
-    const voiceKey = `voice${result.risk_level.charAt(0).toUpperCase() + result.risk_level.slice(1)}`;
-    speak(t(voiceKey), lang, prefs?.voice_speed || 0.9);
+    replayResult(result.risk_level);
   };
 
   const handleNewScan = () => {

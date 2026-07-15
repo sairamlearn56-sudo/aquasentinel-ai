@@ -16,6 +16,8 @@ import Settings from '@/pages/Settings';
 import { LanguageProvider } from '@/lib/LanguageContext';
 import { VoiceProvider } from '@/lib/VoiceContext';
 import VoiceIndicator from '@/components/VoiceIndicator';
+import { AquaProvider } from '@/lib/AquaContext';
+import AquaContainer from '@/components/aqua/AquaContainer';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -42,6 +44,7 @@ const AuthenticatedApp = () => {
 
   // Render the main app
   return (
+    <>
     <Routes>
       <Route element={<Layout />}>
         <Route path="/" element={<Dashboard />} />
@@ -53,6 +56,8 @@ const AuthenticatedApp = () => {
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
+      <AquaContainer />
+    </>
   );
 };
 
@@ -66,8 +71,10 @@ function App() {
           <ScrollToTop />
           <LanguageProvider>
             <VoiceProvider>
-              <AuthenticatedApp />
-              <VoiceIndicator />
+              <AquaProvider>
+                <AuthenticatedApp />
+                <VoiceIndicator />
+              </AquaProvider>
             </VoiceProvider>
           </LanguageProvider>
         </Router>
