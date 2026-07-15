@@ -138,7 +138,6 @@ function DiseaseCard({ name, risk, waterData, delay, t }) {
               initial={{ width: 0 }}
               animate={{ width: `${risk}%` }}
               transition={{ duration: 1, delay: delay / 1000, ease: "easeOut" }}
-              style={{ boxShadow: `0 0 8px ${config.color}60` }}
             />
           </div>
 

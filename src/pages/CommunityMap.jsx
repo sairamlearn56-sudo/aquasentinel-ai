@@ -64,17 +64,17 @@ export default function CommunityMap() {
   const normalize = (val, min, max) => ((val - min) / (max - min)) * 80 + 10;
 
   const colorMap = {
-    safe: "bg-emerald-500",
-    moderate: "bg-amber-500",
-    danger: "bg-rose-500",
+    safe: "bg-safe",
+    moderate: "bg-warning",
+    danger: "bg-danger",
   };
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/25">
-            <MapPin className="w-6 h-6 text-white" />
+          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
+            <MapPin className="w-6 h-6 text-primary" />
           </div>
           <div>
             <h1 className="text-2xl font-heading font-bold">{t("communityMapTitle")}</h1>
@@ -87,9 +87,9 @@ export default function CommunityMap() {
 
       {/* Legend */}
       <div className="flex gap-4 flex-wrap">
-        <LegendItem color="bg-emerald-500" label={t("safeZone")} />
-        <LegendItem color="bg-amber-500" label={t("cautionZone")} />
-        <LegendItem color="bg-rose-500" label={t("dangerZone")} />
+        <LegendItem color="bg-safe" label={t("safeZone")} />
+        <LegendItem color="bg-warning" label={t("cautionZone")} />
+        <LegendItem color="bg-danger" label={t("dangerZone")} />
       </div>
 
       {/* Stylized Map */}
@@ -100,7 +100,7 @@ export default function CommunityMap() {
         className="premium-card p-2 overflow-hidden relative"
       >
         <div
-          className="relative w-full rounded-2xl overflow-hidden"
+          className="relative w-full rounded-xl overflow-hidden"
           style={{
             background: "linear-gradient(135deg, hsl(160 84% 45% / 0.08) 0%, hsl(189 94% 50% / 0.06) 50%, hsl(217 91% 60% / 0.08) 100%)",
             minHeight: "400px",
@@ -140,8 +140,6 @@ export default function CommunityMap() {
                 style={{ left: `${x}%`, top: `${y}%` }}
               >
                 <div className="relative">
-                  {/* Pulse ring */}
-                  <div className={`absolute inset-0 rounded-full ${colorMap[loc.risk]} opacity-30 animate-ping`} style={{ width: "24px", height: "24px" }} />
                   {/* Marker */}
                   <div className={`relative w-6 h-6 rounded-full ${colorMap[loc.risk]} border-2 border-white shadow-lg flex items-center justify-center group-hover:scale-125 transition-transform`}>
                     <MapPin className="w-3 h-3 text-white" />
