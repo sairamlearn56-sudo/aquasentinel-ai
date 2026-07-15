@@ -55,6 +55,7 @@ const AuthenticatedApp = () => {
         <Route path="/" element={<Dashboard />} />
         <Route path="/monitor" element={<LiveMonitor />} />
         <Route path="/analysis" element={<AIAnalysis />} />
+        <Route path="/analysis/:scanId" element={<AIAnalysis />} />
         <Route path="/history" element={<History />} />
         <Route path="/map" element={<CommunityMap />} />
         <Route path="/settings" element={<Settings />} />

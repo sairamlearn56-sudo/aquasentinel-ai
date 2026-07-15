@@ -40,11 +40,8 @@
       "description": "AI-generated doctor-like narrative explanation"
     },
     "recommendations": {
-      "type": "array",
-      "items": {
-        "type": "string"
-      },
-      "description": "Personalized health recommendations"
+      "type": "object",
+      "description": "Structured recommendations: immediatePrecautions, waterTreatment, whenToVisitDoctor, emergencyAdvice"
     },
     "family_member": {
       "type": "string",
@@ -97,6 +94,18 @@
     "water_source_name": {
       "type": "string",
       "description": "Name of the associated water source"
+    },
+    "sample_name": {
+      "type": "string",
+      "description": "User-entered name/label for this water sample"
+    },
+    "ai_confidence": {
+      "type": "number",
+      "description": "AI confidence percentage for the analysis"
+    },
+    "aqua_voice_summary": {
+      "type": "string",
+      "description": "AquaVoice AI spoken summary of the results"
     }
   },
   "required": [

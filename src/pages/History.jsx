@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { TrendingUp, Calendar as CalendarIcon, X, Clock } from "lucide-react";
+import { TrendingUp, Calendar as CalendarIcon, X, Clock, Search, ArrowUpDown } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { base44 } from "@/api/base44Client";
 import { useLanguage } from "@/lib/LanguageContext";
 import EmptyState from "@/components/EmptyState";
@@ -23,6 +24,9 @@ export default function History() {
   const [filter, setFilter] = useState("all");
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortBy, setSortBy] = useState("newest");
+  const navigate = useNavigate();
 
   useEffect(() => {
     async function loadData() {
@@ -51,14 +55,25 @@ export default function History() {
   // Filtered scans
   const filteredScans = useMemo(() => {
     let result = scans;
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter((s) =>
+        (s.sample_name || "").toLowerCase().includes(q) ||
+        (s.water_source_name || "").toLowerCase().includes(q) ||
+        (s.location_name || "").toLowerCase().includes(q)
+      );
+    }
     if (selectedDate) {
       result = result.filter((s) => moment(s.created_date).format("YYYY-MM-DD") === selectedDate);
     }
     if (filter !== "all") {
       result = result.filter((s) => s.risk_level === filter);
     }
+    if (sortBy === "oldest") {
+      result = [...result].reverse();
+    }
     return result;
-  }, [scans, filter, selectedDate]);
+  }, [scans, searchQuery, filter, selectedDate, sortBy]);
 
   if (loading) {
     return (
@@ -154,6 +169,27 @@ export default function History() {
         </motion.div>
       )}
 
+      {/* Search + Sort bar */}
+      <div className="flex items-center gap-3">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search by sample name, source, or location..."
+            className="w-full pl-10 pr-4 py-2.5 rounded-2xl glass border border-border text-sm focus:outline-none focus:border-emerald-500/40"
+          />
+        </div>
+        <button
+          onClick={() => setSortBy(sortBy === "newest" ? "oldest" : "newest")}
+          className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-2xl glass border border-border text-sm font-medium hover:bg-muted/50 transition-colors whitespace-nowrap"
+        >
+          <ArrowUpDown className="w-4 h-4" />
+          {sortBy === "newest" ? "Newest" : "Oldest"}
+        </button>
+      </div>
+
       {/* Filter tabs */}
       <div className="flex gap-2 flex-wrap">
         {FILTERS.map((f) => (
@@ -185,6 +221,8 @@ export default function History() {
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.3, delay: Math.min(idx * 0.03, 0.5) }}
+              onClick={() => navigate(`/analysis/${scan.id}`)}
+              className="cursor-pointer"
             >
               <HistoryTimelineCard scan={scan} t={t} />
             </motion.div>

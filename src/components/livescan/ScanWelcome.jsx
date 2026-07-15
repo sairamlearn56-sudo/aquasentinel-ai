@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Activity, Wifi, WifiOff, Database, Cpu } from "lucide-react";
 import ScanDevice from "@/components/livescan/ScanDevice";
 
-export default function ScanWelcome({ isConnected, onStart, waterSources, selectedWaterSourceId, onSelectWaterSource }) {
+export default function ScanWelcome({ isConnected, onStart, waterSources, selectedWaterSourceId, onSelectWaterSource, sampleName, onSampleNameChange }) {
   const rippleRef = useRef(null);
 
   const createRipple = (e) => {
@@ -99,6 +99,25 @@ export default function ScanWelcome({ isConnected, onStart, waterSources, select
       >
         Place the sensors in water and press Start Monitoring to begin an AI-powered water quality analysis.
       </motion.p>
+
+      {/* Sample Name Input */}
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.38 }}
+        className="mt-6 w-full max-w-xs"
+      >
+        <label className="text-xs text-muted-foreground mb-1.5 block font-medium">
+          Sample Name (optional)
+        </label>
+        <input
+          type="text"
+          value={sampleName || ""}
+          onChange={(e) => onSampleNameChange(e.target.value)}
+          placeholder="e.g., Kitchen Tap Morning"
+          className="w-full px-4 py-2.5 rounded-2xl glass border border-border text-sm focus:outline-none focus:border-cyan-500/40"
+        />
+      </motion.div>
 
       {/* Water Source Selector */}
       {waterSources && waterSources.length > 0 && (

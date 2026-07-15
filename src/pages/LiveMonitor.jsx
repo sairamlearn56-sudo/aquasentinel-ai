@@ -32,6 +32,7 @@ export default function LiveMonitor() {
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
   const [waterSources, setWaterSources] = useState([]);
   const [selectedWaterSourceId, setSelectedWaterSourceId] = useState(null);
+  const [sampleName, setSampleName] = useState("");
 
   // Fetch water sources for selection
   useEffect(() => {
@@ -160,23 +161,23 @@ export default function LiveMonitor() {
     setResult(analysis); // Set immediately so it's ready when timeline finishes
 
     // Save to database in the background
+    const aiConfidence = Math.min(98, 82 + Math.round((100 - analysis.health_score) * 0.15));
+    const voiceSummary = `Water health score: ${analysis.health_score} out of 100. Risk level: ${analysis.risk_level}. ${analysis.ai_analysis.split("\n\n").pop()}`;
+
     base44.entities.Scan.create({
       ...analysis,
       disease_risks: analysis.disease_risks,
-      recommendations: [
-        analysis.recommendations.immediatePrecautions.join("; "),
-        analysis.recommendations.waterTreatment.join("; "),
-        analysis.recommendations.whenToVisitDoctor,
-        analysis.recommendations.emergencyAdvice,
-      ],
+      recommendations: analysis.recommendations,
       language: lang,
       location_name: "Community Zone A",
       latitude: 17.385 + (Math.random() - 0.5) * 0.05,
       longitude: 78.4867 + (Math.random() - 0.5) * 0.05,
       sensor_status: "connected",
       water_source_id: selectedWaterSourceId || undefined,
-      water_source_name:
-        waterSources.find((s) => s.id === selectedWaterSourceId)?.name || undefined,
+      water_source_name: waterSources.find((s) => s.id === selectedWaterSourceId)?.name || undefined,
+      sample_name: sampleName || `Scan ${new Date().toLocaleString()}`,
+      ai_confidence: aiConfidence,
+      aqua_voice_summary: voiceSummary,
     }).then((saved) => {
       setResult((prev) => (prev ? { ...prev, id: saved.id } : prev));
     }).catch(() => {});
@@ -207,6 +208,8 @@ export default function LiveMonitor() {
         waterSources={waterSources}
         selectedWaterSourceId={selectedWaterSourceId}
         onSelectWaterSource={setSelectedWaterSourceId}
+        sampleName={sampleName}
+        onSampleNameChange={setSampleName}
       />
     );
   }
