@@ -1,5 +1,6 @@
 import React from "react";
 import { motion } from "framer-motion";
+import AquaRobotCharacter from "@/components/AquaRobotCharacter";
 
 export default function ScanDevice({ size = 192, showBeam = true, isComplete = false }) {
   return (
@@ -24,17 +25,17 @@ export default function ScanDevice({ size = 192, showBeam = true, isComplete = f
           style={{ animation: `ripple 3s ease-out infinite`, animationDelay: `${i * 1}s` }}
         />
       ))}
-      {/* Inner glowing core */}
+      {/* Inner glowing core with mascot */}
       <motion.div
-        className="absolute inset-8 rounded-full bg-gradient-to-br from-primary/20 to-aqua/10 flex items-center justify-center"
+        className="absolute inset-6 rounded-full bg-gradient-to-br from-primary/15 to-aqua/5 flex items-center justify-center overflow-hidden"
         animate={{ scale: [1, 1.05, 1], opacity: [0.8, 1, 0.8] }}
         transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
       >
-        <svg viewBox="0 0 48 48" className="w-16 h-16 text-primary" fill="none">
-          <path d="M24 6 C24 6, 12 20, 12 30 C12 37, 17 42, 24 42 C31 42, 36 37, 36 30 C36 20, 24 6, 24 6 Z"
-            fill="currentColor" fillOpacity="0.3" stroke="currentColor" strokeWidth="2" strokeLinejoin="round" />
-          <path d="M20 28 Q24 24, 28 28" fill="none" stroke="currentColor" strokeWidth="1.5" opacity="0.5" strokeLinecap="round" />
-        </svg>
+        <AquaRobotCharacter
+          mood="idle"
+          showLegs={false}
+          className="h-[85%] w-auto"
+        />
       </motion.div>
       {/* Sweeping scan beam */}
       {showBeam && !isComplete && (
