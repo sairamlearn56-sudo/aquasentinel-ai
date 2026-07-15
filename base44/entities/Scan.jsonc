@@ -1,0 +1,102 @@
+{
+  "name": "Scan",
+  "type": "object",
+  "properties": {
+    "ph": {
+      "type": "number",
+      "description": "pH level of water"
+    },
+    "tds": {
+      "type": "number",
+      "description": "Total Dissolved Solids in ppm"
+    },
+    "temperature": {
+      "type": "number",
+      "description": "Water temperature in Celsius"
+    },
+    "turbidity": {
+      "type": "number",
+      "description": "Turbidity in NTU"
+    },
+    "health_score": {
+      "type": "number",
+      "description": "Overall water health score 0-100"
+    },
+    "risk_level": {
+      "type": "string",
+      "enum": [
+        "safe",
+        "moderate",
+        "danger"
+      ],
+      "description": "Overall risk classification"
+    },
+    "disease_risks": {
+      "type": "object",
+      "description": "JSON object of disease names to risk percentages"
+    },
+    "ai_analysis": {
+      "type": "string",
+      "description": "AI-generated doctor-like narrative explanation"
+    },
+    "recommendations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      },
+      "description": "Personalized health recommendations"
+    },
+    "family_member": {
+      "type": "string",
+      "enum": [
+        "infant",
+        "child",
+        "adult",
+        "elderly",
+        "pregnant_woman"
+      ],
+      "description": "Selected family member profile"
+    },
+    "language": {
+      "type": "string",
+      "enum": [
+        "en",
+        "hi",
+        "te",
+        "ta",
+        "kn",
+        "mr",
+        "bn"
+      ],
+      "description": "Language used during scan"
+    },
+    "location_name": {
+      "type": "string",
+      "description": "Location label for community map"
+    },
+    "latitude": {
+      "type": "number",
+      "description": "Latitude for map marker"
+    },
+    "longitude": {
+      "type": "number",
+      "description": "Longitude for map marker"
+    },
+    "sensor_status": {
+      "type": "string",
+      "enum": [
+        "connected",
+        "disconnected"
+      ],
+      "default": "connected"
+    }
+  },
+  "required": [
+    "ph",
+    "tds",
+    "temperature",
+    "turbidity",
+    "health_score",
+    "risk_level"
+  ]
+}

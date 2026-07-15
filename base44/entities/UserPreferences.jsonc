@@ -1,0 +1,49 @@
+{
+  "name": "UserPreferences",
+  "type": "object",
+  "properties": {
+    "language": {
+      "type": "string",
+      "enum": [
+        "en",
+        "hi",
+        "te",
+        "ta",
+        "kn",
+        "mr",
+        "bn"
+      ],
+      "default": "en",
+      "description": "Preferred UI and voice language"
+    },
+    "default_family_member": {
+      "type": "string",
+      "enum": [
+        "infant",
+        "child",
+        "adult",
+        "elderly",
+        "pregnant_woman"
+      ],
+      "default": "adult",
+      "description": "Default family member profile for scans"
+    },
+    "voice_enabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether AquaVoice AI speaks after scans"
+    },
+    "voice_speed": {
+      "type": "number",
+      "default": 0.9,
+      "description": "Speech rate for voice agent"
+    },
+    "notifications_enabled": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "language"
+  ]
+}

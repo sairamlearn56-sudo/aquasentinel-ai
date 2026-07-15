@@ -6,7 +6,16 @@ import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
 import ScrollToTop from './components/ScrollToTop';
-// Add page imports here
+import Layout from '@/components/Layout';
+import Dashboard from '@/pages/Dashboard';
+import LiveMonitor from '@/pages/LiveMonitor';
+import AIAnalysis from '@/pages/AIAnalysis';
+import History from '@/pages/History';
+import CommunityMap from '@/pages/CommunityMap';
+import Settings from '@/pages/Settings';
+import { LanguageProvider } from '@/lib/LanguageContext';
+import { VoiceProvider } from '@/lib/VoiceContext';
+import VoiceIndicator from '@/components/VoiceIndicator';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
@@ -34,7 +43,14 @@ const AuthenticatedApp = () => {
   // Render the main app
   return (
     <Routes>
-      {/* Add your page Route elements here */}
+      <Route element={<Layout />}>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/monitor" element={<LiveMonitor />} />
+        <Route path="/analysis" element={<AIAnalysis />} />
+        <Route path="/history" element={<History />} />
+        <Route path="/map" element={<CommunityMap />} />
+        <Route path="/settings" element={<Settings />} />
+      </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
@@ -48,7 +64,12 @@ function App() {
       <QueryClientProvider client={queryClientInstance}>
         <Router>
           <ScrollToTop />
-          <AuthenticatedApp />
+          <LanguageProvider>
+            <VoiceProvider>
+              <AuthenticatedApp />
+              <VoiceIndicator />
+            </VoiceProvider>
+          </LanguageProvider>
         </Router>
         <Toaster />
       </QueryClientProvider>
