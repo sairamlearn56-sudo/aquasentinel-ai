@@ -1,5 +1,5 @@
-import React, { useRef } from "react";
-import { motion } from "framer-motion";
+import React, { useRef, useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Activity, Volume2, VolumeX, Sparkles, ChevronDown, CheckCircle2 } from "lucide-react";
 import { classifyParameter } from "@/lib/waterAnalysis";
 import HealthScoreRing from "@/components/HealthScoreRing";
@@ -10,6 +10,13 @@ import ResultChecklist from "@/components/livescan/ResultChecklist";
 import ResultTrendGraph from "@/components/livescan/ResultTrendGraph";
 import PrimaryRecommendation from "@/components/livescan/PrimaryRecommendation";
 import ResultIllustration from "@/components/livescan/ResultIllustration";
+import AIWaterReport from "@/components/livescan/AIWaterReport";
+
+function formatSensorValue(type, value) {
+  if (type === "tds" || type === "turbidity") return Math.round(value);
+  if (type === "temperature" || type === "ph") return Math.round(value * 10) / 10;
+  return value;
+}
 
 function getSensorExplanation(type, value) {
   const status = classifyParameter(type, value);
@@ -39,6 +46,7 @@ function getSensorExplanation(type, value) {
 
 export default function ScanResults({ result, familyMember, t, isSpeaking, onReplayVoice, onNewScan }) {
   const rippleRef = useRef(null);
+  const [showReport, setShowReport] = useState(false);
 
   if (!result) return null;
 
@@ -208,37 +216,6 @@ export default function ScanResults({ result, familyMember, t, isSpeaking, onRep
         </div>
       </motion.div>
 
-      {/* ===== Primary Recommendation ===== */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.15 }}
-      >
-        <PrimaryRecommendation riskLevel={result.risk_level} />
-      </motion.div>
-
-      {/* ===== AI Summary ===== */}
-      <motion.div
-        initial={{ opacity: 0, y: 12 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.2 }}
-        className="premium-card p-6"
-      >
-        <div className="flex items-center gap-2 mb-4">
-          <div className="w-9 h-9 rounded-xl bg-purple-500/15 flex items-center justify-center">
-            <Sparkles className="w-5 h-5 text-purple-400" />
-          </div>
-          <h2 className="font-heading font-semibold text-lg">AI Summary</h2>
-        </div>
-        <div className="space-y-2">
-          {(result.ai_analysis || "").split("\n\n").slice(0, 4).map((para, idx) => (
-            <p key={idx} className="text-sm text-foreground/75 leading-relaxed">
-              {para}
-            </p>
-          ))}
-        </div>
-      </motion.div>
-
       {/* ===== Sensor Readings ===== */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
@@ -249,10 +226,10 @@ export default function ScanResults({ result, familyMember, t, isSpeaking, onRep
           Averaged Sensor Readings
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <SensorCard type="ph" value={result.ph} label={t("pH")} delay={0} explanation={getSensorExplanation("ph", result.ph)} />
-          <SensorCard type="tds" value={result.tds} label={t("tds")} delay={80} explanation={getSensorExplanation("tds", result.tds)} />
-          <SensorCard type="temperature" value={result.temperature} label={t("temperature")} delay={160} explanation={getSensorExplanation("temperature", result.temperature)} />
-          <SensorCard type="turbidity" value={result.turbidity} label={t("turbidity")} delay={240} explanation={getSensorExplanation("turbidity", result.turbidity)} />
+          <SensorCard type="ph" value={formatSensorValue("ph", result.ph)} label={t("pH")} delay={0} explanation={getSensorExplanation("ph", result.ph)} />
+          <SensorCard type="tds" value={formatSensorValue("tds", result.tds)} label={t("tds")} delay={80} explanation={getSensorExplanation("tds", result.tds)} />
+          <SensorCard type="temperature" value={formatSensorValue("temperature", result.temperature)} label={t("temperature")} delay={160} explanation={getSensorExplanation("temperature", result.temperature)} />
+          <SensorCard type="turbidity" value={formatSensorValue("turbidity", result.turbidity)} label={t("turbidity")} delay={240} explanation={getSensorExplanation("turbidity", result.turbidity)} />
         </div>
       </motion.div>
 
@@ -277,14 +254,27 @@ export default function ScanResults({ result, familyMember, t, isSpeaking, onRep
         <ResultChecklist recommendations={result.recommendations} riskLevel={result.risk_level} />
       </motion.div>
 
-      {/* ===== Trend Graph ===== */}
+      {/* ===== Generate AI Water Report Button ===== */}
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.4 }}
+        className="flex justify-center"
       >
-        <ResultTrendGraph currentScore={result.health_score} />
+        <button
+          onClick={() => setShowReport(!showReport)}
+          className="group relative inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-purple-500 via-violet-500 to-indigo-500 text-white font-heading font-semibold text-base shadow-xl shadow-purple-500/25 hover:shadow-2xl hover:shadow-purple-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 overflow-hidden"
+        >
+          <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+          <Sparkles className="w-5 h-5 relative z-10" />
+          <span className="relative z-10">{showReport ? "Hide AI Report" : "Generate AI Water Report"}</span>
+        </button>
       </motion.div>
+
+      {/* ===== Expandable Premium AI Report ===== */}
+      <AnimatePresence>
+        {showReport && <AIWaterReport result={result} t={t} />}
+      </AnimatePresence>
     </div>
   );
 }
