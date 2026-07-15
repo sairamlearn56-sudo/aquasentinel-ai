@@ -7,121 +7,115 @@ import WaterDrop3D from "@/components/WaterDrop3D";
 import FeatureGrid from "@/components/landing/FeatureGrid";
 import WhyAquaSentinel from "@/components/landing/WhyAquaSentinel";
 import WorkflowSection from "@/components/landing/WorkflowSection";
-import HeroAquaCard from "@/components/landing/HeroAquaCard";
-import StatsRow from "@/components/landing/StatsRow";
-import WhyDifferent from "@/components/landing/WhyDifferent";
 
 export default function Dashboard() {
   const { t } = useLanguage();
   const navigate = useNavigate();
 
   return (
-    <div className="relative pb-16">
-      {/* ===== Hero Section — Two Column ===== */}
-      <div className="relative min-h-[calc(100vh-4rem)] flex items-center px-4 py-10 lg:py-16 overflow-hidden">
+    <div className="relative pb-32">
+      {/* ===== Hero Section ===== */}
+      <div className="relative min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center px-4 py-10 overflow-hidden">
+        {/* Deep gradient background */}
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-primary/5 via-background to-teal/5" />
+
+        {/* Soft gradient orbs */}
         <div className="absolute inset-0 -z-10 overflow-hidden">
           <div className="absolute top-10 left-1/4 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
           <div className="absolute bottom-10 right-1/4 w-96 h-96 bg-teal/5 rounded-full blur-3xl" />
         </div>
 
-        <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center max-w-6xl mx-auto w-full z-10">
-          {/* Left: Droplet + Text + CTAs */}
-          <div className="flex flex-col items-center lg:items-start text-center lg:text-left">
-            <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.7, ease: "easeOut" }}
-              className="relative mb-4"
-            >
-              <div className="absolute inset-0 blur-3xl bg-primary/15 rounded-full" />
-              <div className="relative">
-                <WaterDrop3D size={140} />
-              </div>
-            </motion.div>
+        {/* Center content */}
+        <div className="flex flex-col items-center text-center max-w-3xl mx-auto z-10">
+          {/* Logo */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.7, ease: "easeOut" }}
+            className="relative"
+          >
+            <div className="absolute inset-0 blur-3xl bg-primary/20 rounded-full" />
+            <div className="relative">
+              <WaterDrop3D size={160} />
+            </div>
+          </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-medium text-primary mb-4">
-                <Sparkles className="w-3 h-3" /> AI Powered
-              </span>
-            </motion.div>
+          {/* Title */}
+          <motion.h1
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+            className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight mt-6 gradient-text"
+          >
+            AquaSentinel AI
+          </motion.h1>
 
-            <motion.h1
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
-              className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight gradient-text"
-            >
-              AquaSentinel AI
-            </motion.h1>
+          {/* Subtitle */}
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.35 }}
+            className="text-xl sm:text-2xl text-secondary font-semibold mt-4"
+          >
+            Your AI Water Health Guardian
+          </motion.p>
 
-            <motion.p
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.4 }}
-              className="text-lg sm:text-xl text-secondary font-semibold mt-3"
-            >
-              Your AI Water Health Guardian
-            </motion.p>
+          {/* Description */}
+          <motion.p
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.5 }}
+            className="text-sm sm:text-base text-muted-foreground mt-4 max-w-xl leading-relaxed"
+          >
+            Protecting families from water-borne diseases using AI, IoT sensors, and an
+            intelligent multilingual voice assistant.
+          </motion.p>
 
-            <motion.p
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.5 }}
-              className="text-sm sm:text-base text-muted-foreground mt-3 max-w-md leading-relaxed"
+          {/* CTA Buttons */}
+          <motion.div
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.65 }}
+            className="mt-8 flex flex-wrap items-center justify-center gap-4"
+          >
+            <button
+              onClick={() => navigate("/monitor")}
+              className="group relative inline-flex items-center gap-3 px-10 py-4 rounded-full bg-gradient-to-r from-primary to-teal text-white font-semibold text-base sm:text-lg shadow-xl shadow-primary/25 hover:shadow-2xl hover:shadow-primary/40 hover:scale-[1.03] active:scale-[0.98] transition-all duration-200 animate-glow-pulse overflow-hidden"
             >
-              Protecting families from water-borne diseases using AI, IoT sensors, and an
-              intelligent multilingual voice assistant.
-            </motion.p>
-
-            <motion.div
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.6 }}
-              className="mt-6 flex flex-wrap items-center justify-center lg:justify-start gap-3"
+              <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+              <Activity className="w-5 h-5 relative z-10" />
+              <span className="relative z-10">{t("startMonitoring")}</span>
+              <ArrowRight className="w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform" />
+            </button>
+            <button
+              onClick={() => navigate("/analysis")}
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-full glass border border-primary/20 text-foreground font-semibold hover:bg-primary/5 hover:border-primary/40 transition-all duration-200"
             >
-              <button
-                onClick={() => navigate("/monitor")}
-                className="group relative inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-gradient-to-r from-primary to-teal text-white font-semibold text-base shadow-xl shadow-primary/25 hover:shadow-2xl hover:shadow-primary/40 hover:scale-[1.03] active:scale-[0.98] transition-all duration-200 animate-glow-pulse overflow-hidden"
-              >
-                <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-                <Activity className="w-5 h-5 relative z-10" />
-                <span className="relative z-10">{t("startMonitoring")}</span>
-                <ArrowRight className="w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform" />
-              </button>
-              <button
-                onClick={() => navigate("/analysis")}
-                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-full glass border border-primary/20 text-foreground font-semibold hover:bg-primary/5 hover:border-primary/40 transition-all duration-200"
-              >
-                Learn More
-                <ArrowRight className="w-4 h-4" />
-              </button>
-            </motion.div>
+              Learn More
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </motion.div>
 
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ duration: 0.6, delay: 0.7 }}
-              className="flex flex-wrap items-center justify-center lg:justify-start gap-2 sm:gap-3 mt-6 text-xs"
-            >
-              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full glass text-muted-foreground">
-                <ShieldCheck className="w-3.5 h-3.5 text-safe" /> WHO Standards
-              </span>
-              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full glass text-muted-foreground">
-                <Globe className="w-3.5 h-3.5 text-primary" /> 7 Languages
-              </span>
-              <span className="flex items-center gap-1.5 px-3 py-1.5 rounded-full glass text-muted-foreground">
-                <Sparkles className="w-3.5 h-3.5 text-secondary" /> AI-Powered
-              </span>
-            </motion.div>
-          </div>
-
-          {/* Right: Aqua Character Card */}
-          <HeroAquaCard />
+          {/* Trust badges */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.6, delay: 0.8 }}
+            className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 mt-8 text-xs sm:text-sm"
+          >
+            <span className="flex items-center gap-1.5 px-4 py-2 rounded-full glass text-muted-foreground">
+              <ShieldCheck className="w-4 h-4 text-safe" />
+              WHO Standards
+            </span>
+            <span className="flex items-center gap-1.5 px-4 py-2 rounded-full glass text-muted-foreground">
+              <Globe className="w-4 h-4 text-primary" />
+              7 Languages
+            </span>
+            <span className="flex items-center gap-1.5 px-4 py-2 rounded-full glass text-muted-foreground">
+              <Sparkles className="w-4 h-4 text-secondary" />
+              AI-Powered Analysis
+            </span>
+          </motion.div>
         </div>
 
         {/* Animated wave at bottom */}
@@ -149,14 +143,14 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* ===== Feature Grid ===== */}
-      <section className="px-4 py-12 max-w-6xl mx-auto">
+      {/* ===== Feature Cards ===== */}
+      <section className="px-4 py-16 max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-8"
+          className="text-center mb-10"
         >
           <h2 className="text-2xl sm:text-3xl font-bold">Powerful Features</h2>
           <p className="text-muted-foreground mt-2">Everything you need to keep your family safe</p>
@@ -164,59 +158,34 @@ export default function Dashboard() {
         <FeatureGrid />
       </section>
 
-      {/* ===== Lower Section: Why + How (side by side) ===== */}
-      <section className="px-4 py-12 max-w-6xl mx-auto">
-        <div className="grid lg:grid-cols-2 gap-8">
-          {/* Left: Why AquaSentinel + Stats */}
-          <div>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-              className="mb-6"
-            >
-              <h2 className="text-xl sm:text-2xl font-bold">Why AquaSentinel?</h2>
-              <p className="text-muted-foreground text-sm mt-1">Built to make a real difference</p>
-            </motion.div>
-            <WhyAquaSentinel />
-            <div className="mt-6">
-              <StatsRow />
-            </div>
-          </div>
-
-          {/* Right: How It Works */}
-          <div>
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-              className="mb-6"
-            >
-              <h2 className="text-xl sm:text-2xl font-bold">How AquaSentinel AI Works</h2>
-              <p className="text-muted-foreground text-sm mt-1">From water sample to safety in seconds</p>
-            </motion.div>
-            <div className="glass rounded-3xl p-6 border border-border">
-              <WorkflowSection />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* ===== Why Different ===== */}
-      <section className="px-4 py-12 max-w-6xl mx-auto">
+      {/* ===== Why AquaSentinel ===== */}
+      <section className="px-4 py-16 max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-8"
+          className="text-center mb-10"
         >
-          <h2 className="text-2xl sm:text-3xl font-bold">Why AquaSentinel is Different</h2>
-          <p className="text-muted-foreground mt-2">Six pillars that set us apart</p>
+          <h2 className="text-2xl sm:text-3xl font-bold">Why AquaSentinel?</h2>
+          <p className="text-muted-foreground mt-2">Built to make a real difference</p>
         </motion.div>
-        <WhyDifferent />
+        <WhyAquaSentinel />
+      </section>
+
+      {/* ===== Workflow ===== */}
+      <section className="px-4 py-16 max-w-6xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className="text-center mb-12"
+        >
+          <h2 className="text-2xl sm:text-3xl font-bold">How It Works</h2>
+          <p className="text-muted-foreground mt-2">From water sample to safety in seconds</p>
+        </motion.div>
+        <WorkflowSection />
       </section>
     </div>
   );
