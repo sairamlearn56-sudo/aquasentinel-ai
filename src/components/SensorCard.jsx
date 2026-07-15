@@ -15,7 +15,7 @@ const COLOR_MAP = {
   danger: { text: "text-danger", bg: "bg-danger/5", border: "border-danger/20", ring: "ring-danger/20" },
 };
 
-export default function SensorCard({ type, value, label, delay = 0 }) {
+export default function SensorCard({ type, value, label, delay = 0, explanation }) {
   const Icon = ICONS[type] || TdsIcon;
 
   // Handle disconnected pH sensor (ESP32 sends -1 when sensor is not connected)
@@ -71,6 +71,9 @@ export default function SensorCard({ type, value, label, delay = 0 }) {
         <p className="text-xs text-muted-foreground">
           Safe range: <span className="font-medium">{safeText}</span>
         </p>
+        {explanation && (
+          <p className="text-xs text-muted-foreground mt-1 leading-relaxed">{explanation}</p>
+        )}
       </div>
     </div>
   );

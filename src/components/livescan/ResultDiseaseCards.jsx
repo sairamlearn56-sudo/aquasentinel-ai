@@ -1,23 +1,77 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { getDiseaseConfig } from "@/components/illustrations/DiseaseIllustrations";
+import { classifyParameter } from "@/lib/waterAnalysis";
 import TiltCard from "@/components/TiltCard";
 
-export default function ResultDiseaseCards({ diseaseRisks, t }) {
+function getDiseaseConfidence(risk) {
+  return Math.min(95, Math.round(60 + risk * 0.4));
+}
+
+function getDiseaseReason(disease, waterData) {
+  if (!waterData) return "Based on overall water quality analysis";
+
+  const phStatus = classifyParameter("ph", waterData.ph);
+  const tdsStatus = classifyParameter("tds", waterData.tds);
+  const turbStatus = classifyParameter("turbidity", waterData.turbidity);
+
+  const reasons = {
+    cholera:
+      turbStatus === "danger"
+        ? "High turbidity indicates possible bacterial contamination"
+        : turbStatus === "moderate"
+        ? "Elevated turbidity may harbor Vibrio cholerae bacteria"
+        : "Water clarity is within acceptable limits",
+    typhoid:
+      tdsStatus === "danger"
+        ? "Excessive dissolved solids suggest sewage contamination"
+        : tdsStatus === "moderate"
+        ? "TDS levels indicate possible organic contamination"
+        : "Dissolved solids within safe range",
+    diarrhea:
+      turbStatus !== "safe" || phStatus !== "safe"
+        ? "Turbidity and pH levels indicate pathogen presence"
+        : "Water parameters show low pathogen risk",
+    dysentery:
+      phStatus !== "safe"
+        ? "pH imbalance may allow parasitic and bacterial growth"
+        : "pH levels are within safe range",
+    hepatitisA:
+      turbStatus === "danger" && tdsStatus === "danger"
+        ? "Multiple severe violations indicate viral contamination risk"
+        : turbStatus !== "safe"
+        ? "Turbidity levels suggest possible viral contamination"
+        : "Low viral contamination risk based on water parameters",
+  };
+
+  return reasons[disease] || "Based on overall water quality analysis";
+}
+
+export default function ResultDiseaseCards({ diseaseRisks, waterData, t }) {
   const entries = Object.entries(diseaseRisks);
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {entries.map(([disease, risk], idx) => (
-        <DiseaseCard key={disease} name={disease} risk={risk} delay={idx * 80} t={t} />
+        <DiseaseCard
+          key={disease}
+          name={disease}
+          risk={risk}
+          waterData={waterData}
+          delay={idx * 80}
+          t={t}
+        />
       ))}
     </div>
   );
 }
 
-function DiseaseCard({ name, risk, delay, t }) {
+function DiseaseCard({ name, risk, waterData, delay, t }) {
   const config = getDiseaseConfig(name);
   const Illustration = config.Illustration;
   const [animatedRisk, setAnimatedRisk] = useState(0);
+
+  const confidence = getDiseaseConfidence(risk);
+  const reason = getDiseaseReason(name, waterData);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -44,11 +98,18 @@ function DiseaseCard({ name, risk, delay, t }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: delay / 1000 }}
     >
-      <TiltCard className="glass rounded-2xl p-5 border border-border hover:border-primary/20 transition-colors" intensity={5}>
-        <div className="flex items-center gap-3 mb-4">
+      <TiltCard
+        className="glass rounded-2xl p-5 border border-border hover:border-primary/20 transition-colors"
+        intensity={5}
+      >
+        <div className="flex items-center gap-3 mb-3">
           <motion.div
             className="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0"
-            style={{ backgroundColor: config.color + "15", color: config.color, boxShadow: `0 4px 16px ${config.color}20` }}
+            style={{
+              backgroundColor: config.color + "15",
+              color: config.color,
+              boxShadow: `0 4px 16px ${config.color}20`,
+            }}
             animate={{ scale: [1, 1.08, 1], rotate: [0, 3, 0, -3, 0] }}
             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: delay / 1000 }}
           >
@@ -60,8 +121,9 @@ function DiseaseCard({ name, risk, delay, t }) {
           </div>
           <span className={`text-2xl font-bold ${riskColor}`}>{animatedRisk}%</span>
         </div>
+
         {/* Animated risk bar */}
-        <div className="h-2.5 rounded-full bg-muted overflow-hidden">
+        <div className="h-2.5 rounded-full bg-muted overflow-hidden mb-3">
           <motion.div
             className={`h-full ${riskBg} rounded-full`}
             initial={{ width: 0 }}
@@ -69,6 +131,15 @@ function DiseaseCard({ name, risk, delay, t }) {
             transition={{ duration: 1, delay: delay / 1000, ease: "easeOut" }}
             style={{ boxShadow: `0 0 8px ${config.color}60` }}
           />
+        </div>
+
+        {/* Confidence + Reason */}
+        <div className="space-y-1.5 pt-2 border-t border-border/50">
+          <div className="flex items-center justify-between text-xs">
+            <span className="text-muted-foreground">Confidence</span>
+            <span className="font-medium text-foreground">{confidence}%</span>
+          </div>
+          <p className="text-xs text-muted-foreground leading-relaxed">{reason}</p>
         </div>
       </TiltCard>
     </motion.div>

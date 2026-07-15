@@ -8,13 +8,14 @@ import { analyzeWater } from "@/lib/waterAnalysis";
 import { useWaterData } from "@/hooks/useWaterData";
 import ScanWelcome from "@/components/livescan/ScanWelcome";
 import LiveScanSequence from "@/components/LiveScanSequence";
+import AIProcessingTimeline from "@/components/livescan/AIProcessingTimeline";
 import ScanResults from "@/components/livescan/ScanResults";
 
 export default function LiveMonitor() {
   const { t, lang, prefs } = useLanguage();
   const { speak, isSpeaking, stop } = useVoice();
   const { startAnalysis, speakAnalysisStep, completeAnalysis, replayResult } = useAqua();
-  const [phase, setPhase] = useState("welcome"); // welcome | scanning | results
+  const [phase, setPhase] = useState("welcome"); // welcome | scanning | processing | results
   const [familyMember, setFamilyMember] = useState("adult");
   const [result, setResult] = useState(null);
   const voicePlayedRef = useRef(false);
@@ -23,22 +24,29 @@ export default function LiveMonitor() {
 
   // Scan state
   const readingsRef = useRef([]);
-  const collectingRef = useRef(false);
-  const lastWaterDataRef = useRef(null);
-  const connectingTimerRef = useRef(null);
+  const waterDataRef = useRef(null);
+  const intervalRef = useRef(null);
+  const countRef = useRef(0);
   const [scanProgress, setScanProgress] = useState(0);
-  const [scanStepText, setScanStepText] = useState("");
+  const [isPaused, setIsPaused] = useState(false);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
 
+  // Track latest waterData from Firebase
+  useEffect(() => {
+    waterDataRef.current = waterData;
+  }, [waterData]);
+
+  // Set default family member from prefs
   useEffect(() => {
     if (prefs?.default_family_member) {
       setFamilyMember(prefs.default_family_member);
     }
   }, [prefs]);
 
-  // Cleanup timers on unmount
+  // Cleanup interval on unmount
   useEffect(() => {
     return () => {
-      if (connectingTimerRef.current) clearTimeout(connectingTimerRef.current);
+      if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, []);
 
@@ -54,138 +62,123 @@ export default function LiveMonitor() {
             lang,
             prefs?.voice_speed || 0.9,
             "narration"
-            );
+          );
         }, 1500);
         return () => clearTimeout(timer);
       }
     }
   }, [phase, isConnected, speak, lang, prefs]);
 
+  // ===== Interval: collect 1 reading per second =====
+  const startInterval = () => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    intervalRef.current = setInterval(() => {
+      setElapsedSeconds((prev) => prev + 1);
+      const current = waterDataRef.current;
+      if (current) {
+        readingsRef.current.push(current);
+      }
+      countRef.current += 1;
+      setScanProgress(countRef.current);
+
+      if (countRef.current >= 20) {
+        if (intervalRef.current) clearInterval(intervalRef.current);
+        setTimeout(() => setPhase("processing"), 400);
+      }
+    }, 1000);
+  };
+
   // ===== Start Monitoring — begin a new 20-reading scan =====
   const handleStartMonitoring = () => {
     stop();
-    if (connectingTimerRef.current) clearTimeout(connectingTimerRef.current);
     readingsRef.current = [];
-    collectingRef.current = false;
-    lastWaterDataRef.current = null;
+    countRef.current = 0;
     setScanProgress(0);
-    setScanStepText("Connecting to ESP32...");
+    setIsPaused(false);
+    setElapsedSeconds(0);
     setResult(null);
     setPhase("scanning");
     startAnalysis();
     speakAnalysisStep("connecting");
 
-    connectingTimerRef.current = setTimeout(() => {
-      collectingRef.current = true;
-      setScanStepText("Reading 1/20");
+    // Brief delay then start collecting
+    setTimeout(() => {
       speakAnalysisStep("collecting");
-    }, 1500);
+      startInterval();
+    }, 1000);
   };
 
-  // ===== Collect live readings during scanning =====
+  // ===== Stop (Pause) the scan =====
+  const handleStop = () => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    setIsPaused(true);
+    stop();
+  };
+
+  // ===== Resume from the same reading count =====
+  const handleResume = () => {
+    setIsPaused(false);
+    startInterval();
+  };
+
+  // ===== Cancel — discard scan and return to Ready =====
+  const handleCancel = () => {
+    if (intervalRef.current) clearInterval(intervalRef.current);
+    readingsRef.current = [];
+    countRef.current = 0;
+    setScanProgress(0);
+    setIsPaused(false);
+    setElapsedSeconds(0);
+    setResult(null);
+    welcomeVoiceRef.current = false;
+    setPhase("welcome");
+  };
+
+  // ===== Processing phase — compute analysis and save to DB =====
   useEffect(() => {
-    if (phase !== "scanning") return;
-    if (!collectingRef.current) return;
-    if (!waterData) return;
-    if (readingsRef.current.length >= 20) return;
-    if (lastWaterDataRef.current === waterData) return; // Skip duplicates
+    if (phase !== "processing") return;
+    speakAnalysisStep("analyzing");
 
-    lastWaterDataRef.current = waterData;
-    readingsRef.current.push(waterData);
-    const count = readingsRef.current.length;
-    setScanProgress(count);
+    const readings = readingsRef.current.filter((r) => r != null);
+    if (readings.length === 0) return;
 
-    if (count >= 20) {
-      collectingRef.current = false;
-      setScanStepText("Calculating Average...");
-    } else {
-      setScanStepText(`Reading ${count + 1}/20`);
-    }
-  }, [waterData, phase]);
+    const avg = {
+      ph: readings.reduce((s, r) => s + (r.ph || 0), 0) / readings.length,
+      tds: readings.reduce((s, r) => s + (r.tds || 0), 0) / readings.length,
+      temperature: readings.reduce((s, r) => s + (r.temperature || 0), 0) / readings.length,
+      turbidity: readings.reduce((s, r) => s + (r.turbidity || 0), 0) / readings.length,
+    };
 
-  // ===== Post-readings: step sequence + calculate average + analyze =====
-  useEffect(() => {
-    if (phase !== "scanning" || scanProgress !== 20) return;
+    const analysis = analyzeWater(avg, familyMember);
+    setResult(analysis); // Set immediately so it's ready when timeline finishes
 
-    const timers = [];
+    // Save to database in the background
+    base44.entities.Scan.create({
+      ...analysis,
+      disease_risks: analysis.disease_risks,
+      recommendations: [
+        analysis.recommendations.immediatePrecautions.join("; "),
+        analysis.recommendations.waterTreatment.join("; "),
+        analysis.recommendations.whenToVisitDoctor,
+        analysis.recommendations.emergencyAdvice,
+      ],
+      language: lang,
+      location_name: "Community Zone A",
+      latitude: 17.385 + (Math.random() - 0.5) * 0.05,
+      longitude: 78.4867 + (Math.random() - 0.5) * 0.05,
+      sensor_status: "connected",
+    }).then((saved) => {
+      setResult((prev) => (prev ? { ...prev, id: saved.id } : prev));
+    }).catch(() => {});
+  }, [phase]); // eslint-disable-line react-hooks/exhaustive-deps
 
-    // Step 2: Running AI Model (1.5s after Calculating Average)
-    timers.push(
-      setTimeout(() => {
-        setScanStepText("Running AI Model...");
-        speakAnalysisStep("analyzing");
-      }, 1500)
-    );
+  // ===== Timeline complete → show results =====
+  const handleProcessingComplete = () => {
+    setPhase("results");
+    voicePlayedRef.current = false;
+  };
 
-    // Step 3: Predicting Disease Risk (3s)
-    timers.push(
-      setTimeout(() => {
-        setScanStepText("Predicting Disease Risk...");
-      }, 3000)
-    );
-
-    // Step 4: Generating Recommendations (4.5s)
-    timers.push(
-      setTimeout(() => {
-        setScanStepText("Generating Recommendations...");
-      }, 4500)
-    );
-
-    // Step 5: Finalizing Report + calculate (6s)
-    timers.push(
-      setTimeout(async () => {
-        setScanStepText("Finalizing Report...");
-
-        const readings = readingsRef.current;
-        const avg = {
-          ph: readings.reduce((s, r) => s + (r.ph || 0), 0) / readings.length,
-          tds: readings.reduce((s, r) => s + (r.tds || 0), 0) / readings.length,
-          temperature: readings.reduce((s, r) => s + (r.temperature || 0), 0) / readings.length,
-          turbidity: readings.reduce((s, r) => s + (r.turbidity || 0), 0) / readings.length,
-        };
-
-        const analysis = analyzeWater(avg, familyMember);
-
-        try {
-          const saved = await base44.entities.Scan.create({
-            ...analysis,
-            disease_risks: analysis.disease_risks,
-            recommendations: [
-              analysis.recommendations.immediatePrecautions.join("; "),
-              analysis.recommendations.waterTreatment.join("; "),
-              analysis.recommendations.whenToVisitDoctor,
-              analysis.recommendations.emergencyAdvice,
-            ],
-            language: lang,
-            location_name: "Community Zone A",
-            latitude: 17.385 + (Math.random() - 0.5) * 0.05,
-            longitude: 78.4867 + (Math.random() - 0.5) * 0.05,
-            sensor_status: "connected",
-          });
-          setResult({ ...analysis, id: saved.id });
-        } catch (e) {
-          setResult(analysis);
-        }
-
-        // Step 6: Analysis Complete (7.5s)
-        timers.push(
-          setTimeout(() => {
-            setScanStepText("Analysis Complete ✓");
-            timers.push(
-              setTimeout(() => {
-                setPhase("results");
-                voicePlayedRef.current = false;
-              }, 1200)
-            );
-          }, 1500)
-        );
-      }, 6000)
-    );
-
-    return () => timers.forEach(clearTimeout);
-  }, [phase, scanProgress]);
-
-  // ===== Aqua reacts to results =====
+  // ===== Aqua reacts to results with voice =====
   useEffect(() => {
     if (phase === "results" && result && !voicePlayedRef.current) {
       voicePlayedRef.current = true;
@@ -204,8 +197,24 @@ export default function LiveMonitor() {
     return (
       <div className="max-w-3xl mx-auto">
         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }}>
-          <LiveScanSequence stepText={scanStepText} progress={scanProgress} total={20} />
+          <LiveScanSequence
+            progress={scanProgress}
+            total={20}
+            isPaused={isPaused}
+            elapsedSeconds={elapsedSeconds}
+            onStop={handleStop}
+            onResume={handleResume}
+            onCancel={handleCancel}
+          />
         </motion.div>
+      </div>
+    );
+  }
+
+  if (phase === "processing") {
+    return (
+      <div className="max-w-3xl mx-auto">
+        <AIProcessingTimeline onComplete={handleProcessingComplete} />
       </div>
     );
   }
