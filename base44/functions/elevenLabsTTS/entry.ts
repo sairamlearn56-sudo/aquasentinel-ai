@@ -49,31 +49,41 @@ Deno.serve(async (req) => {
     }
 
     // Call ElevenLabs TTS with the multilingual v2 model (auto-detects language from text)
-    const elevenResponse = await fetch(
+    const ttsBody = {
+      text,
+      model_id: 'eleven_multilingual_v2',
+      voice_settings: {
+        stability: 0.5,
+        similarity_boost: 0.75,
+        style: 0.0,
+        use_speaker_boost: true,
+        speed: Math.min(Math.max(speed, 0.7), 1.2),
+      },
+    };
+    const ttsHeaders = {
+      'Content-Type': 'application/json',
+      'xi-api-key': apiKey,
+      'Accept': 'audio/mpeg',
+    };
+
+    let elevenResponse = await fetch(
       `https://api.elevenlabs.io/v1/text-to-speech/${voiceId}`,
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'xi-api-key': apiKey,
-          'Accept': 'audio/mpeg',
-        },
-        body: JSON.stringify({
-          text,
-          model_id: 'eleven_multilingual_v2',
-          voice_settings: {
-            stability: 0.5,
-            similarity_boost: 0.75,
-            style: 0.0,
-            use_speaker_boost: true,
-            speed: Math.min(Math.max(speed, 0.7), 1.2),
-          },
-        }),
-      }
+      { method: 'POST', headers: ttsHeaders, body: JSON.stringify(ttsBody) }
     );
+
+    // If the configured voice is a library voice (requires paid plan), fall back to a premade voice
+    if (!elevenResponse.ok && elevenResponse.status === 402) {
+      console.warn('[elevenLabsTTS] Configured voice requires paid plan, falling back to premade voice (Adam)');
+      const PREMADE_VOICE = 'pNInz6obpgDQGcFmaJgB'; // Adam — premade male voice, works on free tier
+      elevenResponse = await fetch(
+        `https://api.elevenlabs.io/v1/text-to-speech/${PREMADE_VOICE}`,
+        { method: 'POST', headers: ttsHeaders, body: JSON.stringify(ttsBody) }
+      );
+    }
 
     if (!elevenResponse.ok) {
       const errorText = await elevenResponse.text();
+      console.error('[elevenLabsTTS] API error:', elevenResponse.status, errorText);
       return Response.json(
         { error: `ElevenLabs API error: ${elevenResponse.status} - ${errorText}` },
         { status: 502 }

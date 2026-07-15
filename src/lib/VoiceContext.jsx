@@ -29,7 +29,7 @@ export function VoiceProvider({ children }) {
       setIsLoading(false);
 
       if (response.data?.error) {
-        console.error("ElevenLabs TTS error:", response.data.error);
+        console.error("[AquaVoice] TTS backend error:", response.data.error);
         setCurrentText("");
         return;
       }
@@ -56,7 +56,8 @@ export function VoiceProvider({ children }) {
         audioRef.current = null;
       };
 
-      audioEl.onerror = () => {
+      audioEl.onerror = (e) => {
+        console.error("[AquaVoice] Audio element error:", audioEl.error?.code, e);
         setIsSpeaking(false);
         setCurrentText("");
         URL.revokeObjectURL(audioUrl);
@@ -66,7 +67,13 @@ export function VoiceProvider({ children }) {
       setIsSpeaking(true);
       await audioEl.play();
     } catch (error) {
-      console.error("ElevenLabs TTS failed:", error);
+      console.error("[AquaVoice] TTS pipeline failed:", error?.message || error);
+      if (error?.response?.data?.error) {
+        console.error("[AquaVoice] Backend detail:", error.response.data.error);
+      }
+      if (error?.name === 'NotAllowedError') {
+        console.error("[AquaVoice] Browser blocked audio playback (autoplay policy). User interaction required.");
+      }
       setIsLoading(false);
       setIsSpeaking(false);
       setCurrentText("");
