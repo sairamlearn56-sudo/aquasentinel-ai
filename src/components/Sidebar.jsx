@@ -29,7 +29,7 @@ export default function Sidebar() {
         {/* Logo */}
         <div className="p-5 pb-3">
           <div className="flex items-center gap-3">
-            <div className="relative w-11 h-11 rounded-2xl bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-500 flex items-center justify-center shadow-lg shadow-cyan-500/30">
+            <div className="relative w-11 h-11 rounded-2xl bg-gradient-to-br from-cyan-500 to-emerald-500 flex items-center justify-center shadow-lg shadow-cyan-500/30">
               <Droplets className="w-5 h-5 text-white" />
               <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/25 to-transparent" />
             </div>
@@ -53,7 +53,7 @@ export default function Sidebar() {
                 style={isActive ? { background: `hsl(${item.accent} / 0.1)`, boxShadow: `0 0 16px hsl(${item.accent} / 0.1)` } : {}}
               >
                 {isActive && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full bg-gradient-to-b from-cyan-400 to-blue-500" />
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full bg-gradient-to-b from-cyan-500 to-emerald-500" />
                 )}
                 <Icon className={`w-[18px] h-[18px] flex-shrink-0 transition-all group-hover:scale-110 ${isActive ? item.text : "text-muted-foreground group-hover:text-foreground"}`} />
                 <span className={isActive ? "text-foreground" : "text-muted-foreground group-hover:text-foreground"}>{item.label}</span>
@@ -66,7 +66,7 @@ export default function Sidebar() {
         {/* Footer — Profile + Controls */}
         <div className="p-3 border-t border-border/50 space-y-2">
           <div className="flex items-center gap-2.5 p-2.5 rounded-2xl bg-muted/25">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-400 to-purple-500 flex items-center justify-center text-white text-sm font-heading font-bold flex-shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500 to-emerald-500 flex items-center justify-center text-white text-sm font-heading font-bold flex-shrink-0">
               {user?.full_name?.[0]?.toUpperCase() || "G"}
             </div>
             <div className="flex-1 min-w-0">
@@ -88,7 +88,7 @@ export default function Sidebar() {
       <div className="lg:hidden fixed top-0 left-0 right-0 z-40 glass-strong border-b border-border/50">
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-500 flex items-center justify-center shadow-md shadow-cyan-500/20">
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-cyan-500 to-emerald-500 flex items-center justify-center shadow-md shadow-cyan-500/20">
               <Droplets className="w-4 h-4 text-white" />
             </div>
             <span className="font-heading font-bold text-sm tracking-tight">AquaSentinel AI</span>

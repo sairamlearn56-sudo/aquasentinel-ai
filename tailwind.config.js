@@ -72,9 +72,9 @@ module.exports = {
   			}
   		},
   		fontFamily: {
-  			heading: ['Manrope', 'var(--font-heading)'],
-  			body: ['Inter', 'var(--font-body)'],
-  			display: ['Manrope', 'var(--font-display)'],
+  			heading: ['Sora', 'Manrope', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+  			body: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+  			display: ['Sora', 'Manrope', 'ui-sans-serif', 'system-ui', 'sans-serif'],
   			mono: ['var(--font-mono)']
   		},
   		keyframes: {
