@@ -9,6 +9,7 @@ import ResultDiseaseCards from "@/components/livescan/ResultDiseaseCards";
 import ResultChecklist from "@/components/livescan/ResultChecklist";
 import ResultTrendGraph from "@/components/livescan/ResultTrendGraph";
 import PrimaryRecommendation from "@/components/livescan/PrimaryRecommendation";
+import ResultIllustration from "@/components/livescan/ResultIllustration";
 
 function getSensorExplanation(type, value) {
   const status = classifyParameter(type, value);
@@ -124,8 +125,10 @@ export default function ScanResults({ result, familyMember, t, isSpeaking, onRep
             </div>
           </div>
 
-          {/* Center: Health Score Ring + Status */}
-          <div className="flex flex-col sm:flex-row items-center gap-8">
+          {/* Center: Illustration + Health Score Ring + Status */}
+          <div className="flex flex-col sm:flex-row items-center gap-6 sm:gap-8">
+            <ResultIllustration riskLevel={result.risk_level} />
+
             <motion.div
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
