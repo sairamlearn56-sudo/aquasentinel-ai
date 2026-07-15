@@ -13,6 +13,7 @@ import HealthScoreRing from "@/components/HealthScoreRing";
 import SensorCard from "@/components/SensorCard";
 import RiskBadge from "@/components/RiskBadge";
 import DiseaseRiskCard from "@/components/DiseaseRiskCard";
+import WaterStatusCard from "@/components/illustrations/WaterStatusCard";
 
 export default function LiveMonitor() {
   const { t, lang, prefs } = useLanguage();
@@ -186,27 +187,17 @@ export default function LiveMonitor() {
         </div>
       </motion.div>
 
-      {/* Health Score + Risk */}
+      {/* Water Status Card */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.1 }}
-        className="glass rounded-3xl p-6 flex flex-col sm:flex-row items-center gap-6"
       >
-        <HealthScoreRing score={result.health_score} riskLevel={result.risk_level} size={180} />
-        <div className="flex-1 text-center sm:text-left">
-          <p className="text-sm text-muted-foreground mb-2">{t("todayHealthStatus")}</p>
-          <div className="mb-3">
-            <RiskBadge level={result.risk_level} label={t(result.risk_level)} size="lg" />
-          </div>
-          <p className="text-sm text-muted-foreground max-w-md">
-            {result.risk_level === "safe"
-              ? t("voiceSafe")
-              : result.risk_level === "moderate"
-              ? t("voiceModerate")
-              : t("voiceDanger")}
-          </p>
-        </div>
+        <WaterStatusCard
+          status={result.risk_level}
+          score={result.health_score}
+          date={`${t(familyMember)} · ${new Date().toLocaleDateString()}`}
+        />
       </motion.div>
 
       {/* Sensor Cards */}

@@ -7,6 +7,8 @@ import { useLanguage } from "@/lib/LanguageContext";
 import HealthScoreRing from "@/components/HealthScoreRing";
 import RiskBadge from "@/components/RiskBadge";
 import DiseaseRiskCard from "@/components/DiseaseRiskCard";
+import WaterStatusCard from "@/components/illustrations/WaterStatusCard";
+import { RecIconBoilWater, RecIconWaterTreatment, RecIconDoctor, RecIconEmergency } from "@/components/illustrations/RecommendationIcons";
 import EmptyState from "@/components/EmptyState";
 import { DISEASE_INFO, classifyParameter, SAFE_RANGES } from "@/lib/waterAnalysis";
 import moment from "moment";
@@ -65,21 +67,17 @@ export default function AIAnalysis() {
         </div>
       </motion.div>
 
-      {/* Score + Risk */}
+      {/* Water Status Card */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: 0.1 }}
-        className="glass rounded-3xl p-6 flex flex-col sm:flex-row items-center gap-6"
       >
-        <HealthScoreRing score={scan.health_score} riskLevel={scan.risk_level} size={150} />
-        <div className="flex-1 text-center sm:text-left">
-          <p className="text-sm text-muted-foreground mb-2">{t("overallRisk")}</p>
-          <RiskBadge level={scan.risk_level} label={t(scan.risk_level)} size="lg" />
-          <p className="text-xs text-muted-foreground mt-3">
-            {t("recentScan")}: {moment(scan.created_date).format("MMM D, YYYY h:mm A")}
-          </p>
-        </div>
+        <WaterStatusCard
+          status={scan.risk_level}
+          score={scan.health_score}
+          date={`${t("recentScan")}: ${moment(scan.created_date).format("MMM D, YYYY h:mm A")}`}
+        />
       </motion.div>
 
       {/* AI Narrative */}
@@ -161,28 +159,28 @@ export default function AIAnalysis() {
         {scan.recommendations && scan.recommendations.length >= 4 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <RecCard
-              icon={Shield}
+              icon={RecIconBoilWater}
               title={t("immediatePrecautions")}
               items={scan.recommendations[0].split("; ").filter(Boolean)}
               color="text-warning"
               bg="bg-warning/10"
             />
             <RecCard
-              icon={Droplets}
+              icon={RecIconWaterTreatment}
               title={t("waterTreatment")}
               items={scan.recommendations[1].split("; ").filter(Boolean)}
               color="text-primary"
               bg="bg-primary/10"
             />
             <RecCard
-              icon={Stethoscope}
+              icon={RecIconDoctor}
               title={t("whenToVisitDoctor")}
               content={scan.recommendations[2]}
               color="text-teal"
               bg="bg-teal/10"
             />
             <RecCard
-              icon={Siren}
+              icon={RecIconEmergency}
               title={t("emergencyAdvice")}
               content={scan.recommendations[3]}
               color="text-danger"
@@ -208,8 +206,8 @@ function RecCard({ icon: Icon, title, items, content, color, bg }) {
   return (
     <div className={`rounded-2xl border border-border p-5 ${bg}`}>
       <div className="flex items-center gap-2 mb-3">
-        <div className={`w-8 h-8 rounded-xl bg-white/50 dark:bg-black/20 flex items-center justify-center ${color}`}>
-          <Icon className="w-4 h-4" />
+        <div className={`w-10 h-10 rounded-xl bg-white/50 dark:bg-black/20 flex items-center justify-center ${color}`}>
+          <Icon className="w-6 h-6" />
         </div>
         <h3 className="font-semibold text-sm">{title}</h3>
       </div>

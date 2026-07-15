@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, ShieldCheck, Globe, Activity } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageContext";
 import LandingLogo from "@/components/landing/LandingLogo";
-import FamilyIllustration from "@/components/landing/FamilyIllustration";
+import HeroIllustration from "@/components/illustrations/HeroIllustration";
 
 export default function Dashboard() {
   const { t } = useLanguage();
@@ -121,7 +121,7 @@ export default function Dashboard() {
         transition={{ duration: 0.8, delay: 0.9 }}
         className="mt-10 w-full max-w-lg"
       >
-        <FamilyIllustration />
+        <HeroIllustration />
       </motion.div>
     </div>
   );

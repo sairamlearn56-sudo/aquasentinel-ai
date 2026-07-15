@@ -1,12 +1,12 @@
 import React from "react";
-import { Droplets, FlaskConical, Thermometer, Waves } from "lucide-react";
 import { SAFE_RANGES, classifyParameter } from "@/lib/waterAnalysis";
+import { PhIcon, TdsIcon, TurbidityIcon, TemperatureIcon } from "@/components/icons/SensorIcons";
 
 const ICONS = {
-  ph: FlaskConical,
-  tds: Droplets,
-  temperature: Thermometer,
-  turbidity: Waves,
+  ph: PhIcon,
+  tds: TdsIcon,
+  temperature: TemperatureIcon,
+  turbidity: TurbidityIcon,
 };
 
 const COLOR_MAP = {
@@ -16,7 +16,7 @@ const COLOR_MAP = {
 };
 
 export default function SensorCard({ type, value, label, delay = 0 }) {
-  const Icon = ICONS[type] || Droplets;
+  const Icon = ICONS[type] || TdsIcon;
   const status = classifyParameter(type, value);
   const range = SAFE_RANGES[type];
   const colors = COLOR_MAP[status];
@@ -30,8 +30,8 @@ export default function SensorCard({ type, value, label, delay = 0 }) {
       style={{ animationDelay: `${delay}ms` }}
     >
       <div className="flex items-center justify-between mb-4">
-        <div className={`w-11 h-11 rounded-2xl flex items-center justify-center ${colors.bg} ${colors.text}`}>
-          <Icon className="w-5 h-5" />
+        <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${colors.bg} ${colors.text}`}>
+          <Icon className="w-7 h-7" />
         </div>
         <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${colors.bg} ${colors.text}`}>
           {status === "safe" ? "✓ Safe" : status === "moderate" ? "⚠ Caution" : "✕ Danger"}

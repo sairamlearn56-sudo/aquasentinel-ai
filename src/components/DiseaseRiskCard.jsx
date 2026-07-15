@@ -1,31 +1,29 @@
 import React from "react";
-import { Activity } from "lucide-react";
-
-const DISEASE_COLORS = {
-  cholera: "text-red-500",
-  typhoid: "text-orange-500",
-  diarrhea: "text-amber-500",
-  dysentery: "text-rose-500",
-  hepatitisA: "text-yellow-600",
-};
+import { getDiseaseConfig } from "@/components/illustrations/DiseaseIllustrations";
 
 export default function DiseaseRiskCard({ name, risk, delay = 0, t }) {
-  const colorClass = DISEASE_COLORS[name] || "text-muted-foreground";
-  
+  const config = getDiseaseConfig(name);
+  const Illustration = config.Illustration;
+
   const riskColor = risk < 15 ? "text-safe" : risk < 40 ? "text-warning" : "text-danger";
   const riskBg = risk < 15 ? "bg-safe" : risk < 40 ? "bg-warning" : "bg-danger";
+  const riskLabel = risk < 15 ? "Low Risk" : risk < 40 ? "Moderate" : "High Risk";
 
   return (
     <div
-      className="glass rounded-2xl p-4 border border-border animate-fade-in-up"
+      className="bg-white dark:bg-card rounded-2xl p-4 border border-border shadow-sm animate-fade-in-up"
       style={{ animationDelay: `${delay}ms` }}
     >
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <div className={`w-8 h-8 rounded-xl bg-muted/50 flex items-center justify-center ${colorClass}`}>
-            <Activity className="w-4 h-4" />
-          </div>
-          <span className="text-sm font-semibold">{t(name)}</span>
+      <div className="flex items-center gap-3 mb-3">
+        <div
+          className="w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0"
+          style={{ backgroundColor: config.color + "15", color: config.color }}
+        >
+          <Illustration className="w-7 h-7" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold truncate">{t(name)}</p>
+          <p className={`text-xs font-medium ${riskColor}`}>{riskLabel}</p>
         </div>
         <span className={`text-lg font-bold ${riskColor}`}>{risk}%</span>
       </div>
