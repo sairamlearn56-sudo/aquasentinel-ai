@@ -1,30 +1,51 @@
-import React from "react";
+import React, { useRef } from "react";
 import { motion } from "framer-motion";
 import { Activity, Wifi, WifiOff, Database, Cpu } from "lucide-react";
 import ScanDevice from "@/components/livescan/ScanDevice";
 
 export default function ScanWelcome({ isConnected, onStart, waterSources, selectedWaterSourceId, onSelectWaterSource }) {
+  const rippleRef = useRef(null);
+
+  const createRipple = (e) => {
+    const button = e.currentTarget;
+    const circle = document.createElement("span");
+    const diameter = Math.max(button.clientWidth, button.clientHeight);
+    const rect = button.getBoundingClientRect();
+    circle.style.width = circle.style.height = `${diameter}px`;
+    circle.style.left = `${e.clientX - rect.left - diameter / 2}px`;
+    circle.style.top = `${e.clientY - rect.top - diameter / 2}px`;
+    circle.className = "ripple bg-white/30";
+    const existing = button.getElementsByClassName("ripple")[0];
+    if (existing) existing.remove();
+    button.appendChild(circle);
+  };
+
   return (
     <div className="relative min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center px-4 py-10 overflow-hidden">
-      {/* Water ripple background */}
-      <div className="absolute inset-0 -z-10 flex items-center justify-center overflow-hidden pointer-events-none">
+      {/* Layered gradient background */}
+      <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
+        {/* Drifting orbs */}
+        <div className="absolute top-10 left-1/4 w-80 h-80 bg-cyan-500/8 rounded-full blur-3xl animate-mesh-drift" />
+        <div className="absolute bottom-10 right-1/4 w-96 h-96 bg-blue-500/8 rounded-full blur-3xl animate-mesh-drift" style={{ animationDelay: "5s" }} />
+        <div className="absolute top-1/3 right-1/3 w-64 h-64 bg-emerald-500/6 rounded-full blur-3xl animate-mesh-drift" style={{ animationDelay: "10s" }} />
+        {/* Ripple circles */}
         {[0, 1, 2, 3].map((i) => (
           <motion.div
             key={i}
-            className="absolute rounded-full border border-primary/8"
-            style={{ width: 200, height: 200 }}
-            animate={{ scale: [1, 6], opacity: [0.15, 0] }}
+            className="absolute rounded-full border border-cyan-500/8"
+            style={{ width: 200, height: 200, left: "50%", top: "45%" }}
+            animate={{ scale: [1, 6], opacity: [0.12, 0] }}
             transition={{ duration: 8, repeat: Infinity, delay: i * 2, ease: "easeOut" }}
           />
         ))}
       </div>
 
-      {/* Floating blue particles */}
+      {/* Floating particles */}
       <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
         {[...Array(10)].map((_, i) => (
           <div
             key={i}
-            className="absolute rounded-full bg-primary/10 animate-float-up"
+            className="absolute rounded-full bg-cyan-500/12 animate-float-up"
             style={{
               width: `${4 + (i % 3) * 3}px`,
               height: `${4 + (i % 3) * 3}px`,
@@ -41,7 +62,7 @@ export default function ScanWelcome({ isConnected, onStart, waterSources, select
       <motion.div
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.7, ease: "easeOut" }}
+        transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
         className="mb-8"
       >
         <ScanDevice size={192} showBeam={true} />
@@ -54,17 +75,17 @@ export default function ScanWelcome({ isConnected, onStart, waterSources, select
         transition={{ duration: 0.5, delay: 0.15 }}
         className="flex flex-wrap items-center justify-center gap-3 mb-6"
       >
-        <StatusBadge icon={isConnected ? Wifi : WifiOff} label="ESP32" status={isConnected ? "Connected" : "Waiting..."} color={isConnected ? "safe" : "warning"} />
-        <StatusBadge icon={Database} label="Firebase" status="Connected" color="safe" />
-        <StatusBadge icon={Cpu} label="AI Engine" status="Ready" color="safe" />
+        <StatusBadge icon={isConnected ? Wifi : WifiOff} label="ESP32" status={isConnected ? "Connected" : "Waiting..."} color={isConnected ? "emerald" : "amber"} />
+        <StatusBadge icon={Database} label="Firebase" status="Connected" color="cyan" />
+        <StatusBadge icon={Cpu} label="AI Engine" status="Ready" color="purple" />
       </motion.div>
 
       {/* Heading */}
       <motion.h1
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.25 }}
-        className="text-3xl sm:text-4xl font-bold text-center gradient-text"
+        transition={{ duration: 0.6, delay: 0.25, ease: [0.22, 1, 0.36, 1] }}
+        className="text-3xl sm:text-4xl font-heading font-bold text-center gradient-text"
       >
         Ready to Scan Water
       </motion.h1>
@@ -73,8 +94,8 @@ export default function ScanWelcome({ isConnected, onStart, waterSources, select
       <motion.p
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.35 }}
-        className="text-sm text-muted-foreground text-center max-w-md mt-3"
+        transition={{ duration: 0.6, delay: 0.35 }}
+        className="text-sm text-muted-foreground text-center max-w-md mt-3 leading-relaxed"
       >
         Place the sensors in water and press Start Monitoring to begin an AI-powered water quality analysis.
       </motion.p>
@@ -93,7 +114,7 @@ export default function ScanWelcome({ isConnected, onStart, waterSources, select
           <select
             value={selectedWaterSourceId || ""}
             onChange={(e) => onSelectWaterSource(e.target.value || null)}
-            className="w-full px-4 py-2.5 rounded-2xl glass border border-border text-sm focus:outline-none focus:border-primary/40 cursor-pointer"
+            className="w-full px-4 py-2.5 rounded-2xl glass border border-border text-sm focus:outline-none focus:border-cyan-500/40 cursor-pointer"
           >
             <option value="">No water source</option>
             {waterSources.map((s) => (
@@ -109,10 +130,10 @@ export default function ScanWelcome({ isConnected, onStart, waterSources, select
       <motion.button
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5, delay: 0.5 }}
-        onClick={onStart}
+        transition={{ duration: 0.6, delay: 0.5 }}
+        onClick={(e) => { if (isConnected) { createRipple(e); onStart(); } }}
         disabled={!isConnected}
-        className="mt-8 group relative inline-flex items-center gap-3 px-12 py-4 rounded-full bg-gradient-to-r from-primary to-teal text-white font-semibold text-lg shadow-xl shadow-primary/25 hover:shadow-2xl hover:shadow-primary/40 hover:scale-[1.03] active:scale-[0.98] transition-all duration-200 animate-glow-pulse overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+        className="mt-8 group relative inline-flex items-center gap-3 px-12 py-4 rounded-full bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 text-white font-heading font-semibold text-lg shadow-xl shadow-cyan-500/25 hover:shadow-2xl hover:shadow-cyan-500/40 hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 animate-glow-pulse overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
       >
         <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
         <Activity className="w-5 h-5 relative z-10" />
@@ -124,7 +145,7 @@ export default function ScanWelcome({ isConnected, onStart, waterSources, select
         <motion.p
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="text-sm text-warning mt-4 flex items-center gap-1.5"
+          className="text-sm text-amber-400 mt-4 flex items-center gap-1.5"
         >
           <WifiOff className="w-4 h-4" />
           Waiting for ESP32 Connection...
@@ -136,8 +157,10 @@ export default function ScanWelcome({ isConnected, onStart, waterSources, select
 
 function StatusBadge({ icon: Icon, label, status, color }) {
   const colors = {
-    safe: "text-safe bg-safe/10 border-safe/20",
-    warning: "text-warning bg-warning/10 border-warning/20",
+    emerald: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
+    amber: "text-amber-400 bg-amber-500/10 border-amber-500/20",
+    cyan: "text-cyan-400 bg-cyan-500/10 border-cyan-500/20",
+    purple: "text-purple-400 bg-purple-500/10 border-purple-500/20",
   };
   return (
     <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium ${colors[color]}`}>

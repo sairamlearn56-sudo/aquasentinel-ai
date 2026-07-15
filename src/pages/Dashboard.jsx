@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight, Activity, ShieldCheck, Globe, Sparkles, Droplets, BrainCircuit } from "lucide-react";
@@ -9,28 +9,43 @@ import WhyAquaSentinel from "@/components/landing/WhyAquaSentinel";
 import WorkflowSection from "@/components/landing/WorkflowSection";
 
 const stats = [
-  { value: "12,540+", label: "Families Protected", icon: ShieldCheck, color: "text-safe" },
-  { value: "85,320+", label: "Water Scans", icon: Droplets, color: "text-primary" },
-  { value: "3,245+", label: "Diseases Predicted", icon: BrainCircuit, color: "text-violet-500" },
-  { value: "8+", label: "Languages Supported", icon: Globe, color: "text-teal-500" },
+  { value: "12,540+", label: "Families Protected", icon: ShieldCheck, color: "text-emerald-400" },
+  { value: "85,320+", label: "Water Scans", icon: Droplets, color: "text-cyan-400" },
+  { value: "3,245+", label: "Diseases Predicted", icon: BrainCircuit, color: "text-purple-400" },
+  { value: "8+", label: "Languages Supported", icon: Globe, color: "text-blue-400" },
 ];
 
 export default function Dashboard() {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const rippleRef = useRef(null);
+
+  const createRipple = (e) => {
+    const button = e.currentTarget;
+    const circle = document.createElement("span");
+    const diameter = Math.max(button.clientWidth, button.clientHeight);
+    const rect = button.getBoundingClientRect();
+    circle.style.width = circle.style.height = `${diameter}px`;
+    circle.style.left = `${e.clientX - rect.left - diameter / 2}px`;
+    circle.style.top = `${e.clientY - rect.top - diameter / 2}px`;
+    circle.className = "ripple bg-white/30";
+    const existing = button.getElementsByClassName("ripple")[0];
+    if (existing) existing.remove();
+    button.appendChild(circle);
+  };
 
   return (
     <div className="relative pb-32">
       {/* ===== Hero Section ===== */}
       <div className="relative min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center px-4 py-10 overflow-hidden">
-        {/* Subtle gradient background */}
-        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-primary/5 via-background to-teal/5" />
+        {/* Layered gradient background */}
+        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-cyan-500/5 via-transparent to-purple-500/5" />
 
         {/* Soft gradient orbs */}
         <div className="absolute inset-0 -z-10 overflow-hidden">
-          <div className="absolute top-10 left-1/4 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
-          <div className="absolute bottom-10 right-1/4 w-96 h-96 bg-teal/5 rounded-full blur-3xl" />
-          <div className="absolute top-1/3 right-1/3 w-64 h-64 bg-violet-500/5 rounded-full blur-3xl" />
+          <div className="absolute top-10 left-1/4 w-72 h-72 bg-cyan-500/8 rounded-full blur-3xl animate-mesh-drift" />
+          <div className="absolute bottom-10 right-1/4 w-96 h-96 bg-purple-500/8 rounded-full blur-3xl animate-mesh-drift" style={{ animationDelay: "5s" }} />
+          <div className="absolute top-1/3 right-1/3 w-64 h-64 bg-blue-500/8 rounded-full blur-3xl animate-mesh-drift" style={{ animationDelay: "10s" }} />
         </div>
 
         {/* Center content */}
@@ -39,10 +54,10 @@ export default function Dashboard() {
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.7, ease: "easeOut" }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
             className="relative"
           >
-            <div className="absolute inset-0 blur-3xl bg-primary/20 rounded-full" />
+            <div className="absolute inset-0 blur-3xl bg-cyan-500/20 rounded-full" />
             <div className="relative">
               <WaterDrop3D size={160} />
             </div>
@@ -52,8 +67,8 @@ export default function Dashboard() {
           <motion.h1
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
-            className="text-5xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight mt-6 gradient-text"
+            transition={{ duration: 0.7, delay: 0.2, ease: [0.22, 1, 0.36, 1] }}
+            className="text-5xl sm:text-6xl lg:text-7xl font-heading font-extrabold tracking-tight mt-6 gradient-text"
           >
             AquaSentinel AI
           </motion.h1>
@@ -62,8 +77,8 @@ export default function Dashboard() {
           <motion.p
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.35 }}
-            className="text-xl sm:text-2xl text-secondary font-semibold mt-4"
+            transition={{ duration: 0.7, delay: 0.35 }}
+            className="text-xl sm:text-2xl text-secondary font-semibold mt-4 font-heading"
           >
             Your AI Water Health Guardian
           </motion.p>
@@ -72,7 +87,7 @@ export default function Dashboard() {
           <motion.p
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.5 }}
+            transition={{ duration: 0.7, delay: 0.5 }}
             className="text-sm sm:text-base text-muted-foreground mt-4 max-w-xl leading-relaxed"
           >
             Protecting families from water-borne diseases using AI, IoT sensors, and an
@@ -83,12 +98,12 @@ export default function Dashboard() {
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, delay: 0.65 }}
+            transition={{ duration: 0.7, delay: 0.65 }}
             className="mt-8 flex flex-wrap items-center justify-center gap-4"
           >
             <button
-              onClick={() => navigate("/monitor")}
-              className="group relative inline-flex items-center gap-3 px-10 py-4 rounded-full bg-gradient-to-r from-primary to-teal text-white font-semibold text-base sm:text-lg shadow-xl shadow-primary/25 hover:shadow-2xl hover:shadow-primary/40 hover:scale-[1.03] active:scale-[0.98] transition-all duration-200 animate-glow-pulse overflow-hidden"
+              onClick={(e) => { createRipple(e); navigate("/monitor"); }}
+              className="group relative inline-flex items-center gap-3 px-10 py-4 rounded-full bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 text-white font-heading font-semibold text-base sm:text-lg shadow-xl shadow-cyan-500/25 hover:shadow-2xl hover:shadow-cyan-500/40 hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 overflow-hidden animate-glow-pulse"
             >
               <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
               <Activity className="w-5 h-5 relative z-10" />
@@ -96,8 +111,8 @@ export default function Dashboard() {
               <ArrowRight className="w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform" />
             </button>
             <button
-              onClick={() => navigate("/analysis")}
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-full glass border border-primary/20 text-foreground font-semibold hover:bg-primary/5 hover:border-primary/40 transition-all duration-200"
+              onClick={(e) => { createRipple(e); navigate("/analysis"); }}
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-full glass border border-cyan-500/20 text-foreground font-medium hover:bg-cyan-500/5 hover:border-cyan-500/40 transition-all duration-300"
             >
               Learn More
               <ArrowRight className="w-4 h-4" />
@@ -108,19 +123,19 @@ export default function Dashboard() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ duration: 0.6, delay: 0.8 }}
+            transition={{ duration: 0.7, delay: 0.8 }}
             className="flex flex-wrap items-center justify-center gap-3 sm:gap-4 mt-8 text-xs sm:text-sm"
           >
             <span className="flex items-center gap-1.5 px-4 py-2 rounded-full glass text-muted-foreground">
-              <ShieldCheck className="w-4 h-4 text-safe" />
+              <ShieldCheck className="w-4 h-4 text-emerald-400" />
               WHO Standards
             </span>
             <span className="flex items-center gap-1.5 px-4 py-2 rounded-full glass text-muted-foreground">
-              <Globe className="w-4 h-4 text-primary" />
+              <Globe className="w-4 h-4 text-cyan-400" />
               7 Languages
             </span>
             <span className="flex items-center gap-1.5 px-4 py-2 rounded-full glass text-muted-foreground">
-              <Sparkles className="w-4 h-4 text-secondary" />
+              <Sparkles className="w-4 h-4 text-purple-400" />
               AI-Powered Analysis
             </span>
           </motion.div>
@@ -138,11 +153,11 @@ export default function Dashboard() {
                 initial={{ opacity: 0, y: 20 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: i * 0.1 }}
-                className="glass rounded-2xl p-6 text-center"
+                transition={{ duration: 0.5, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
+                className="premium-card p-6 text-center"
               >
                 <Icon className={`w-8 h-8 mx-auto mb-3 ${stat.color}`} />
-                <p className="text-2xl sm:text-3xl font-bold gradient-text">{stat.value}</p>
+                <p className="text-2xl sm:text-3xl font-heading font-bold gradient-text">{stat.value}</p>
                 <p className="text-xs text-muted-foreground mt-1">{stat.label}</p>
               </motion.div>
             );
@@ -159,7 +174,7 @@ export default function Dashboard() {
           transition={{ duration: 0.5 }}
           className="text-center mb-10"
         >
-          <h2 className="text-2xl sm:text-3xl font-bold">Powerful Features</h2>
+          <h2 className="text-2xl sm:text-3xl font-heading font-bold">Powerful Features</h2>
           <p className="text-muted-foreground mt-2">Everything you need to keep your family safe</p>
         </motion.div>
         <FeatureGrid />
@@ -174,7 +189,7 @@ export default function Dashboard() {
           transition={{ duration: 0.5 }}
           className="text-center mb-10"
         >
-          <h2 className="text-2xl sm:text-3xl font-bold">Why AquaSentinel?</h2>
+          <h2 className="text-2xl sm:text-3xl font-heading font-bold">Why AquaSentinel?</h2>
           <p className="text-muted-foreground mt-2">Built to make a real difference</p>
         </motion.div>
         <WhyAquaSentinel />
@@ -189,7 +204,7 @@ export default function Dashboard() {
           transition={{ duration: 0.5 }}
           className="text-center mb-12"
         >
-          <h2 className="text-2xl sm:text-3xl font-bold">How It Works</h2>
+          <h2 className="text-2xl sm:text-3xl font-heading font-bold">How It Works</h2>
           <p className="text-muted-foreground mt-2">From water sample to safety in seconds</p>
         </motion.div>
         <WorkflowSection />

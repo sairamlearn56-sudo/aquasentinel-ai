@@ -49,6 +49,10 @@ module.exports = {
   			warning: 'hsl(var(--warning))',
   			danger: 'hsl(var(--danger))',
   			purple: 'hsl(var(--purple))',
+  			blue: 'hsl(var(--blue))',
+  			coral: 'hsl(var(--coral))',
+  			gold: 'hsl(var(--gold))',
+  			orange: 'hsl(var(--orange))',
   			chart: {
   				'1': 'hsl(var(--chart-1))',
   				'2': 'hsl(var(--chart-2))',
@@ -83,7 +87,7 @@ module.exports = {
   				to: { height: '0' }
   			},
   			'fade-in': {
-  				from: { opacity: '0', transform: 'translateY(10px)' },
+  				from: { opacity: '0', transform: 'translateY(12px)' },
   				to: { opacity: '1', transform: 'translateY(0)' }
   			},
   			'fade-in-scale': {
@@ -96,11 +100,11 @@ module.exports = {
   			},
   			'gentle-bounce': {
   				'0%, 100%': { transform: 'translateY(0)' },
-  				'50%': { transform: 'translateY(-4px)' }
+  				'50%': { transform: 'translateY(-5px)' }
   			},
   			'pulse-soft': {
   				'0%, 100%': { opacity: '1' },
-  				'50%': { opacity: '0.6' }
+  				'50%': { opacity: '0.55' }
   			},
   			'ripple': {
   				'0%': { transform: 'scale(0)', opacity: '0.5' },
@@ -117,20 +121,26 @@ module.exports = {
   			'spin-slow': {
   				from: { transform: 'rotate(0deg)' },
   				to: { transform: 'rotate(360deg)' }
+  			},
+  			'mesh-drift': {
+  				'0%, 100%': { transform: 'translate(0, 0) scale(1)' },
+  				'33%': { transform: 'translate(30px, -20px) scale(1.05)' },
+  				'66%': { transform: 'translate(-20px, 25px) scale(0.95)' }
   			}
   		},
   		animation: {
   			'accordion-down': 'accordion-down 0.2s ease-out',
   			'accordion-up': 'accordion-up 0.2s ease-out',
-  			'fade-in': 'fade-in 0.5s ease-out forwards',
-  			'fade-in-scale': 'fade-in-scale 0.4s ease-out forwards',
+  			'fade-in': 'fade-in 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards',
+  			'fade-in-scale': 'fade-in-scale 0.4s cubic-bezier(0.22, 1, 0.36, 1) forwards',
   			'float': 'float 4s ease-in-out infinite',
-  			'gentle-bounce': 'gentle-bounce 2s ease-in-out infinite',
-  			'pulse-soft': 'pulse-soft 2s ease-in-out infinite',
+  			'gentle-bounce': 'gentle-bounce 2.5s ease-in-out infinite',
+  			'pulse-soft': 'pulse-soft 2.5s ease-in-out infinite',
   			'ripple': 'ripple 8s ease-out infinite',
   			'shimmer': 'shimmer 2s infinite',
   			'water-fill': 'water-fill 1.2s ease-out forwards',
-  			'spin-slow': 'spin-slow 3s linear infinite'
+  			'spin-slow': 'spin-slow 8s linear infinite',
+  			'mesh-drift': 'mesh-drift 20s ease-in-out infinite'
   		}
   	}
   },
