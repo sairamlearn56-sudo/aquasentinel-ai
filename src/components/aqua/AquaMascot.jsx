@@ -5,11 +5,14 @@ import { useVoice } from "@/lib/VoiceContext";
 /**
  * Aqua — the AI Health Guide mascot.
  * A cute water-drop robot with expressive eyes, animated mouth,
- * and mood-based expressions/glow.
+ * head movement, hand gestures, and mood-based expressions.
  */
 export default function AquaMascot({ mood, onClick }) {
   const { isSpeaking } = useVoice();
   const [blink, setBlink] = useState(false);
+  const [idleWave, setIdleWave] = useState(false);
+  const [eyeOffsetX, setEyeOffsetX] = useState(0);
+  const [eyeOffsetY, setEyeOffsetY] = useState(0);
 
   // Blinking — pauses during analyzing/listening
   useEffect(() => {
@@ -21,6 +24,30 @@ export default function AquaMascot({ mood, onClick }) {
     return () => clearInterval(interval);
   }, [mood]);
 
+  // Idle wave every ~8 seconds (only when idle and not speaking)
+  useEffect(() => {
+    if (mood !== "idle" || isSpeaking) return;
+    const interval = setInterval(() => {
+      setIdleWave(true);
+      setTimeout(() => setIdleWave(false), 2000);
+    }, 8000);
+    return () => clearInterval(interval);
+  }, [mood, isSpeaking]);
+
+  // Eye movement during speaking — natural gaze shifts
+  useEffect(() => {
+    if (!isSpeaking) {
+      setEyeOffsetX(0);
+      setEyeOffsetY(0);
+      return;
+    }
+    const interval = setInterval(() => {
+      setEyeOffsetX(Math.random() * 4 - 2);
+      setEyeOffsetY(Math.random() * 2 - 1);
+    }, 600);
+    return () => clearInterval(interval);
+  }, [isSpeaking]);
+
   const glowMap = {
     safe: { color: "rgba(34, 197, 94, 0.35)", ring: "rgba(34, 197, 94, 0.15)" },
     moderate: { color: "rgba(234, 179, 8, 0.35)", ring: "rgba(234, 179, 8, 0.15)" },
@@ -29,16 +56,39 @@ export default function AquaMascot({ mood, onClick }) {
     thinking: { color: "rgba(6, 182, 212, 0.25)", ring: "rgba(6, 182, 212, 0.1)" },
     waving: { color: "rgba(6, 182, 212, 0.3)", ring: "rgba(6, 182, 212, 0.12)" },
     listening: { color: "rgba(6, 182, 212, 0.3)", ring: "rgba(6, 182, 212, 0.12)" },
+    speaking: { color: "rgba(6, 182, 212, 0.25)", ring: "rgba(6, 182, 212, 0.1)" },
     idle: { color: "rgba(6, 182, 212, 0.2)", ring: "rgba(6, 182, 212, 0.08)" },
   };
   const glow = glowMap[mood] || glowMap.idle;
+
+  // Determine if head should nod (during speaking, not analyzing)
+  const headNod = isSpeaking && mood !== "analyzing";
+
+  // Right arm behavior — gestures based on mood
+  const showWave = mood === "waving" || (mood === "idle" && idleWave);
+  const rightArmRotate = showWave
+    ? [0, -30, 0, -30, 0]
+    : mood === "safe"
+    ? -70
+    : mood === "danger"
+    ? 25
+    : isSpeaking && mood !== "analyzing"
+    ? [0, -8, 0]
+    : 0;
+  const rightArmTransition = showWave
+    ? { duration: 1.5, repeat: Infinity, ease: "easeInOut" }
+    : isSpeaking && mood !== "analyzing"
+    ? { duration: 2, repeat: Infinity, ease: "easeInOut" }
+    : { duration: 0.3 };
 
   // Mouth rendering
   const renderMouth = () => {
     if (isSpeaking) {
       return (
         <motion.ellipse
-          cx="60" cy="82" rx="4"
+          cx="60"
+          cy="82"
+          rx="4"
           fill="hsl(200, 25%, 20%)"
           animate={{ ry: [2, 5, 2, 4, 3] }}
           transition={{ duration: 0.35, repeat: Infinity, ease: "easeInOut" }}
@@ -61,7 +111,7 @@ export default function AquaMascot({ mood, onClick }) {
     }
   };
 
-  // Eyes
+  // Eyes — expression changes by mood, with pupil movement during speaking
   const renderEyes = () => {
     if (blink) {
       return (
@@ -71,10 +121,35 @@ export default function AquaMascot({ mood, onClick }) {
         </>
       );
     }
+
+    // Listening — attentive, looking at user, slightly wider eyes
+    if (mood === "listening") {
+      return (
+        <>
+          <circle cx="52" cy="70" r="4" fill="hsl(200, 25%, 20%)" />
+          <circle cx="68" cy="70" r="4" fill="hsl(200, 25%, 20%)" />
+          <circle cx="53" cy="69" r="1.5" fill="white" />
+          <circle cx="69" cy="69" r="1.5" fill="white" />
+        </>
+      );
+    }
+
+    // Thinking — looking up-left at holographic display
+    if (mood === "thinking") {
+      return (
+        <>
+          <circle cx="50" cy="67" r="3.5" fill="hsl(200, 25%, 20%)" />
+          <circle cx="66" cy="67" r="3.5" fill="hsl(200, 25%, 20%)" />
+          <circle cx="51" cy="66" r="1.2" fill="white" />
+          <circle cx="67" cy="66" r="1.2" fill="white" />
+        </>
+      );
+    }
+
     const isHappy = mood === "safe" || mood === "waving";
     const isWorried = mood === "danger";
+
     if (isHappy) {
-      // Happy curved eyes
       return (
         <>
           <path d="M49 71 Q52 67 55 71" fill="none" stroke="hsl(200, 25%, 20%)" strokeWidth="2.5" strokeLinecap="round" />
@@ -82,8 +157,8 @@ export default function AquaMascot({ mood, onClick }) {
         </>
       );
     }
+
     if (isWorried) {
-      // Worried eyes (slightly angled)
       return (
         <>
           <circle cx="52" cy="70" r="3.5" fill="hsl(200, 25%, 20%)" />
@@ -93,22 +168,17 @@ export default function AquaMascot({ mood, onClick }) {
         </>
       );
     }
-    // Normal eyes
+
+    // Normal eyes with pupil movement during speaking
     return (
       <>
-        <circle cx="52" cy="70" r="3.5" fill="hsl(200, 25%, 20%)" />
-        <circle cx="68" cy="70" r="3.5" fill="hsl(200, 25%, 20%)" />
-        <circle cx="53.5" cy="69" r="1.2" fill="white" />
-        <circle cx="69.5" cy="69" r="1.2" fill="white" />
+        <circle cx={52 + eyeOffsetX} cy={70 + eyeOffsetY} r="3.5" fill="hsl(200, 25%, 20%)" />
+        <circle cx={68 + eyeOffsetX} cy={70 + eyeOffsetY} r="3.5" fill="hsl(200, 25%, 20%)" />
+        <circle cx={53.5 + eyeOffsetX} cy={69 + eyeOffsetY} r="1.2" fill="white" />
+        <circle cx={69.5 + eyeOffsetX} cy={69 + eyeOffsetY} r="1.2" fill="white" />
       </>
     );
   };
-
-  // Right arm behavior
-  const rightArmRotate = mood === "waving" ? [0, -30, 0, -30, 0] : mood === "safe" ? -50 : mood === "danger" ? 20 : 0;
-  const rightArmTransition = mood === "waving"
-    ? { duration: 1.5, repeat: Infinity, ease: "easeInOut" }
-    : { duration: 0.3 };
 
   return (
     <div className="relative cursor-pointer group" onClick={onClick}>
@@ -159,7 +229,9 @@ export default function AquaMascot({ mood, onClick }) {
             {/* Antenna */}
             <line x1="60" y1="24" x2="60" y2="12" stroke="hsl(185, 80%, 50%)" strokeWidth="2.5" strokeLinecap="round" />
             <motion.circle
-              cx="60" cy="8" r="4"
+              cx="60"
+              cy="8"
+              r="4"
               fill="hsl(185, 80%, 60%)"
               animate={{ opacity: [0.5, 1, 0.5], scale: [0.9, 1.1, 0.9] }}
               transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
@@ -168,13 +240,21 @@ export default function AquaMascot({ mood, onClick }) {
             {/* Left arm */}
             <ellipse cx="26" cy="82" rx="5" ry="4" fill="url(#aquaArm)" />
 
-            {/* Right arm (animated) */}
+            {/* Right arm (animated) with gesture shapes */}
             <motion.g
               style={{ transformOrigin: "92px 78px" }}
               animate={{ rotate: rightArmRotate }}
               transition={rightArmTransition}
             >
               <ellipse cx="94" cy="82" rx="5" ry="4" fill="url(#aquaArm)" />
+              {/* Thumbs up gesture (safe) */}
+              {mood === "safe" && (
+                <rect x="92" y="72" width="4" height="8" rx="2" fill="url(#aquaArm)" />
+              )}
+              {/* Pointing gesture (danger) */}
+              {mood === "danger" && (
+                <ellipse cx="100" cy="82" rx="6" ry="2.5" fill="url(#aquaArm)" />
+              )}
             </motion.g>
 
             {/* Body — water drop */}
@@ -186,18 +266,25 @@ export default function AquaMascot({ mood, onClick }) {
             {/* Shine highlight */}
             <ellipse cx="46" cy="62" rx="7" ry="13" fill="white" opacity="0.22" />
 
-            {/* Face area */}
-            <ellipse cx="60" cy="74" rx="24" ry="20" fill="url(#aquaFace)" />
+            {/* Head group — nods gently during speaking */}
+            <motion.g
+              animate={headNod ? { rotate: [-1.5, 1.5, -1.5] } : { rotate: 0 }}
+              transition={headNod ? { duration: 2, repeat: Infinity, ease: "easeInOut" } : { duration: 0.3 }}
+              style={{ transformOrigin: "60px 80px" }}
+            >
+              {/* Face area */}
+              <ellipse cx="60" cy="74" rx="24" ry="20" fill="url(#aquaFace)" />
 
-            {/* Cheeks */}
-            <circle cx="44" cy="80" r="3" fill="hsl(350, 70%, 72%)" opacity="0.35" />
-            <circle cx="76" cy="80" r="3" fill="hsl(350, 70%, 72%)" opacity="0.35" />
+              {/* Cheeks */}
+              <circle cx="44" cy="80" r="3" fill="hsl(350, 70%, 72%)" opacity="0.35" />
+              <circle cx="76" cy="80" r="3" fill="hsl(350, 70%, 72%)" opacity="0.35" />
 
-            {/* Eyes */}
-            {renderEyes()}
+              {/* Eyes */}
+              {renderEyes()}
 
-            {/* Mouth */}
-            {renderMouth()}
+              {/* Mouth */}
+              {renderMouth()}
+            </motion.g>
 
             {/* Health badge */}
             <circle cx="60" cy="98" r="6" fill="white" stroke="hsl(185, 80%, 50%)" strokeWidth="1.5" />
@@ -207,9 +294,9 @@ export default function AquaMascot({ mood, onClick }) {
         </motion.div>
       </motion.div>
 
-      {/* Holographic screens (analyzing mode) */}
+      {/* Holographic screens (analyzing + thinking modes) */}
       <AnimatePresence>
-        {mood === "analyzing" && (
+        {(mood === "analyzing" || mood === "thinking") && (
           <>
             <motion.div
               initial={{ opacity: 0, x: -10, y: 10 }}

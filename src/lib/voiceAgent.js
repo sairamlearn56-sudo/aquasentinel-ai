@@ -1,76 +1,101 @@
 // AquaVoice AI — Multilingual voice guidance system
-// Uses browser Speech Synthesis API for instant, multilingual, comforting voice
+// Uses browser Speech Synthesis API with male voice preference and native locale matching
 
-import { LANGUAGES } from "./i18n";
+const LOCALE_MAP = {
+  en: "en-IN",
+  hi: "hi-IN",
+  te: "te-IN",
+  ta: "ta-IN",
+  kn: "kn-IN",
+  mr: "mr-IN",
+  bn: "bn-IN",
+};
 
-// Map our language codes to BCP-47 voice codes
-function getVoiceCode(lang) {
-  const langConfig = LANGUAGES.find((l) => l.code === lang);
-  return langConfig?.voiceCode || "en-US";
+const MALE_PATTERNS = [
+  /male/i,
+  /ravi|karthik|arjun|pratham|hemanth|daniel|thomas|james|alex|david|mark|oliver|george|fred|aaron/i,
+];
+
+const FEMALE_PATTERNS = [
+  /female/i,
+  /samantha|victoria|karen|tessa|fiona|meera|heera|kalpana|laila|sara|susan|allison|ava|zira|ananya/i,
+];
+
+function getLocale(lang) {
+  return LOCALE_MAP[lang] || "en-IN";
 }
 
-// Find the best available voice for a language
-function pickBestVoice(voiceCode) {
+function isMaleVoice(name) {
+  return MALE_PATTERNS.some((p) => p.test(name));
+}
+
+function isFemaleVoice(name) {
+  return FEMALE_PATTERNS.some((p) => p.test(name));
+}
+
+function pickBestVoice(lang) {
   if (!("speechSynthesis" in window)) return null;
   const voices = window.speechSynthesis.getVoices();
   if (!voices.length) return null;
 
-  // Try exact match first
-  let voice = voices.find((v) => v.lang === voiceCode);
-  if (voice) return voice;
+  const locale = getLocale(lang);
+  const prefix = locale.split("-")[0];
 
-  // Try language prefix match (e.g., "hi" matches "hi-IN")
-  const prefix = voiceCode.split("-")[0];
-  voice = voices.find((v) => v.lang.startsWith(prefix));
-  if (voice) return voice;
+  const exactMatches = voices.filter((v) => v.lang === locale);
+  const prefixMatches = voices.filter((v) => v.lang.startsWith(prefix));
+  const langVoices = exactMatches.length ? exactMatches : prefixMatches;
 
-  // Fallback to default
-  return voices[0];
-}
+  if (!langVoices.length) return null;
 
-// Speak text in the specified language
-export function speak(text, lang = "en", speed = 0.9) {
-  if (!("speechSynthesis" in window)) {
-    console.warn("Speech synthesis not supported in this browser");
-    return;
+  const maleVoices = langVoices.filter((v) => isMaleVoice(v.name || ""));
+  if (maleVoices.length) {
+    const googleMale = maleVoices.find((v) => /google/i.test(v.name || ""));
+    return googleMale || maleVoices[0];
   }
 
-  // Cancel any ongoing speech
+  const nonFemale = langVoices.filter((v) => !isFemaleVoice(v.name || ""));
+  if (nonFemale.length) {
+    const google = nonFemale.find((v) => /google/i.test(v.name || ""));
+    return google || nonFemale[0];
+  }
+
+  const google = langVoices.find((v) => /google/i.test(v.name || ""));
+  return google || langVoices[0];
+}
+
+export function speak(text, lang = "en", speed = 0.9) {
+  if (!("speechSynthesis" in window)) return;
+
   window.speechSynthesis.cancel();
 
   const utterance = new SpeechSynthesisUtterance(text);
-  const voiceCode = getVoiceCode(lang);
-  const voice = pickBestVoice(voiceCode);
+  const voice = pickBestVoice(lang);
 
   if (voice) {
     utterance.voice = voice;
+    utterance.lang = voice.lang;
+  } else {
+    utterance.lang = getLocale(lang);
   }
-  utterance.lang = voiceCode;
-  utterance.rate = speed;
-  utterance.pitch = 1.0;
-  utterance.volume = 1.0;
 
-  // Slightly slower for comfort, slightly higher pitch for warmth
-  if (lang !== "en") {
-    utterance.rate = Math.max(0.7, speed - 0.05);
-  }
+  const isRegional = lang !== "en";
+  utterance.rate = isRegional ? Math.min(0.85, speed) : Math.min(0.9, speed);
+  utterance.pitch = 0.92;
+  utterance.volume = 1.0;
 
   window.speechSynthesis.speak(utterance);
 }
 
-// Stop any ongoing speech
 export function stopSpeaking() {
   if ("speechSynthesis" in window) {
     window.speechSynthesis.cancel();
   }
 }
 
-// Check if speech synthesis is available
 export function isVoiceSupported() {
   return "speechSynthesis" in window;
 }
 
-// Preload voices (some browsers need this)
 export function preloadVoices() {
   if ("speechSynthesis" in window) {
     window.speechSynthesis.getVoices();
