@@ -1,24 +1,33 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { motion } from "framer-motion";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, BarChart, Bar, CartesianGrid } from "recharts";
-import { TrendingUp, Calendar, Clock, Radio } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { TrendingUp, Calendar as CalendarIcon, X, Clock } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useLanguage } from "@/lib/LanguageContext";
-import RiskBadge from "@/components/RiskBadge";
 import EmptyState from "@/components/EmptyState";
+import HistoryDatePicker from "@/components/history/HistoryDatePicker";
+import HistoryTimelineCard from "@/components/history/HistoryTimelineCard";
 import moment from "moment";
+
+const FILTERS = [
+  { key: "all", label: "All" },
+  { key: "safe", label: "Safe" },
+  { key: "moderate", label: "Moderate" },
+  { key: "danger", label: "Danger" },
+];
 
 export default function History() {
   const { t } = useLanguage();
   const [scans, setScans] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState("daily");
+  const [filter, setFilter] = useState("all");
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(null);
 
   useEffect(() => {
     async function loadData() {
       try {
-        const results = await base44.entities.Scan.list("-created_date", 50);
+        const results = await base44.entities.Scan.list("-created_date", 100);
         setScans(results || []);
       } catch (e) {
       } finally {
@@ -28,24 +37,28 @@ export default function History() {
     loadData();
   }, []);
 
-  const chartData = useMemo(() => {
-    if (scans.length === 0) return [];
-    const grouped = {};
+  // Set of dates that have scans (YYYY-MM-DD)
+  const scanDates = useMemo(() => {
+    const set = new Set();
     scans.forEach((s) => {
-      let key;
-      if (tab === "daily") key = moment(s.created_date).format("MMM D");
-      else if (tab === "weekly") key = moment(s.created_date).format("[W]w");
-      else key = moment(s.created_date).format("MMM");
-      
-      if (!grouped[key]) grouped[key] = { label: key, scores: [], count: 0 };
-      grouped[key].scores.push(s.health_score);
-      grouped[key].count++;
+      if (s.created_date) {
+        set.add(moment(s.created_date).format("YYYY-MM-DD"));
+      }
     });
-    return Object.values(grouped).map((g) => ({
-      label: g.label,
-      score: Math.round(g.scores.reduce((a, b) => a + b, 0) / g.scores.length),
-    })).reverse();
-  }, [scans, tab]);
+    return set;
+  }, [scans]);
+
+  // Filtered scans
+  const filteredScans = useMemo(() => {
+    let result = scans;
+    if (selectedDate) {
+      result = result.filter((s) => moment(s.created_date).format("YYYY-MM-DD") === selectedDate);
+    }
+    if (filter !== "all") {
+      result = result.filter((s) => s.risk_level === filter);
+    }
+    return result;
+  }, [scans, filter, selectedDate]);
 
   if (loading) {
     return (
@@ -62,8 +75,11 @@ export default function History() {
         description={t("noHistoryDesc")}
         illustration="history"
         action={
-          <Link to="/monitor" className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors">
-            <Radio className="w-5 h-5" />
+          <Link
+            to="/monitor"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-primary text-primary-foreground font-semibold hover:bg-primary/90 transition-colors"
+          >
+            <TrendingUp className="w-5 h-5" />
             {t("startMonitoring")}
           </Link>
         }
@@ -73,113 +89,106 @@ export default function History() {
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
-      {/* Header */}
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-        <h1 className="text-2xl font-bold flex items-center gap-2">
-          <TrendingUp className="w-6 h-6 text-primary" />
-          {t("historyTitle")}
-        </h1>
-        <p className="text-sm text-muted-foreground mt-1">{scans.length} scans recorded</p>
-      </motion.div>
-
-      {/* Trend Chart */}
+      {/* Header with Calendar icon */}
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.1 }}
-        className="glass rounded-3xl p-6"
+        transition={{ duration: 0.4 }}
+        className="flex items-center justify-between"
       >
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="font-semibold">{t("trendGraph")}</h2>
-          <div className="flex gap-1 bg-muted/50 rounded-xl p-1">
-            {["daily", "weekly", "monthly"].map((tt) => (
-              <button
-                key={tt}
-                onClick={() => setTab(tt)}
-                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
-                  tab === tt ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {t(tt)}
-              </button>
-            ))}
-          </div>
+        <div>
+          <h1 className="text-2xl font-bold flex items-center gap-2">
+            <TrendingUp className="w-6 h-6 text-primary" />
+            {t("historyTitle")}
+          </h1>
+          <p className="text-sm text-muted-foreground mt-1">{scans.length} scans recorded</p>
         </div>
-        {chartData.length > 0 && (
-          <ResponsiveContainer width="100%" height={220}>
-            <LineChart data={chartData}>
-              <defs>
-                <linearGradient id="lineGrad" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="hsl(185, 80%, 45%)" stopOpacity={0.3} />
-                  <stop offset="100%" stopColor="hsl(185, 80%, 45%)" stopOpacity={0} />
-                </linearGradient>
-              </defs>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
-              <XAxis dataKey="label" stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} />
-              <YAxis domain={[0, 100]} stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} width={30} />
-              <Tooltip
-                contentStyle={{
-                  background: "hsl(var(--card))",
-                  border: "1px solid hsl(var(--border))",
-                  borderRadius: "12px",
-                  fontSize: "12px",
+        {/* Calendar icon */}
+        <div className="relative">
+          <button
+            onClick={() => setShowDatePicker(!showDatePicker)}
+            className={`p-2.5 rounded-xl glass border transition-colors ${
+              showDatePicker || selectedDate
+                ? "border-primary/40 text-primary"
+                : "border-border hover:bg-muted/50"
+            }`}
+            title="Filter by date"
+          >
+            <CalendarIcon className="w-5 h-5" />
+          </button>
+          <AnimatePresence>
+            {showDatePicker && (
+              <HistoryDatePicker
+                scanDates={scanDates}
+                onSelect={(date) => {
+                  setSelectedDate(date);
+                  setShowDatePicker(false);
                 }}
+                onClose={() => setShowDatePicker(false)}
               />
-              <Line
-                type="monotone"
-                dataKey="score"
-                stroke="hsl(185, 80%, 45%)"
-                strokeWidth={2.5}
-                dot={{ fill: "hsl(185, 80%, 45%)", r: 4 }}
-                activeDot={{ r: 6 }}
-                fill="url(#lineGrad)"
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        )}
+            )}
+          </AnimatePresence>
+        </div>
       </motion.div>
+
+      {/* Selected date banner */}
+      {selectedDate && (
+        <motion.div
+          initial={{ opacity: 0, y: -5 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center justify-between glass rounded-2xl px-4 py-3"
+        >
+          <p className="text-sm">
+            Showing records for{" "}
+            <span className="font-semibold">{moment(selectedDate).format("MMMM D, YYYY")}</span>
+          </p>
+          <button
+            onClick={() => setSelectedDate(null)}
+            className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
+          >
+            <X className="w-3.5 h-3.5" />
+            Clear filter
+          </button>
+        </motion.div>
+      )}
+
+      {/* Filter tabs */}
+      <div className="flex gap-2 flex-wrap">
+        {FILTERS.map((f) => (
+          <button
+            key={f.key}
+            onClick={() => setFilter(f.key)}
+            className={`px-4 py-2 rounded-xl text-sm font-medium transition-colors ${
+              filter === f.key
+                ? "bg-primary text-primary-foreground"
+                : "glass text-muted-foreground hover:text-foreground"
+            }`}
+          >
+            {f.label}
+          </button>
+        ))}
+      </div>
 
       {/* Timeline */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.2 }}
-        className="glass rounded-3xl p-6"
-      >
-        <h2 className="font-semibold mb-4 flex items-center gap-2">
-          <Clock className="w-5 h-5 text-primary" />
-          {t("timeline")}
-        </h2>
+      {filteredScans.length === 0 ? (
+        <div className="glass rounded-3xl p-12 text-center">
+          <Clock className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
+          <p className="text-muted-foreground">No water quality records found.</p>
+        </div>
+      ) : (
         <div className="space-y-3">
-          {scans.slice(0, 20).map((scan, idx) => (
+          {filteredScans.map((scan, idx) => (
             <motion.div
               key={scan.id || idx}
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.3, delay: idx * 0.05 }}
-              className="flex items-center gap-4 p-3 rounded-2xl bg-muted/20 hover:bg-muted/40 transition-colors"
+              transition={{ duration: 0.3, delay: Math.min(idx * 0.03, 0.5) }}
             >
-              <div className="flex-shrink-0 w-12 h-12 rounded-2xl bg-gradient-to-br from-primary/15 to-aqua/10 flex flex-col items-center justify-center">
-                <span className="text-base font-bold text-primary">{scan.health_score}</span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span className="text-sm font-medium">
-                    {moment(scan.created_date).format("MMM D, h:mm A")}
-                  </span>
-                  <RiskBadge level={scan.risk_level} label={t(scan.risk_level)} size="sm" />
-                </div>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  pH {scan.ph} · TDS {scan.tds} · {scan.temperature}°C · {scan.turbidity} NTU
-                </p>
-              </div>
-              <span className="text-xs text-muted-foreground hidden sm:block">
-                {t(scan.family_member)}
-              </span>
+              <HistoryTimelineCard scan={scan} t={t} />
             </motion.div>
           ))}
         </div>
-      </motion.div>
+      )}
     </div>
   );
 }

@@ -1,0 +1,31 @@
+{
+  "name": "WaterSource",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Water source name"
+    },
+    "label": {
+      "type": "string",
+      "enum": [
+        "Home Tap",
+        "Borewell",
+        "River",
+        "School Tank",
+        "Hospital Tank",
+        "RO Water",
+        "Other"
+      ],
+      "default": "Home Tap",
+      "description": "Category of the water source"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Optional notes about this water source"
+    }
+  },
+  "required": [
+    "name"
+  ]
+}

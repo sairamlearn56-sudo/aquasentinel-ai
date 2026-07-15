@@ -14,6 +14,8 @@ import History from '@/pages/History';
 import CommunityMap from '@/pages/CommunityMap';
 import Settings from '@/pages/Settings';
 import Profile from '@/pages/Profile';
+import WaterTracker from '@/pages/WaterTracker';
+import WaterSourceDetail from '@/pages/WaterSourceDetail';
 import { LanguageProvider } from '@/lib/LanguageContext';
 import { VoiceProvider } from '@/lib/VoiceContext';
 import VoiceIndicator from '@/components/VoiceIndicator';
@@ -57,6 +59,8 @@ const AuthenticatedApp = () => {
         <Route path="/map" element={<CommunityMap />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/profile" element={<Profile />} />
+        <Route path="/tracker" element={<WaterTracker />} />
+        <Route path="/tracker/:id" element={<WaterSourceDetail />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

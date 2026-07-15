@@ -30,6 +30,13 @@ export default function LiveMonitor() {
   const [scanProgress, setScanProgress] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
+  const [waterSources, setWaterSources] = useState([]);
+  const [selectedWaterSourceId, setSelectedWaterSourceId] = useState(null);
+
+  // Fetch water sources for selection
+  useEffect(() => {
+    base44.entities.WaterSource.list("-created_date", 100).then(setWaterSources).catch(() => {});
+  }, []);
 
   // Track latest waterData from Firebase
   useEffect(() => {
@@ -167,6 +174,9 @@ export default function LiveMonitor() {
       latitude: 17.385 + (Math.random() - 0.5) * 0.05,
       longitude: 78.4867 + (Math.random() - 0.5) * 0.05,
       sensor_status: "connected",
+      water_source_id: selectedWaterSourceId || undefined,
+      water_source_name:
+        waterSources.find((s) => s.id === selectedWaterSourceId)?.name || undefined,
     }).then((saved) => {
       setResult((prev) => (prev ? { ...prev, id: saved.id } : prev));
     }).catch(() => {});
@@ -190,7 +200,15 @@ export default function LiveMonitor() {
 
   // ===== Render phases =====
   if (phase === "welcome") {
-    return <ScanWelcome isConnected={isConnected} onStart={handleStartMonitoring} />;
+    return (
+      <ScanWelcome
+        isConnected={isConnected}
+        onStart={handleStartMonitoring}
+        waterSources={waterSources}
+        selectedWaterSourceId={selectedWaterSourceId}
+        onSelectWaterSource={setSelectedWaterSourceId}
+      />
+    );
   }
 
   if (phase === "scanning") {

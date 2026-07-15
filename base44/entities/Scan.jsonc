@@ -89,6 +89,14 @@
         "disconnected"
       ],
       "default": "connected"
+    },
+    "water_source_id": {
+      "type": "string",
+      "description": "ID of the associated water source"
+    },
+    "water_source_name": {
+      "type": "string",
+      "description": "Name of the associated water source"
     }
   },
   "required": [
