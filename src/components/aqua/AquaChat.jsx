@@ -1,12 +1,23 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Send, Mic, Loader2 } from "lucide-react";
+import { X, Send, Mic, Loader2, Square } from "lucide-react";
 import { useAqua } from "@/lib/AquaContext";
 import { useLanguage } from "@/lib/LanguageContext";
 import { getAquaMessage, getAquaSuggestions } from "@/lib/aquaMessages";
 
 export default function AquaChat({ onClose }) {
-  const { messages, askQuestion, thinking, mood, isSpeaking, lang, stop } = useAqua();
+  const {
+    messages,
+    askQuestion,
+    thinking,
+    mood,
+    isSpeaking,
+    isLoading,
+    lang,
+    stopSpeaking,
+    startListening,
+    stopListening,
+  } = useAqua();
   const [input, setInput] = useState("");
   const [listening, setListening] = useState(false);
   const messagesEndRef = useRef(null);
@@ -31,28 +42,42 @@ export default function AquaChat({ onClose }) {
     if (listening) {
       recognitionRef.current?.stop();
       setListening(false);
+      stopListening();
       return;
     }
+    // Stop any ongoing speech before listening
+    stopSpeaking();
+
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) return;
 
     const recognition = new SpeechRecognition();
-    recognition.lang = lang === "en" ? "en-US" : `${lang}-IN`;
+    recognition.lang = lang === "en" ? "en-IN" : `${lang}-IN`;
     recognition.interimResults = false;
     recognition.maxAlternatives = 1;
 
     recognition.onresult = (event) => {
       const transcript = event.results[0][0].transcript;
       setListening(false);
+      stopListening();
       handleSend(transcript);
     };
-    recognition.onerror = () => setListening(false);
-    recognition.onend = () => setListening(false);
+    recognition.onerror = () => {
+      setListening(false);
+      stopListening();
+    };
+    recognition.onend = () => {
+      setListening(false);
+      stopListening();
+    };
 
     recognitionRef.current = recognition;
     setListening(true);
+    startListening();
     recognition.start();
   };
+
+  const showStopBar = isSpeaking || isLoading;
 
   return (
     <motion.div
@@ -70,7 +95,7 @@ export default function AquaChat({ onClose }) {
               <svg viewBox="0 0 24 24" className="w-5 h-5 text-white" fill="currentColor">
                 <path d="M12 2 C12 2, 5 9, 5 15 C5 18.866, 8.134 22, 12 22 C15.866 22, 19 18.866, 19 15 C19 9, 12 2, 12 2 Z" />
               </svg>
-              {isSpeaking && (
+              {(isSpeaking || isLoading) && (
                 <motion.div
                   className="absolute inset-0 rounded-2xl border-2 border-white"
                   animate={{ scale: [1, 1.15], opacity: [0.6, 0] }}
@@ -81,7 +106,7 @@ export default function AquaChat({ onClose }) {
             <div>
               <p className="font-semibold text-sm leading-tight">Aqua</p>
               <p className="text-xs text-muted-foreground leading-tight">
-                {thinking ? "Thinking..." : isSpeaking ? "Speaking..." : listening ? "Listening..." : "AI Health Guide"}
+                {thinking ? "Thinking..." : isLoading ? "Generating voice..." : isSpeaking ? "Speaking..." : listening ? "Listening..." : "AI Health Guide"}
               </p>
             </div>
           </div>
@@ -147,19 +172,44 @@ export default function AquaChat({ onClose }) {
           <div ref={messagesEndRef} />
         </div>
 
+        {/* Stop Speaking bar */}
+        <AnimatePresence>
+          {showStopBar && (
+            <motion.div
+              initial={{ height: 0, opacity: 0 }}
+              animate={{ height: "auto", opacity: 1 }}
+              exit={{ height: 0, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="overflow-hidden border-t border-border/50"
+            >
+              <button
+                onClick={stopSpeaking}
+                className="w-full flex items-center justify-center gap-2 py-2.5 bg-danger/10 text-danger hover:bg-danger/15 transition-colors text-sm font-medium"
+              >
+                <Square className="w-3.5 h-3.5 fill-current" />
+                {isLoading ? "Generating voice..." : "Stop Speaking"}
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
         {/* Input */}
         <div className="p-3 border-t border-border/50 bg-background/50">
           <div className="flex items-center gap-2">
+            {/* Ask button */}
             <button
               onClick={toggleMic}
-              className={`flex-shrink-0 w-10 h-10 rounded-xl flex items-center justify-center transition-colors ${
+              disabled={thinking}
+              className={`flex-shrink-0 flex items-center gap-1.5 px-3 h-10 rounded-xl text-sm font-medium transition-all disabled:opacity-40 ${
                 listening
-                  ? "bg-danger/15 text-danger animate-pulse"
-                  : "bg-muted/40 text-muted-foreground hover:bg-muted/60"
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-primary/10 text-primary hover:bg-primary/20"
               }`}
             >
-              <Mic className="w-4 h-4" />
+              <Mic className={`w-4 h-4 ${listening ? "animate-pulse" : ""}`} />
+              <span className="hidden sm:inline">{listening ? "Listening" : "Ask"}</span>
             </button>
+            {/* Text input */}
             <input
               type="text"
               value={input}
@@ -169,6 +219,7 @@ export default function AquaChat({ onClose }) {
               disabled={thinking || listening}
               className="flex-1 min-w-0 bg-muted/30 rounded-xl px-3.5 py-2.5 text-sm outline-none border border-transparent focus:border-primary/30 transition-colors disabled:opacity-50"
             />
+            {/* Send button */}
             <button
               onClick={() => handleSend()}
               disabled={!input.trim() || thinking}

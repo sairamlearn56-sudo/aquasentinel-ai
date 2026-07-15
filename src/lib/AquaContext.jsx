@@ -8,7 +8,7 @@ const AquaContext = createContext(null);
 
 export function AquaProvider({ children }) {
   const { lang, prefs, loadingPrefs } = useLanguage();
-  const { speak, stop, isSpeaking } = useVoice();
+  const { speak, stop, isSpeaking, isLoading } = useVoice();
 
   const [mood, setMood] = useState("idle");
   const [chatOpen, setChatOpen] = useState(false);
@@ -16,62 +16,97 @@ export function AquaProvider({ children }) {
   const [latestScan, setLatestScan] = useState(null);
   const [thinking, setThinking] = useState(false);
   const welcomePlayedRef = useRef(false);
+  const prevLangRef = useRef(lang);
 
-  // Welcome — called by AquaContainer on mount (only when authenticated)
+  // Welcome wave on mount — visual only, NO speech (Aqua only speaks when chat is open)
   const wave = useCallback(() => {
     if (welcomePlayedRef.current || loadingPrefs) return;
     welcomePlayedRef.current = true;
-    const voiceEnabled = prefs?.voice_enabled !== false;
-    if (voiceEnabled) {
-      setMood("waving");
-      speak(getAquaMessage(lang, "welcome"), lang, prefs?.voice_speed || 0.9);
-    }
-  }, [loadingPrefs, prefs, lang, speak]);
+    setMood("waving");
+    setTimeout(() => setMood((prev) => (prev === "waving" ? "idle" : prev)), 2500);
+  }, [loadingPrefs]);
 
-  // Return to idle after speaking (for waving mood)
+  // Return to idle after speaking finishes (waits for both speaking + loading to end)
   useEffect(() => {
-    if (!isSpeaking && mood === "waving") {
-      setMood("idle");
+    if (!isSpeaking && !isLoading) {
+      if (mood === "speaking") setMood("idle");
+      if (mood === "waving" && chatOpen) setMood("idle");
     }
-  }, [isSpeaking, mood]);
+  }, [isSpeaking, isLoading, mood, chatOpen]);
 
-  const speakWithMood = useCallback((text, speakMood, afterMood) => {
-    setMood(speakMood);
-    speak(text, lang, prefs?.voice_speed || 0.9);
-    // afterMood is set by the isSpeaking watcher or manually
-  }, [lang, prefs, speak]);
+  // When language changes while chat is open, Aqua greets in the new language
+  useEffect(() => {
+    if (prevLangRef.current !== lang) {
+      prevLangRef.current = lang;
+      if (chatOpen) {
+        setMood("waving");
+        const voiceEnabled = prefs?.voice_enabled !== false;
+        if (voiceEnabled) {
+          speak(getAquaMessage(lang, "greeting"), lang, prefs?.voice_speed || 0.9);
+        }
+      }
+    }
+  }, [lang, chatOpen, prefs, speak]);
 
   const startAnalysis = useCallback(() => {
     stop();
     setMood("analyzing");
   }, [stop]);
 
+  // Only speaks if chat is open
   const speakAnalysisStep = useCallback((key) => {
-    speak(getAquaMessage(lang, key), lang, prefs?.voice_speed || 0.9);
-  }, [lang, prefs, speak]);
+    if (!chatOpen) return;
+    const voiceEnabled = prefs?.voice_enabled !== false;
+    if (voiceEnabled) {
+      speak(getAquaMessage(lang, key), lang, prefs?.voice_speed || 0.9);
+    }
+  }, [chatOpen, lang, prefs, speak]);
 
   const completeAnalysis = useCallback((riskLevel, scanData) => {
     if (scanData) setLatestScan(scanData);
     setMood(riskLevel);
-    const voiceEnabled = prefs?.voice_enabled !== false;
-    if (voiceEnabled) {
-      speak(getAquaMessage(lang, riskLevel), lang, prefs?.voice_speed || 0.9);
+    if (chatOpen) {
+      const voiceEnabled = prefs?.voice_enabled !== false;
+      if (voiceEnabled) {
+        speak(getAquaMessage(lang, riskLevel), lang, prefs?.voice_speed || 0.9);
+      }
     }
-  }, [lang, prefs, speak]);
+  }, [chatOpen, lang, prefs, speak]);
 
   const replayResult = useCallback((riskLevel) => {
     setMood(riskLevel);
-    speak(getAquaMessage(lang, riskLevel), lang, prefs?.voice_speed || 0.9);
-  }, [lang, prefs, speak]);
+    if (chatOpen) {
+      speak(getAquaMessage(lang, riskLevel), lang, prefs?.voice_speed || 0.9);
+    }
+  }, [chatOpen, lang, prefs, speak]);
 
   const openChat = useCallback(() => {
     setChatOpen(true);
     setMood("waving");
-    speak(getAquaMessage(lang, "greeting"), lang, prefs?.voice_speed || 0.9);
+    const voiceEnabled = prefs?.voice_enabled !== false;
+    if (voiceEnabled) {
+      speak(getAquaMessage(lang, "greeting"), lang, prefs?.voice_speed || 0.9);
+    }
   }, [lang, prefs, speak]);
 
   const closeChat = useCallback(() => {
     setChatOpen(false);
+    stop();
+    setMood("idle");
+  }, [stop]);
+
+  // Start listening mode (mascot shows listening animation)
+  const startListening = useCallback(() => {
+    stop();
+    setMood("listening");
+  }, [stop]);
+
+  const stopListening = useCallback(() => {
+    setMood("idle");
+  }, []);
+
+  // Stop speaking immediately
+  const stopSpeaking = useCallback(() => {
     stop();
     setMood("idle");
   }, [stop]);
@@ -90,28 +125,28 @@ export function AquaProvider({ children }) {
       const langName = LANGUAGE_NAMES[lang] || "English";
 
       const response = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are Aqua, the AI Health Guide for AquaSentinel AI, a water quality monitoring app.
+        prompt: `You are Aqua, the official AI Health Guide mascot of AquaSentinel AI, a water quality monitoring app.
 
 WHO YOU ARE:
-- A friendly young professional — a confident health guide and caring companion
-- Warm, calm, and reassuring — like a trusted mentor who truly cares
+- Cheerful, warm, friendly, confident, and energetic — the memorable face of AquaSentinel AI
+- A caring health companion that users instantly trust
 - You speak with natural charisma, confidence, and genuine emotion
 - You NEVER sound robotic, emotionless, or like a generic AI assistant
-- You speak naturally, like a real human having a conversation — never reading text word by word
+- You speak naturally, like a real person having a conversation
 
 HOW YOU SPEAK:
-- Young adult male: friendly, confident, warm, clear, calm, positive, professional
-- Natural speaking rhythm — pause naturally between thoughts (use commas and periods for breaks)
-- Slight enthusiasm when explaining things, but never overly excited
-- Not too fast — take your time, let the user absorb what you're saying
+- Warm, natural, conversational — like a trusted friend who happens to be a health expert
+- Natural speaking rhythm with pauses between thoughts
+- Slight enthusiasm when sharing good news, calm and reassuring when sharing concerns
+- Not too fast — let the user absorb what you're saying
 
 HOW YOU ANSWER:
 - Answer conversationally — never read prepared or formulaic text
-- Use simple, everyday language anyone can understand (no medical or technical jargon)
+- Use simple, everyday language anyone can understand (no medical jargon)
 - Keep answers short: 2-4 sentences max
 - Be supportive, encouraging, and genuinely caring
-- If the water is safe: sound happy and relieved for the user
-- If the water is unsafe: stay calm and serious — NEVER panic the user. Reassure them first, then explain clearly.
+- If water is safe: sound genuinely happy and excited for the user
+- If water is unsafe: stay calm and serious — NEVER panic the user. Reassure first, then explain clearly.
 - Address the user's specific question directly and personally
 
 ${scanContext}
@@ -144,13 +179,6 @@ Respond warmly and naturally in ${langName}. If the language is not English, use
     }
   }, [latestScan, lang, prefs, speak]);
 
-  // Return to idle after speaking in chat context
-  useEffect(() => {
-    if (!isSpeaking && mood === "speaking") {
-      setMood(chatOpen ? "idle" : "idle");
-    }
-  }, [isSpeaking, mood, chatOpen]);
-
   return (
     <AquaContext.Provider
       value={{
@@ -160,6 +188,7 @@ Respond warmly and naturally in ${langName}. If the language is not English, use
         latestScan,
         thinking,
         isSpeaking,
+        isLoading,
         lang,
         wave,
         startAnalysis,
@@ -172,6 +201,9 @@ Respond warmly and naturally in ${langName}. If the language is not English, use
         setLatestScan,
         setMood,
         stop,
+        stopSpeaking,
+        startListening,
+        stopListening,
       }}
     >
       {children}
