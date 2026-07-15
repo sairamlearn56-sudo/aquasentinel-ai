@@ -68,9 +68,9 @@ module.exports = {
   			}
   		},
   		fontFamily: {
-  			heading: ['Inter', 'var(--font-heading)'],
+  			heading: ['Manrope', 'var(--font-heading)'],
   			body: ['Inter', 'var(--font-body)'],
-  			display: ['Inter', 'var(--font-display)'],
+  			display: ['Manrope', 'var(--font-display)'],
   			mono: ['var(--font-mono)']
   		},
   		keyframes: {
