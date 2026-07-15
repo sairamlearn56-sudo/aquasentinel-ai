@@ -12,6 +12,7 @@ export const AuthProvider = ({ children }) => {
   const [isLoadingPublicSettings, setIsLoadingPublicSettings] = useState(true);
   const [authError, setAuthError] = useState(null);
   const [authChecked, setAuthChecked] = useState(false);
+  const [isGuest, setIsGuest] = useState(() => localStorage.getItem("aqua-guest") === "true");
   const [appPublicSettings, setAppPublicSettings] = useState(null); // Contains only { id, public_settings }
 
   useEffect(() => {
@@ -19,6 +20,15 @@ export const AuthProvider = ({ children }) => {
   }, []);
 
   const checkAppState = async () => {
+    if (localStorage.getItem("aqua-guest") === "true") {
+      setIsGuest(true);
+      setUser({ full_name: "Guest User", email: "guest@aquasentinel.ai", role: "user" });
+      setIsAuthenticated(true);
+      setAuthChecked(true);
+      setIsLoadingAuth(false);
+      setIsLoadingPublicSettings(false);
+      return;
+    }
     try {
       setIsLoadingPublicSettings(true);
       setAuthError(null);
@@ -114,10 +124,29 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const continueAsGuest = () => {
+    localStorage.setItem("aqua-guest", "true");
+    setIsGuest(true);
+    setUser({ full_name: "Guest User", email: "guest@aquasentinel.ai", role: "user" });
+    setIsAuthenticated(true);
+    setAuthError(null);
+    setAuthChecked(true);
+    setIsLoadingAuth(false);
+    setIsLoadingPublicSettings(false);
+  };
+
   const logout = (shouldRedirect = true) => {
+    const wasGuest = localStorage.getItem("aqua-guest") === "true";
+    localStorage.removeItem("aqua-guest");
+    setIsGuest(false);
     setUser(null);
     setIsAuthenticated(false);
-    
+
+    if (wasGuest) {
+      if (shouldRedirect) window.location.href = "/login";
+      return;
+    }
+
     if (shouldRedirect) {
       // Use the SDK's logout method which handles token cleanup and redirect
       base44.auth.logout(window.location.href);
@@ -136,6 +165,8 @@ export const AuthProvider = ({ children }) => {
     <AuthContext.Provider value={{ 
       user, 
       isAuthenticated, 
+      isGuest,
+      continueAsGuest,
       isLoadingAuth,
       isLoadingPublicSettings,
       authError,

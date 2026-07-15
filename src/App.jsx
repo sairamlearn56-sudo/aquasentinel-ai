@@ -13,6 +13,7 @@ import AIAnalysis from '@/pages/AIAnalysis';
 import History from '@/pages/History';
 import CommunityMap from '@/pages/CommunityMap';
 import Settings from '@/pages/Settings';
+import Profile from '@/pages/Profile';
 import { LanguageProvider } from '@/lib/LanguageContext';
 import { VoiceProvider } from '@/lib/VoiceContext';
 import VoiceIndicator from '@/components/VoiceIndicator';
@@ -55,6 +56,7 @@ const AuthenticatedApp = () => {
         <Route path="/history" element={<History />} />
         <Route path="/map" element={<CommunityMap />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/profile" element={<Profile />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

@@ -1,12 +1,14 @@
 import React from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, Radio, BrainCircuit, TrendingUp, MapPin, Settings, Droplets } from "lucide-react";
+import { LayoutDashboard, Radio, BrainCircuit, TrendingUp, MapPin, Settings, Droplets, User, LogOut } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageContext";
+import { useAuth } from "@/lib/AuthContext";
 import LanguageSelector from "@/components/LanguageSelector";
 import ThemeToggle from "@/components/ThemeToggle";
 
 export default function Sidebar() {
   const { t } = useLanguage();
+  const { user, logout } = useAuth();
   const location = useLocation();
 
   const navItems = [
@@ -16,6 +18,7 @@ export default function Sidebar() {
     { to: "/history", icon: TrendingUp, label: t("history"), accent: "text-teal-500" },
     { to: "/map", icon: MapPin, label: t("communityMap"), accent: "text-emerald-500" },
     { to: "/settings", icon: Settings, label: t("settings"), accent: "text-indigo-500" },
+    { to: "/profile", icon: User, label: "Profile", accent: "text-primary" },
   ];
 
   return (
@@ -63,6 +66,18 @@ export default function Sidebar() {
 
         {/* Footer */}
         <div className="p-4 border-t border-border space-y-3">
+          <div className="flex items-center gap-2 p-2 rounded-xl bg-muted/30">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-teal flex items-center justify-center text-white text-sm font-bold flex-shrink-0">
+              {user?.full_name?.[0]?.toUpperCase() || "G"}
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate">{user?.full_name || "Guest"}</p>
+              <p className="text-xs text-muted-foreground truncate">{user?.email || ""}</p>
+            </div>
+            <button onClick={() => logout()} className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-danger hover:bg-danger/10 transition-colors flex-shrink-0" title="Logout">
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
           <div className="flex items-center justify-between gap-2">
             <LanguageSelector compact />
             <ThemeToggle compact />
