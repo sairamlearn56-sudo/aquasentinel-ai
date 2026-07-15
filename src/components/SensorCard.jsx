@@ -17,6 +17,31 @@ const COLOR_MAP = {
 
 export default function SensorCard({ type, value, label, delay = 0 }) {
   const Icon = ICONS[type] || TdsIcon;
+
+  // Handle disconnected pH sensor (ESP32 sends -1 when sensor is not connected)
+  if (type === "ph" && (value === -1 || value === "-1")) {
+    return (
+      <div
+        className="glass rounded-3xl p-5 border border-muted animate-fade-in-up"
+        style={{ animationDelay: `${delay}ms` }}
+      >
+        <div className="flex items-center justify-between mb-4">
+          <div className="w-12 h-12 rounded-2xl flex items-center justify-center bg-muted/20 text-muted-foreground">
+            <Icon className="w-7 h-7" />
+          </div>
+          <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-muted/20 text-muted-foreground">
+            Offline
+          </span>
+        </div>
+        <p className="text-sm text-muted-foreground mb-1">{label}</p>
+        <p className="text-sm font-semibold text-muted-foreground">pH Sensor Not Connected</p>
+        <div className="mt-3 pt-3 border-t border-border/50">
+          <p className="text-xs text-muted-foreground">Check sensor wiring</p>
+        </div>
+      </div>
+    );
+  }
+
   const status = classifyParameter(type, value);
   const range = SAFE_RANGES[type];
   const colors = COLOR_MAP[status];
