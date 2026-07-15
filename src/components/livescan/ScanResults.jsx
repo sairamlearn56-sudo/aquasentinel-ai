@@ -263,7 +263,7 @@ export default function ScanResults({ result, familyMember, t, isSpeaking, onRep
       >
         <button
           onClick={() => setShowReport(!showReport)}
-          className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-purple text-white font-medium text-sm hover:opacity-90 active:scale-[0.98] transition-all"
+          className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-primary text-primary-foreground font-medium text-sm hover:opacity-90 active:scale-[0.98] transition-all"
         >
           <Sparkles className="w-4 h-4" />
           {showReport ? "Hide AI Report" : "Generate AI Water Report"}
