@@ -19,17 +19,13 @@ import InvestigationSection from "@/components/investigation/InvestigationSectio
 import { generateInvestigationReport } from "@/lib/investigationReport";
 import { useLanguage } from "@/lib/LanguageContext";
 
-const SAFE_WATER_INFOGRAPHIC = "https://media.base44.com/images/public/6a574a21e1fc72b4f71b88d8/8b8b3c3d5_WhatsAppImage2026-07-16at122527AM1.jpg";
-const CONTAMINATED_WATER_INFOGRAPHIC = "https://media.base44.com/images/public/6a574a21e1fc72b4f71b88d8/f60cbfa04_WhatsAppImage2026-07-16at122527AM.jpg";
-
 export default function InvestigationReport({ scan, onBack }) {
   const { t } = useLanguage();
   const report = generateInvestigationReport(scan);
   const riskColor = scan.risk_level === "safe" ? "safe" : scan.risk_level === "moderate" ? "warning" : "danger";
-  const isSafe = scan.risk_level === "safe";
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Back button */}
       <button
         onClick={onBack}
@@ -88,39 +84,25 @@ export default function InvestigationReport({ scan, onBack }) {
         <BulletList items={report.insideWater} color="purple" />
       </InvestigationSection>
 
-      {/* 6. Health Impact — with educational infographic */}
+      {/* 6. Health Impact */}
       <InvestigationSection icon={HeartPulse} title="Health Impact" number={6} color="danger" delay={0.3}>
         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Possible Health Effects</p>
         <BulletList items={report.healthImpact.effects} color="danger" />
         <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide pt-1">Who Is Most at Risk</p>
         <BulletList items={report.healthImpact.atRisk} color="danger" />
-
-        {/* Educational Infographic */}
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.35 }}
-          className="mt-4 rounded-2xl overflow-hidden bg-white p-2 shadow-lg"
-        >
-          <img
-            src={isSafe ? SAFE_WATER_INFOGRAPHIC : CONTAMINATED_WATER_INFOGRAPHIC}
-            alt={isSafe ? "Benefits of drinking safe, clean water" : "Health risks of drinking contaminated water"}
-            className="w-full rounded-xl"
-          />
-        </motion.div>
       </InvestigationSection>
 
       {/* 7. Recommended Actions */}
       <InvestigationSection icon={Lightbulb} title="Recommended Actions" number={7} color="safe" delay={0.35}>
         <div className="space-y-2">
           {report.recommendedActions.map((rec, idx) => (
-            <div key={idx} className="flex items-start gap-3 p-3 rounded-xl bg-muted/20">
+            <div key={idx} className="flex items-start gap-3 p-2.5 rounded-xl bg-muted/20">
               <div className="w-6 h-6 rounded-lg bg-safe/15 flex items-center justify-center flex-shrink-0 mt-0.5">
                 <span className="text-xs font-bold text-safe">{idx + 1}</span>
               </div>
               <div>
                 <p className="text-sm font-medium text-foreground">{rec.action}</p>
-                <p className="text-xs text-muted-foreground mt-0.5">{rec.detail}</p>
+                <p className="text-xs text-muted-foreground">{rec.detail}</p>
               </div>
             </div>
           ))}
@@ -132,10 +114,10 @@ export default function InvestigationReport({ scan, onBack }) {
         icon={AlertTriangle}
         title="If Ignored"
         number={8}
-        color={isSafe ? "safe" : "danger"}
+        color={scan.risk_level === "safe" ? "safe" : "danger"}
         delay={0.4}
       >
-        <BulletList items={report.ifIgnored} color={isSafe ? "safe" : "danger"} />
+        <BulletList items={report.ifIgnored} color={scan.risk_level === "safe" ? "safe" : "danger"} />
       </InvestigationSection>
 
       {/* 9. AI Suggestions */}
@@ -161,7 +143,7 @@ function BulletList({ items, color = "primary" }) {
     teal: "bg-teal",
   };
   return (
-    <ul className="space-y-3">
+    <ul className="space-y-2.5">
       {items.map((item, idx) => (
         <li key={idx} className="flex items-start gap-2.5 text-sm">
           <span className={`flex-shrink-0 mt-[7px] w-1.5 h-1.5 rounded-full ${dotColor[color] || dotColor.primary}`} />
