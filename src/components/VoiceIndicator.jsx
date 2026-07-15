@@ -5,7 +5,8 @@ import { useVoice } from "@/lib/VoiceContext";
 export default function VoiceIndicator() {
   const { isSpeaking, currentText, stop } = useVoice();
 
-  if (!isSpeaking) return null;
+  // Aqua panel now handles all speaking indicators (waveform, state badge, stop button)
+  return null;
 
   return (
     <div className="fixed bottom-6 right-6 z-50 animate-fade-in-scale">

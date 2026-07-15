@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
-import { AnimatePresence } from "framer-motion";
-import { Mic, Square, Loader2, MessageCircle } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Mic, Square, MessageCircle, Loader2, CheckCircle2, Brain, Volume2 } from "lucide-react";
 import { useAqua } from "@/lib/AquaContext";
-import { useLanguage } from "@/lib/LanguageContext";
 import AquaMascot from "@/components/aqua/AquaMascot";
 import AquaChat from "@/components/aqua/AquaChat";
 
@@ -32,19 +31,16 @@ export default function AquaContainer() {
   }, [wave]);
 
   const handleAskClick = () => {
-    // If listening → stop
     if (listening) {
       recognitionRef.current?.stop();
       return;
     }
-    // If speaking → stop
     if (isSpeaking || isLoading) {
       stopSpeaking();
       return;
     }
     if (thinking) return;
 
-    // Start listening
     stopSpeaking();
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -79,47 +75,96 @@ export default function AquaContainer() {
     recognition.start();
   };
 
-  const showStop = listening || isSpeaking || isLoading;
+  const showStop = listening || isSpeaking || isLoading || mood === "analyzing";
+  const isGeneratingVoice = isLoading && !isSpeaking;
+
+  // Determine state label + icon
+  let stateLabel = "Ready";
+  let StateIcon = CheckCircle2;
+  let stateColor = "text-emerald-400";
+
+  if (listening) {
+    stateLabel = "Listening...";
+    StateIcon = Mic;
+    stateColor = "text-blue-400";
+  } else if (thinking) {
+    stateLabel = "Thinking...";
+    StateIcon = Brain;
+    stateColor = "text-cyan-400";
+  } else if (isGeneratingVoice) {
+    stateLabel = "Generating Voice...";
+    StateIcon = Loader2;
+    stateColor = "text-purple-400";
+  } else if (isSpeaking) {
+    stateLabel = "Speaking...";
+    StateIcon = Volume2;
+    stateColor = "text-cyan-400";
+  }
 
   return (
     <>
-      {/* Mascot + Ask/Stop button — always visible, bottom-left */}
-      <div className="fixed bottom-3 left-3 lg:left-72 z-40 pointer-events-auto flex items-end gap-3">
+      {/* Compact floating assistant panel — bottom-left, fixed */}
+      <div className="fixed bottom-3 left-3 lg:left-72 z-40 pointer-events-auto flex flex-col items-center gap-1.5">
+        {/* Aqua mascot */}
         <AquaMascot mood={mood} onClick={chatOpen ? closeChat : openChat} />
 
-        {/* Ask / Stop button */}
-        <div className="mb-3 flex flex-col gap-2">
-          <button
-            onClick={handleAskClick}
-            disabled={thinking}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-full font-semibold text-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
-              showStop
-                ? "bg-danger text-white shadow-lg shadow-danger/30 hover:bg-danger/90"
-                : "bg-gradient-to-r from-primary to-teal text-white shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/40 hover:scale-105 animate-glow-pulse"
-            }`}
-          >
-            {thinking ? (
-              <Loader2 className="w-4 h-4 animate-spin" />
-            ) : showStop ? (
-              <Square className="w-3.5 h-3.5 fill-current" />
-            ) : (
-              <Mic className="w-4 h-4" />
-            )}
-            <span>{thinking ? "Thinking" : showStop ? "Stop" : "Ask"}</span>
-          </button>
+        {/* State indicator badge */}
+        <motion.div
+          key={stateLabel}
+          initial={{ opacity: 0, y: -4 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.25 }}
+          className="px-2.5 py-1 rounded-full glass border border-border/40 text-[10px] font-medium text-muted-foreground flex items-center gap-1 whitespace-nowrap"
+        >
+          <StateIcon className={`w-2.5 h-2.5 ${stateColor} ${thinking || isGeneratingVoice ? "animate-spin" : ""}`} />
+          {stateLabel}
+        </motion.div>
 
-          {/* Chat toggle — small icon button */}
-          <button
-            onClick={chatOpen ? closeChat : openChat}
-            className="self-start flex items-center justify-center w-9 h-9 rounded-full glass border border-border text-muted-foreground hover:text-primary hover:border-primary/30 transition-all"
-            title="Open chat"
-          >
-            <MessageCircle className="w-4 h-4" />
-          </button>
-        </div>
+        {/* Ask button — compact pill */}
+        <button
+          onClick={handleAskClick}
+          disabled={thinking}
+          className="group relative inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden bg-gradient-to-r from-primary to-teal text-white shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 hover:scale-105 active:scale-95"
+        >
+          <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-500 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+          <Mic className="w-3 h-3 relative z-10" />
+          <span className="relative z-10">Ask</span>
+        </button>
+
+        {/* Stop button — only visible when active */}
+        <AnimatePresence>
+          {showStop && (
+            <motion.button
+              initial={{ opacity: 0, height: 0, marginTop: 0 }}
+              animate={{ opacity: 1, height: "auto", marginTop: 2 }}
+              exit={{ opacity: 0, height: 0, marginTop: 0 }}
+              transition={{ duration: 0.2 }}
+              onClick={() => {
+                if (listening) {
+                  recognitionRef.current?.stop();
+                } else {
+                  stopSpeaking();
+                }
+              }}
+              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-semibold bg-danger/90 text-white shadow-md shadow-danger/20 hover:bg-danger hover:shadow-lg hover:shadow-danger/30 hover:scale-105 active:scale-95 transition-all duration-200 overflow-hidden"
+            >
+              <Square className="w-2.5 h-2.5 fill-current" />
+              Stop
+            </motion.button>
+          )}
+        </AnimatePresence>
+
+        {/* Chat toggle — small icon */}
+        <button
+          onClick={chatOpen ? closeChat : openChat}
+          className="mt-0.5 w-7 h-7 rounded-full glass border border-border/40 flex items-center justify-center text-muted-foreground hover:text-primary hover:border-primary/30 transition-all"
+          title="Open chat"
+        >
+          <MessageCircle className="w-3 h-3" />
+        </button>
       </div>
 
-      {/* Chat window — optional */}
+      {/* Chat window */}
       <AnimatePresence>
         {chatOpen && <AquaChat onClose={closeChat} />}
       </AnimatePresence>

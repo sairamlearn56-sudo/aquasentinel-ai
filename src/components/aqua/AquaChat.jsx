@@ -85,7 +85,7 @@ export default function AquaChat({ onClose }) {
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 30, scale: 0.92 }}
       transition={{ duration: 0.25, ease: "easeOut" }}
-      className="fixed bottom-28 left-4 lg:left-72 z-50 w-[calc(100vw-2rem)] max-w-sm"
+      className="fixed bottom-60 left-3 lg:left-72 z-50 w-[calc(100vw-1.5rem)] max-w-sm"
     >
       <div className="glass-strong rounded-3xl shadow-2xl border border-border/50 overflow-hidden flex flex-col" style={{ maxHeight: "70vh" }}>
         {/* Header */}
