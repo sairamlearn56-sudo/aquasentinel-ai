@@ -17,6 +17,7 @@ import { LanguageProvider } from '@/lib/LanguageContext';
 import { VoiceProvider } from '@/lib/VoiceContext';
 import VoiceIndicator from '@/components/VoiceIndicator';
 import { AquaProvider } from '@/lib/AquaContext';
+import { ThemeProvider } from '@/lib/ThemeContext';
 import AquaContainer from '@/components/aqua/AquaContainer';
 import PageLoader from '@/components/PageLoader';
 
@@ -70,14 +71,16 @@ function App() {
       <QueryClientProvider client={queryClientInstance}>
         <Router>
           <ScrollToTop />
-          <LanguageProvider>
-            <VoiceProvider>
-              <AquaProvider>
-                <AuthenticatedApp />
-                <VoiceIndicator />
-              </AquaProvider>
-            </VoiceProvider>
-          </LanguageProvider>
+          <ThemeProvider>
+            <LanguageProvider>
+              <VoiceProvider>
+                <AquaProvider>
+                  <AuthenticatedApp />
+                  <VoiceIndicator />
+                </AquaProvider>
+              </VoiceProvider>
+            </LanguageProvider>
+          </ThemeProvider>
         </Router>
         <Toaster />
       </QueryClientProvider>

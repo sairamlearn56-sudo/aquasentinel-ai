@@ -1,12 +1,19 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { ArrowRight, Activity, ShieldCheck, Globe, Sparkles } from "lucide-react";
+import { ArrowRight, Activity, ShieldCheck, Globe, Sparkles, Droplets, BrainCircuit } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageContext";
 import WaterDrop3D from "@/components/WaterDrop3D";
 import FeatureGrid from "@/components/landing/FeatureGrid";
 import WhyAquaSentinel from "@/components/landing/WhyAquaSentinel";
 import WorkflowSection from "@/components/landing/WorkflowSection";
+
+const stats = [
+  { value: "12,540+", label: "Families Protected", icon: ShieldCheck, color: "text-safe" },
+  { value: "85,320+", label: "Water Scans", icon: Droplets, color: "text-primary" },
+  { value: "3,245+", label: "Diseases Predicted", icon: BrainCircuit, color: "text-violet-500" },
+  { value: "8+", label: "Languages Supported", icon: Globe, color: "text-teal-500" },
+];
 
 export default function Dashboard() {
   const { t } = useLanguage();
@@ -16,18 +23,19 @@ export default function Dashboard() {
     <div className="relative pb-32">
       {/* ===== Hero Section ===== */}
       <div className="relative min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center px-4 py-10 overflow-hidden">
-        {/* Deep gradient background */}
+        {/* Subtle gradient background */}
         <div className="absolute inset-0 -z-10 bg-gradient-to-b from-primary/5 via-background to-teal/5" />
 
         {/* Soft gradient orbs */}
         <div className="absolute inset-0 -z-10 overflow-hidden">
           <div className="absolute top-10 left-1/4 w-72 h-72 bg-primary/5 rounded-full blur-3xl" />
           <div className="absolute bottom-10 right-1/4 w-96 h-96 bg-teal/5 rounded-full blur-3xl" />
+          <div className="absolute top-1/3 right-1/3 w-64 h-64 bg-violet-500/5 rounded-full blur-3xl" />
         </div>
 
         {/* Center content */}
         <div className="flex flex-col items-center text-center max-w-3xl mx-auto z-10">
-          {/* Logo */}
+          {/* 3D Logo */}
           <motion.div
             initial={{ opacity: 0, scale: 0.8 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -117,34 +125,33 @@ export default function Dashboard() {
             </span>
           </motion.div>
         </div>
-
-        {/* Animated wave at bottom */}
-        <div className="absolute bottom-0 left-0 right-0 pointer-events-none">
-          <svg viewBox="0 0 1440 100" className="w-full h-auto" preserveAspectRatio="none">
-            <defs>
-              <linearGradient id="waveGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-                <stop offset="0%" stopColor="hsl(194, 100%, 50%)" stopOpacity="0.03" />
-                <stop offset="100%" stopColor="hsl(194, 100%, 50%)" stopOpacity="0.12" />
-              </linearGradient>
-            </defs>
-            <motion.path
-              d="M0,50 C320,80 640,20 960,50 C1280,80 1440,30 1440,30 L1440,100 L0,100 Z"
-              fill="url(#waveGrad)"
-              animate={{
-                d: [
-                  "M0,50 C320,80 640,20 960,50 C1280,80 1440,30 1440,30 L1440,100 L0,100 Z",
-                  "M0,40 C320,20 640,70 960,40 C1280,10 1440,60 1440,60 L1440,100 L0,100 Z",
-                  "M0,50 C320,80 640,20 960,50 C1280,80 1440,30 1444,30 L1440,100 L0,100 Z",
-                ],
-              }}
-              transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-            />
-          </svg>
-        </div>
       </div>
 
+      {/* ===== Stats Section ===== */}
+      <section className="px-4 py-12 max-w-6xl mx-auto">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {stats.map((stat, i) => {
+            const Icon = stat.icon;
+            return (
+              <motion.div
+                key={stat.label}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: i * 0.1 }}
+                className="glass rounded-2xl p-6 text-center"
+              >
+                <Icon className={`w-8 h-8 mx-auto mb-3 ${stat.color}`} />
+                <p className="text-2xl sm:text-3xl font-bold gradient-text">{stat.value}</p>
+                <p className="text-xs text-muted-foreground mt-1">{stat.label}</p>
+              </motion.div>
+            );
+          })}
+        </div>
+      </section>
+
       {/* ===== Feature Cards ===== */}
-      <section className="px-4 py-16 max-w-6xl mx-auto">
+      <section className="px-4 py-12 max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -159,7 +166,7 @@ export default function Dashboard() {
       </section>
 
       {/* ===== Why AquaSentinel ===== */}
-      <section className="px-4 py-16 max-w-6xl mx-auto">
+      <section className="px-4 py-12 max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -174,7 +181,7 @@ export default function Dashboard() {
       </section>
 
       {/* ===== Workflow ===== */}
-      <section className="px-4 py-16 max-w-6xl mx-auto">
+      <section className="px-4 py-12 max-w-6xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}

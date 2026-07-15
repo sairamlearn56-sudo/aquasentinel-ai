@@ -48,6 +48,7 @@ module.exports = {
   			safe: 'hsl(var(--safe))',
   			warning: 'hsl(var(--warning))',
   			danger: 'hsl(var(--danger))',
+  			purple: 'hsl(var(--purple))',
   			chart: {
   				'1': 'hsl(var(--chart-1))',
   				'2': 'hsl(var(--chart-2))',
