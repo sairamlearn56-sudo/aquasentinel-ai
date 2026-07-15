@@ -1,13 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Radio, ArrowRight, RotateCcw, Brain, Volume2, VolumeX } from "lucide-react";
+import { ArrowRight, RotateCcw, Brain, Volume2, VolumeX } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useLanguage } from "@/lib/LanguageContext";
 import { useVoice } from "@/lib/VoiceContext";
 import { useAqua } from "@/lib/AquaContext";
 import { generateSensorData, analyzeWater } from "@/lib/waterAnalysis";
-import FamilyMemberSelector from "@/components/FamilyMemberSelector";
 import ScanSequence from "@/components/ScanSequence";
 import HealthScoreRing from "@/components/HealthScoreRing";
 import SensorCard from "@/components/SensorCard";
@@ -20,7 +19,7 @@ export default function LiveMonitor() {
   const { speak, isSpeaking, stop } = useVoice();
   const { startAnalysis, speakAnalysisStep, completeAnalysis, replayResult } = useAqua();
   const navigate = useNavigate();
-  const [phase, setPhase] = useState("select"); // select | scanning | results
+  const [phase, setPhase] = useState("scanning"); // scanning | results
   const [familyMember, setFamilyMember] = useState("adult");
   const [result, setResult] = useState(null);
   const voicePlayedRef = useRef(false);
@@ -108,38 +107,6 @@ export default function LiveMonitor() {
     setPhase("select");
     voicePlayedRef.current = false;
   };
-
-  // ===== Phase: Select Family Member =====
-  if (phase === "select") {
-    return (
-      <div className="max-w-3xl mx-auto space-y-8">
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-          <div className="text-center mb-8">
-            <div className="inline-flex w-16 h-16 rounded-3xl bg-gradient-to-br from-primary to-aqua items-center justify-center mb-4 shadow-lg shadow-primary/20">
-              <Radio className="w-8 h-8 text-white" />
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-bold mb-2">{t("liveMonitor")}</h1>
-            <p className="text-muted-foreground">{t("selectFamilyMember")}</p>
-          </div>
-
-          <div className="glass rounded-3xl p-6">
-            <FamilyMemberSelector value={familyMember} onChange={setFamilyMember} />
-          </div>
-
-          <div className="mt-8 flex justify-center">
-            <button
-              onClick={() => setPhase("scanning")}
-              className="inline-flex items-center gap-2 px-8 py-4 rounded-2xl bg-gradient-to-r from-primary to-aqua text-white font-semibold shadow-lg shadow-primary/20 hover:shadow-xl hover:shadow-primary/30 hover:scale-[1.02] transition-all duration-200"
-            >
-              <Radio className="w-5 h-5" />
-              {t("beginScan")}
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
-        </motion.div>
-      </div>
-    );
-  }
 
   // ===== Phase: Scanning =====
   if (phase === "scanning") {

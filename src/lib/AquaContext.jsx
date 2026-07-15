@@ -55,30 +55,25 @@ export function AquaProvider({ children }) {
 
   // Only speaks if chat is open
   const speakAnalysisStep = useCallback((key) => {
-    if (!chatOpen) return;
     const voiceEnabled = prefs?.voice_enabled !== false;
     if (voiceEnabled) {
       speak(getAquaMessage(lang, key), lang, prefs?.voice_speed || 0.9);
     }
-  }, [chatOpen, lang, prefs, speak]);
+  }, [lang, prefs, speak]);
 
   const completeAnalysis = useCallback((riskLevel, scanData) => {
     if (scanData) setLatestScan(scanData);
     setMood(riskLevel);
-    if (chatOpen) {
-      const voiceEnabled = prefs?.voice_enabled !== false;
-      if (voiceEnabled) {
-        speak(getAquaMessage(lang, riskLevel), lang, prefs?.voice_speed || 0.9);
-      }
+    const voiceEnabled = prefs?.voice_enabled !== false;
+    if (voiceEnabled) {
+      speak(getAquaMessage(lang, riskLevel), lang, prefs?.voice_speed || 0.9);
     }
-  }, [chatOpen, lang, prefs, speak]);
+  }, [lang, prefs, speak]);
 
   const replayResult = useCallback((riskLevel) => {
     setMood(riskLevel);
-    if (chatOpen) {
-      speak(getAquaMessage(lang, riskLevel), lang, prefs?.voice_speed || 0.9);
-    }
-  }, [chatOpen, lang, prefs, speak]);
+    speak(getAquaMessage(lang, riskLevel), lang, prefs?.voice_speed || 0.9);
+  }, [lang, prefs, speak]);
 
   const openChat = useCallback(() => {
     setChatOpen(true);
