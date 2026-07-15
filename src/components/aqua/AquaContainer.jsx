@@ -31,14 +31,6 @@ export default function AquaContainer() {
   }, [wave]);
 
   const handleAskClick = () => {
-    if (listening) {
-      recognitionRef.current?.stop();
-      return;
-    }
-    if (isSpeaking || isLoading) {
-      stopSpeaking();
-      return;
-    }
     if (thinking) return;
 
     stopSpeaking();
@@ -120,16 +112,18 @@ export default function AquaContainer() {
           {stateLabel}
         </motion.div>
 
-        {/* Ask button — compact pill */}
-        <button
-          onClick={handleAskClick}
-          disabled={thinking}
-          className="group relative inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden bg-gradient-to-r from-primary to-teal text-white shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 hover:scale-105 active:scale-95"
-        >
-          <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-500 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
-          <Mic className="w-3 h-3 relative z-10" />
-          <span className="relative z-10">Ask</span>
-        </button>
+        {/* Ask button — hidden when Stop is showing */}
+        {!showStop && (
+          <button
+            onClick={handleAskClick}
+            disabled={thinking}
+            className="group relative inline-flex items-center gap-1.5 px-4 py-2 rounded-full text-xs font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed overflow-hidden bg-gradient-to-r from-primary to-teal text-white shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 hover:scale-105 active:scale-95"
+          >
+            <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-500 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+            <Mic className="w-3 h-3 relative z-10" />
+            <span className="relative z-10">Ask</span>
+          </button>
+        )}
 
         {/* Stop button — only visible when active */}
         <AnimatePresence>

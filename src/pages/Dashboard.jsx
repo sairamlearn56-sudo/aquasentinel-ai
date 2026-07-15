@@ -4,17 +4,9 @@ import { motion } from "framer-motion";
 import { ArrowRight, Activity, ShieldCheck, Globe, Sparkles, Droplets, BrainCircuit } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageContext";
 import WaterDrop3D from "@/components/WaterDrop3D";
-import AnimatedCounter from "@/components/AnimatedCounter";
 import FeatureGrid from "@/components/landing/FeatureGrid";
 import WhyAquaSentinel from "@/components/landing/WhyAquaSentinel";
 import WorkflowSection from "@/components/landing/WorkflowSection";
-
-const stats = [
-  { value: 12540, suffix: "+", label: "Families Protected", icon: ShieldCheck, color: "text-emerald-400" },
-  { value: 85320, suffix: "+", label: "Water Scans", icon: Droplets, color: "text-cyan-400" },
-  { value: 3245, suffix: "+", label: "Diseases Predicted", icon: BrainCircuit, color: "text-purple-400" },
-  { value: 8, suffix: "+", label: "Languages Supported", icon: Globe, color: "text-blue-400" },
-];
 
 export default function Dashboard() {
   const { t } = useLanguage();
@@ -59,8 +51,8 @@ export default function Dashboard() {
             className="relative"
           >
             <div className="absolute inset-0 blur-3xl bg-cyan-500/20 rounded-full" />
-            <div className="relative">
-              <WaterDrop3D size={160} />
+            <div className="relative rounded-full glass-strong border border-cyan-500/20 p-5 shadow-xl shadow-cyan-500/10">
+              <WaterDrop3D size={110} />
             </div>
           </motion.div>
 
@@ -156,31 +148,6 @@ export default function Dashboard() {
           </motion.div>
         </div>
       </div>
-
-      {/* ===== Stats Section with Animated Counters ===== */}
-      <section className="px-4 py-12 max-w-6xl mx-auto">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {stats.map((stat, i) => {
-            const Icon = stat.icon;
-            return (
-              <motion.div
-                key={stat.label}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: i * 0.1, ease: [0.22, 1, 0.36, 1] }}
-                className="premium-card p-6 text-center"
-              >
-                <Icon className={`w-8 h-8 mx-auto mb-3 ${stat.color}`} />
-                <p className="text-2xl sm:text-3xl font-heading font-bold gradient-text">
-                  <AnimatedCounter target={stat.value} suffix={stat.suffix} />
-                </p>
-                <p className="text-xs text-muted-foreground mt-1">{stat.label}</p>
-              </motion.div>
-            );
-          })}
-        </div>
-      </section>
 
       {/* ===== Feature Cards ===== */}
       <section className="px-4 py-12 max-w-6xl mx-auto">

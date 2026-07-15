@@ -30,14 +30,7 @@ export default function LiveMonitor() {
   const [scanProgress, setScanProgress] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
-  const [waterSources, setWaterSources] = useState([]);
-  const [selectedWaterSourceId, setSelectedWaterSourceId] = useState(null);
   const [sampleName, setSampleName] = useState("");
-
-  // Fetch water sources for selection
-  useEffect(() => {
-    base44.entities.WaterSource.list("-created_date", 100).then(setWaterSources).catch(() => {});
-  }, []);
 
   // Track latest waterData from Firebase
   useEffect(() => {
@@ -57,25 +50,6 @@ export default function LiveMonitor() {
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
   }, []);
-
-  // Welcome voice — Aqua greets when ESP32 connects
-  useEffect(() => {
-    if (phase === "welcome" && isConnected && !welcomeVoiceRef.current) {
-      welcomeVoiceRef.current = true;
-      const voiceEnabled = prefs?.voice_enabled !== false;
-      if (voiceEnabled) {
-        const timer = setTimeout(() => {
-          speak(
-            "Hello! I'm Aqua. Your water health assistant. Place the sensors in water and press Start Monitoring whenever you're ready.",
-            lang,
-            prefs?.voice_speed || 0.9,
-            "narration"
-          );
-        }, 1500);
-        return () => clearTimeout(timer);
-      }
-    }
-  }, [phase, isConnected, speak, lang, prefs]);
 
   // ===== Interval: collect 1 reading per second =====
   const startInterval = () => {
@@ -173,8 +147,6 @@ export default function LiveMonitor() {
       latitude: 17.385 + (Math.random() - 0.5) * 0.05,
       longitude: 78.4867 + (Math.random() - 0.5) * 0.05,
       sensor_status: "connected",
-      water_source_id: selectedWaterSourceId || undefined,
-      water_source_name: waterSources.find((s) => s.id === selectedWaterSourceId)?.name || undefined,
       sample_name: sampleName || `Scan ${new Date().toLocaleString()}`,
       ai_confidence: aiConfidence,
       aqua_voice_summary: voiceSummary,
@@ -205,9 +177,6 @@ export default function LiveMonitor() {
       <ScanWelcome
         isConnected={isConnected}
         onStart={handleStartMonitoring}
-        waterSources={waterSources}
-        selectedWaterSourceId={selectedWaterSourceId}
-        onSelectWaterSource={setSelectedWaterSourceId}
         sampleName={sampleName}
         onSampleNameChange={setSampleName}
       />

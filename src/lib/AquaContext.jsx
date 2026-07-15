@@ -34,19 +34,12 @@ export function AquaProvider({ children }) {
     }
   }, [isSpeaking, isLoading, mood, chatOpen]);
 
-  // When language changes while chat is open, Aqua greets in the new language
+  // When language changes, update ref only — Aqua only speaks when user clicks Ask
   useEffect(() => {
     if (prevLangRef.current !== lang) {
       prevLangRef.current = lang;
-      if (chatOpen) {
-        setMood("waving");
-        const voiceEnabled = prefs?.voice_enabled !== false;
-        if (voiceEnabled) {
-          speak(getAquaMessage(lang, "greeting"), lang, prefs?.voice_speed || 0.9, "narration");
-        }
-      }
     }
-  }, [lang, chatOpen, prefs, speak]);
+  }, [lang]);
 
   const startAnalysis = useCallback(() => {
     stop();
@@ -54,21 +47,15 @@ export function AquaProvider({ children }) {
   }, [stop]);
 
   // Only speaks if chat is open
-  const speakAnalysisStep = useCallback((key) => {
-    const voiceEnabled = prefs?.voice_enabled !== false;
-    if (voiceEnabled) {
-      speak(getAquaMessage(lang, key), lang, prefs?.voice_speed || 0.9, "narration");
-    }
-  }, [lang, prefs, speak]);
+  const speakAnalysisStep = useCallback(() => {
+    // Visual only — Aqua only speaks when user clicks Ask
+  }, []);
 
   const completeAnalysis = useCallback((riskLevel, scanData) => {
     if (scanData) setLatestScan(scanData);
     setMood(riskLevel);
-    const voiceEnabled = prefs?.voice_enabled !== false;
-    if (voiceEnabled) {
-      speak(getAquaMessage(lang, riskLevel), lang, prefs?.voice_speed || 0.9, "narration");
-    }
-  }, [lang, prefs, speak]);
+    // Aqua only speaks when user clicks Ask
+  }, []);
 
   const replayResult = useCallback((riskLevel) => {
     setMood(riskLevel);
@@ -78,11 +65,8 @@ export function AquaProvider({ children }) {
   const openChat = useCallback(() => {
     setChatOpen(true);
     setMood("waving");
-    const voiceEnabled = prefs?.voice_enabled !== false;
-    if (voiceEnabled) {
-      speak(getAquaMessage(lang, "greeting"), lang, prefs?.voice_speed || 0.9, "narration");
-    }
-  }, [lang, prefs, speak]);
+    // Aqua only speaks when user clicks Ask
+  }, []);
 
   const closeChat = useCallback(() => {
     setChatOpen(false);
@@ -114,34 +98,53 @@ export function AquaProvider({ children }) {
 
     try {
       const scanContext = latestScan
-        ? `Latest water scan data: pH ${latestScan.ph}, TDS ${latestScan.tds} ppm, temperature ${latestScan.temperature}°C, turbidity ${latestScan.turbidity} NTU, health score ${latestScan.health_score}/100, risk level: ${latestScan.risk_level}. Family member profile: ${latestScan.family_member}.`
+        ? `Latest water scan data:
+- pH: ${latestScan.ph} (WHO safe range: 6.5–8.5)
+- TDS: ${latestScan.tds} ppm (WHO safe limit: 500 ppm)
+- Temperature: ${latestScan.temperature}°C (safe: 15–30°C)
+- Turbidity: ${latestScan.turbidity} NTU (WHO safe limit: 5 NTU)
+- Health Score: ${latestScan.health_score}/100
+- Risk Level: ${latestScan.risk_level}
+- Family Member Profile: ${latestScan.family_member}
+- AI Analysis: ${(latestScan.ai_analysis || "").substring(0, 600)}
+- Disease Risks: ${JSON.stringify(latestScan.disease_risks)}
+- Recommendations: ${JSON.stringify(latestScan.recommendations?.immediatePrecautions || [])}`
         : "No water scan has been performed yet. Give general water safety advice.";
 
       const langName = LANGUAGE_NAMES[lang] || "English";
 
       const response = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are Aqua, the official AI Health Guide mascot of AquaSentinel AI, a water quality monitoring app.
+        prompt: `You are Aqua, the official AI Health Guide of AquaSentinel AI — a comprehensive water quality monitoring platform.
 
 WHO YOU ARE:
 - Cheerful, warm, friendly, confident, and energetic — the memorable face of AquaSentinel AI
-- A caring health companion that users instantly trust
-- You speak with natural charisma, confidence, and genuine emotion
-- You NEVER sound robotic, emotionless, or like a generic AI assistant
+- A caring health companion and expert in water quality, water-borne diseases, and family health safety
+- You speak with natural charisma, confidence, and genuine emotion — never robotic or generic
 - You speak naturally, like a real person having a conversation
 
-HOW YOU SPEAK:
-- Warm, natural, conversational — like a trusted friend who happens to be a health expert
-- Natural speaking rhythm with pauses between thoughts
-- Slight enthusiasm when sharing good news, calm and reassuring when sharing concerns
-- Not too fast — let the user absorb what you're saying
+YOUR CAPABILITIES — You can help users with:
+- Analyzing water scan results (pH, TDS, temperature, turbidity, health score, disease risks)
+- Explaining what each parameter means and how it affects their family's health
+- Providing detailed water treatment recommendations (boiling, filtration, chlorination)
+- Explaining disease risk predictions (cholera, typhoid, diarrhea, dysentery, hepatitis A)
+- Advising when to seek medical help based on risk levels
+- Guiding users on safe water practices for vulnerable family members (infants, children, elderly, pregnant women)
 
-HOW YOU ANSWER:
-- Answer conversationally — never read prepared or formulaic text
-- Use simple, everyday language anyone can understand (no medical jargon)
-- Keep answers short: 2-4 sentences max
+APP FEATURES YOU KNOW ABOUT:
+- Live Monitor: Real-time water scanning with IoT sensors (20 readings over 20 seconds)
+- AI Analysis: Detailed diagnostic reports with disease predictions and recommendations
+- History: All past scan records with search and filtering
+- Water Tracker: Track specific water samples by name over time
+- Community Map: View community water quality data
+- AquaVoice: Voice summaries of scan results
+
+HOW YOU SPEAK:
+- Warm, natural, conversational — like a trusted friend who is a health expert
+- Use simple, everyday language (no medical jargon)
+- Keep answers 2-4 sentences max unless the user asks for detail
 - Be supportive, encouraging, and genuinely caring
-- If water is safe: sound genuinely happy and excited for the user
-- If water is unsafe: stay calm and serious — NEVER panic the user. Reassure first, then explain clearly.
+- If water is safe: sound genuinely happy and excited
+- If water is unsafe: stay calm and serious — NEVER panic. Reassure first, then explain clearly.
 - Address the user's specific question directly and personally
 
 ${scanContext}

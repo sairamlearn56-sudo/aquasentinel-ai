@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Activity, Wifi, WifiOff, Database, Cpu } from "lucide-react";
 import ScanDevice from "@/components/livescan/ScanDevice";
 
-export default function ScanWelcome({ isConnected, onStart, waterSources, selectedWaterSourceId, onSelectWaterSource, sampleName, onSampleNameChange }) {
+export default function ScanWelcome({ isConnected, onStart, sampleName, onSampleNameChange }) {
   const rippleRef = useRef(null);
 
   const createRipple = (e) => {
@@ -118,32 +118,6 @@ export default function ScanWelcome({ isConnected, onStart, waterSources, select
           className="w-full px-4 py-2.5 rounded-2xl glass border border-border text-sm focus:outline-none focus:border-cyan-500/40"
         />
       </motion.div>
-
-      {/* Water Source Selector */}
-      {waterSources && waterSources.length > 0 && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.42 }}
-          className="mt-6 w-full max-w-xs"
-        >
-          <label className="text-xs text-muted-foreground mb-1.5 block font-medium">
-            Water Source (optional)
-          </label>
-          <select
-            value={selectedWaterSourceId || ""}
-            onChange={(e) => onSelectWaterSource(e.target.value || null)}
-            className="w-full px-4 py-2.5 rounded-2xl glass border border-border text-sm focus:outline-none focus:border-cyan-500/40 cursor-pointer"
-          >
-            <option value="">No water source</option>
-            {waterSources.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name} ({s.label})
-              </option>
-            ))}
-          </select>
-        </motion.div>
-      )}
 
       {/* Start Monitoring button */}
       <motion.button
