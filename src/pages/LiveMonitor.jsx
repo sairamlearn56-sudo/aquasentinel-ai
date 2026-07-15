@@ -6,7 +6,8 @@ import { base44 } from "@/api/base44Client";
 import { useLanguage } from "@/lib/LanguageContext";
 import { useVoice } from "@/lib/VoiceContext";
 import { useAqua } from "@/lib/AquaContext";
-import { generateSensorData, analyzeWater } from "@/lib/waterAnalysis";
+import { analyzeWater } from "@/lib/waterAnalysis";
+import { useWaterData } from "@/hooks/useWaterData";
 import ScanSequence from "@/components/ScanSequence";
 import HealthScoreRing from "@/components/HealthScoreRing";
 import SensorCard from "@/components/SensorCard";
@@ -23,6 +24,12 @@ export default function LiveMonitor() {
   const [familyMember, setFamilyMember] = useState("adult");
   const [result, setResult] = useState(null);
   const voicePlayedRef = useRef(false);
+  const { waterData, isConnected } = useWaterData();
+  const waterDataRef = useRef(null);
+
+  useEffect(() => {
+    waterDataRef.current = waterData;
+  }, [waterData]);
 
   useEffect(() => {
     if (prefs?.default_family_member) {
@@ -59,7 +66,13 @@ export default function LiveMonitor() {
   ];
 
   const handleScanComplete = async () => {
-    const sensorData = generateSensorData();
+    // Use real Firebase data — wait briefly if not yet received
+    let sensorData = waterDataRef.current;
+    if (!sensorData) {
+      await new Promise((r) => setTimeout(r, 3000));
+      sensorData = waterDataRef.current;
+    }
+    if (!sensorData) return;
     const analysis = analyzeWater(sensorData, familyMember);
     
     try {
@@ -96,6 +109,14 @@ export default function LiveMonitor() {
     }
   }, [phase, result, completeAnalysis]);
 
+  // Auto-update results when Firebase data changes in real-time
+  useEffect(() => {
+    if (phase === "results" && waterData) {
+      const analysis = analyzeWater(waterData, familyMember);
+      setResult((prev) => (prev ? { ...analysis, id: prev.id } : null));
+    }
+  }, [waterData, phase, familyMember]);
+
   const handleReplayVoice = () => {
     if (!result) return;
     replayResult(result.risk_level);
@@ -104,7 +125,7 @@ export default function LiveMonitor() {
   const handleNewScan = () => {
     stop();
     setResult(null);
-    setPhase("select");
+    setPhase("scanning");
     voicePlayedRef.current = false;
   };
 
