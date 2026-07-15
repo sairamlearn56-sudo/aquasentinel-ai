@@ -52,8 +52,9 @@ export default function LiveMonitor() {
           speak(
             "Hello! I'm Aqua. Your water health assistant. Place the sensors in water and press Start Monitoring whenever you're ready.",
             lang,
-            prefs?.voice_speed || 0.9
-          );
+            prefs?.voice_speed || 0.9,
+            "narration"
+            );
         }, 1500);
         return () => clearTimeout(timer);
       }

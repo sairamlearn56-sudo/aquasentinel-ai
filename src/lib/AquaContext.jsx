@@ -42,7 +42,7 @@ export function AquaProvider({ children }) {
         setMood("waving");
         const voiceEnabled = prefs?.voice_enabled !== false;
         if (voiceEnabled) {
-          speak(getAquaMessage(lang, "greeting"), lang, prefs?.voice_speed || 0.9);
+          speak(getAquaMessage(lang, "greeting"), lang, prefs?.voice_speed || 0.9, "narration");
         }
       }
     }
@@ -57,7 +57,7 @@ export function AquaProvider({ children }) {
   const speakAnalysisStep = useCallback((key) => {
     const voiceEnabled = prefs?.voice_enabled !== false;
     if (voiceEnabled) {
-      speak(getAquaMessage(lang, key), lang, prefs?.voice_speed || 0.9);
+      speak(getAquaMessage(lang, key), lang, prefs?.voice_speed || 0.9, "narration");
     }
   }, [lang, prefs, speak]);
 
@@ -66,13 +66,13 @@ export function AquaProvider({ children }) {
     setMood(riskLevel);
     const voiceEnabled = prefs?.voice_enabled !== false;
     if (voiceEnabled) {
-      speak(getAquaMessage(lang, riskLevel), lang, prefs?.voice_speed || 0.9);
+      speak(getAquaMessage(lang, riskLevel), lang, prefs?.voice_speed || 0.9, "narration");
     }
   }, [lang, prefs, speak]);
 
   const replayResult = useCallback((riskLevel) => {
     setMood(riskLevel);
-    speak(getAquaMessage(lang, riskLevel), lang, prefs?.voice_speed || 0.9);
+    speak(getAquaMessage(lang, riskLevel), lang, prefs?.voice_speed || 0.9, "narration");
   }, [lang, prefs, speak]);
 
   const openChat = useCallback(() => {
@@ -80,7 +80,7 @@ export function AquaProvider({ children }) {
     setMood("waving");
     const voiceEnabled = prefs?.voice_enabled !== false;
     if (voiceEnabled) {
-      speak(getAquaMessage(lang, "greeting"), lang, prefs?.voice_speed || 0.9);
+      speak(getAquaMessage(lang, "greeting"), lang, prefs?.voice_speed || 0.9, "narration");
     }
   }, [lang, prefs, speak]);
 
@@ -163,14 +163,14 @@ Respond warmly and naturally in ${langName}. If the language is not English, use
       setMood("speaking");
       const voiceEnabled = prefs?.voice_enabled !== false;
       if (voiceEnabled) {
-        speak(answer, lang, prefs?.voice_speed || 0.9);
+        speak(answer, lang, prefs?.voice_speed || 0.9, "chat");
       }
     } catch (e) {
       setThinking(false);
       const fallback = "I'm having trouble connecting right now. Please try again in a moment.";
       setMessages((prev) => [...prev, { role: "assistant", content: fallback }]);
       setMood("speaking");
-      speak(fallback, lang, prefs?.voice_speed || 0.9);
+      speak(fallback, lang, prefs?.voice_speed || 0.9, "chat");
     }
   }, [latestScan, lang, prefs, speak]);
 

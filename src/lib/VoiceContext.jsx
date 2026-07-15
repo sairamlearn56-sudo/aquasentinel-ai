@@ -9,7 +9,7 @@ export function VoiceProvider({ children }) {
   const [currentText, setCurrentText] = useState("");
   const audioRef = useRef(null);
 
-  const speak = useCallback(async (text, lang = "en", speed = 0.9) => {
+  const speak = useCallback(async (text, lang = "en", speed = 0.9, mode = "chat") => {
     // Stop any currently playing audio
     if (audioRef.current) {
       audioRef.current.pause();
@@ -24,6 +24,7 @@ export function VoiceProvider({ children }) {
         text,
         language: lang,
         speed,
+        mode,
       });
 
       setIsLoading(false);
