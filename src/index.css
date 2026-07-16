@@ -6,7 +6,58 @@
 
 @layer base {
   :root {
-    /* ===== Dark Healthcare Design System ===== */
+    /* ===== Light Theme (default) ===== */
+    --background: 210 40% 98%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 173 58% 40%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 199 80% 42%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 210 40% 96%;
+    --muted-foreground: 215 16% 47%;
+    --accent: 173 58% 40%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 214 32% 91%;
+    --input: 214 32% 91%;
+    --ring: 173 58% 40%;
+    --aqua: 173 58% 40%;
+    --teal: 173 58% 40%;
+    --safe: 142 71% 45%;
+    --warning: 38 92% 45%;
+    --danger: 0 72% 51%;
+    --purple: 245 58% 51%;
+    --blue: 199 80% 42%;
+    --coral: 0 72% 51%;
+    --gold: 38 92% 45%;
+    --orange: 24 82% 50%;
+    --chart-1: 173 58% 40%;
+    --chart-2: 199 80% 42%;
+    --chart-3: 142 71% 45%;
+    --chart-4: 38 92% 45%;
+    --chart-5: 0 72% 51%;
+    --radius: 0.75rem;
+    --font-heading: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+    --font-body: 'Inter', ui-sans-serif, system-ui, sans-serif;
+    --font-display: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+    --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    --sidebar-background: 210 40% 98%;
+    --sidebar-foreground: 215 16% 47%;
+    --sidebar-primary: 173 58% 40%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 40% 96%;
+    --sidebar-accent-foreground: 222 47% 11%;
+    --sidebar-border: 214 32% 91%;
+    --sidebar-ring: 173 58% 40%;
+  }
+
+  .dark {
+    /* ===== Dark Healthcare Theme ===== */
     --background: 220 49% 8%;
     --foreground: 210 40% 96%;
     --card: 221 40% 13%;
@@ -55,51 +106,6 @@
     --sidebar-border: 219 37% 20%;
     --sidebar-ring: 173 66% 50%;
   }
-
-  .dark {
-    --background: 220 49% 8%;
-    --foreground: 210 40% 96%;
-    --card: 221 40% 13%;
-    --card-foreground: 210 40% 96%;
-    --popover: 221 40% 13%;
-    --popover-foreground: 210 40% 96%;
-    --primary: 173 66% 50%;
-    --primary-foreground: 220 49% 8%;
-    --secondary: 199 92% 60%;
-    --secondary-foreground: 220 49% 8%;
-    --muted: 221 35% 17%;
-    --muted-foreground: 215 20% 65%;
-    --accent: 173 66% 50%;
-    --accent-foreground: 220 49% 8%;
-    --destructive: 0 91% 71%;
-    --destructive-foreground: 210 40% 96%;
-    --border: 219 37% 21%;
-    --input: 219 37% 21%;
-    --ring: 173 66% 50%;
-    --aqua: 173 66% 50%;
-    --teal: 173 66% 50%;
-    --safe: 158 64% 52%;
-    --warning: 43 96% 56%;
-    --danger: 0 91% 71%;
-    --purple: 252 58% 65%;
-    --blue: 199 92% 60%;
-    --coral: 0 91% 71%;
-    --gold: 43 96% 56%;
-    --orange: 24 82% 55%;
-    --chart-1: 173 66% 50%;
-    --chart-2: 199 92% 60%;
-    --chart-3: 158 64% 52%;
-    --chart-4: 43 96% 56%;
-    --chart-5: 0 91% 71%;
-    --sidebar-background: 220 49% 10%;
-    --sidebar-foreground: 215 20% 65%;
-    --sidebar-primary: 173 66% 50%;
-    --sidebar-primary-foreground: 220 49% 8%;
-    --sidebar-accent: 221 35% 15%;
-    --sidebar-accent-foreground: 210 40% 96%;
-    --sidebar-border: 219 37% 20%;
-    --sidebar-ring: 173 66% 50%;
-  }
 }
 
 @layer utilities {
@@ -119,7 +125,7 @@
     background: hsl(var(--card));
     border: 1px solid hsl(var(--border));
     border-radius: 12px !important;
-    transition: border-color 0.2s ease;
+    transition: border-color 0.2s ease, background-color 0.3s ease;
   }
   .premium-card:hover {
     border-color: hsl(var(--primary) / 0.3);
@@ -127,8 +133,6 @@
 
   .glow-primary { transition: box-shadow 0.2s ease; }
   .glow-primary:hover { box-shadow: 0 0 0 1px hsl(var(--primary) / 0.15); }
-  .glow-safe { }
-  .glow-danger { }
 
   /* ===== Gradient Text (static) ===== */
   .gradient-text {
@@ -175,6 +179,7 @@
   * { @apply border-border outline-ring/50; }
   html {
     background-color: hsl(var(--background));
+    transition: background-color 0.3s ease;
   }
   body {
     background: hsl(var(--background));
@@ -184,6 +189,7 @@
     line-height: 1.6;
     letter-spacing: -0.006em;
     font-variant-numeric: tabular-nums;
+    transition: background-color 0.3s ease, color 0.3s ease;
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);
