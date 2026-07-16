@@ -8,7 +8,7 @@ const AquaContext = createContext(null);
 
 export function AquaProvider({ children }) {
   const { lang, prefs, loadingPrefs } = useLanguage();
-  const { speak, stop, isSpeaking, isLoading } = useVoice();
+  const { speak, stop, retry, isSpeaking, isLoading, voiceError } = useVoice();
 
   const [mood, setMood] = useState("idle");
   const [chatOpen, setChatOpen] = useState(false);
@@ -202,6 +202,8 @@ Respond warmly and naturally in ${langName}. If the language is not English, use
         stopSpeaking,
         startListening,
         stopListening,
+        voiceError,
+        retry,
       }}
     >
       {children}
