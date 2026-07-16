@@ -1,0 +1,80 @@
+{
+  "name": "Alert",
+  "type": "object",
+  "properties": {
+    "alert_id": {
+      "type": "string",
+      "description": "Unique alert identifier"
+    },
+    "village": {
+      "type": "string",
+      "description": "Village or location name"
+    },
+    "sensor_name": {
+      "type": "string",
+      "description": "Name of the sensor that triggered the alert"
+    },
+    "water_quality_score": {
+      "type": "number",
+      "description": "Water quality score 0-100"
+    },
+    "risk_level": {
+      "type": "string",
+      "enum": [
+        "safe",
+        "warning",
+        "high_risk",
+        "critical"
+      ],
+      "default": "warning",
+      "description": "Risk level classification"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "resolved"
+      ],
+      "default": "active",
+      "description": "Alert status"
+    },
+    "sms_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "sent",
+        "failed",
+        "not_applicable"
+      ],
+      "default": "pending",
+      "description": "SMS delivery status"
+    },
+    "email_status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "sent",
+        "failed",
+        "not_applicable"
+      ],
+      "default": "pending",
+      "description": "Email delivery status"
+    },
+    "notification_sent_at": {
+      "type": "string",
+      "description": "Timestamp of when notification was sent"
+    },
+    "message": {
+      "type": "string",
+      "description": "Alert message body"
+    }
+  },
+  "required": [
+    "alert_id",
+    "village",
+    "sensor_name",
+    "water_quality_score",
+    "risk_level",
+    "status"
+  ]
+}

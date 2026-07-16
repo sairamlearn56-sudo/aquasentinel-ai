@@ -1,0 +1,76 @@
+{
+  "name": "Sensor",
+  "type": "object",
+  "properties": {
+    "sensor_id": {
+      "type": "string",
+      "description": "Unique sensor identifier"
+    },
+    "sensor_name": {
+      "type": "string",
+      "description": "Display name for the sensor"
+    },
+    "sensor_type": {
+      "type": "string",
+      "enum": [
+        "ph",
+        "tds",
+        "turbidity",
+        "temperature",
+        "multiparameter"
+      ],
+      "default": "multiparameter",
+      "description": "Type of sensor"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "online",
+        "warning",
+        "offline"
+      ],
+      "default": "online",
+      "description": "Current sensor status"
+    },
+    "battery_level": {
+      "type": "number",
+      "default": 100,
+      "description": "Battery level percentage 0-100"
+    },
+    "signal_strength": {
+      "type": "number",
+      "default": 100,
+      "description": "Signal strength percentage 0-100"
+    },
+    "village": {
+      "type": "string",
+      "description": "Village where sensor is installed"
+    },
+    "installation_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of installation"
+    },
+    "calibration_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Last calibration date"
+    },
+    "firmware_version": {
+      "type": "string",
+      "default": "v2.1.0",
+      "description": "Firmware version"
+    },
+    "enabled": {
+      "type": "boolean",
+      "default": true,
+      "description": "Whether the sensor is enabled"
+    }
+  },
+  "required": [
+    "sensor_id",
+    "sensor_name",
+    "sensor_type",
+    "status"
+  ]
+}

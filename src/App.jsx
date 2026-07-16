@@ -16,6 +16,14 @@ import Settings from '@/pages/Settings';
 import Profile from '@/pages/Profile';
 import WaterTracker from '@/pages/WaterTracker';
 import WaterSourceDetail from '@/pages/WaterSourceDetail';
+import AlertCenter from '@/pages/AlertCenter';
+import CommunityHealth from '@/pages/CommunityHealth';
+import Analytics from '@/pages/Analytics';
+import AIHealthAssistant from '@/pages/AIHealthAssistant';
+import Notifications from '@/pages/Notifications';
+import CommunityReporting from '@/pages/CommunityReporting';
+import Reports from '@/pages/Reports';
+import SensorManagement from '@/pages/SensorManagement';
 import { LanguageProvider } from '@/lib/LanguageContext';
 import { VoiceProvider } from '@/lib/VoiceContext';
 import VoiceIndicator from '@/components/VoiceIndicator';
@@ -62,6 +70,14 @@ const AuthenticatedApp = () => {
         <Route path="/profile" element={<Profile />} />
         <Route path="/tracker" element={<WaterTracker />} />
         <Route path="/tracker/:id" element={<WaterSourceDetail />} />
+        <Route path="/alerts" element={<AlertCenter />} />
+        <Route path="/community-health" element={<CommunityHealth />} />
+        <Route path="/analytics" element={<Analytics />} />
+        <Route path="/ai-assistant" element={<AIHealthAssistant />} />
+        <Route path="/notifications" element={<Notifications />} />
+        <Route path="/community-reporting" element={<CommunityReporting />} />
+        <Route path="/reports" element={<Reports />} />
+        <Route path="/sensors" element={<SensorManagement />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
