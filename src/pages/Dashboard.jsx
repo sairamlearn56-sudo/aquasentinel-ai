@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 import { ArrowRight, Activity, ShieldCheck, Globe, Sparkles, Droplets, BrainCircuit } from "lucide-react";
@@ -7,10 +7,26 @@ import WaterDrop3D from "@/components/WaterDrop3D";
 import FeatureGrid from "@/components/landing/FeatureGrid";
 import WhyAquaSentinel from "@/components/landing/WhyAquaSentinel";
 import WorkflowSection from "@/components/landing/WorkflowSection";
+import { base44 } from "@/api/base44Client";
+import DashboardWidgets from "@/components/dashboard/DashboardWidgets";
+import AIRecommendations from "@/components/dashboard/AIRecommendations";
+import AIInsights from "@/components/dashboard/AIInsights";
+import ApplicationsSection from "@/components/landing/ApplicationsSection";
 
 export default function Dashboard() {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const [latestScan, setLatestScan] = useState(null);
+
+  useEffect(() => {
+    async function fetchLatest() {
+      try {
+        const data = await base44.entities.Scan.list("-created_date", 1);
+        if (data && data.length > 0) setLatestScan(data[0]);
+      } catch (e) {}
+    }
+    fetchLatest();
+  }, []);
 
   const createRipple = (e) => {
     const button = e.currentTarget;
@@ -137,6 +153,15 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* ===== Dashboard Overview Widgets ===== */}
+      <section className="px-4 py-8 max-w-6xl mx-auto">
+        <DashboardWidgets scan={latestScan} />
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+          <AIRecommendations scan={latestScan} />
+          <AIInsights scan={latestScan} />
+        </div>
+      </section>
+
       {/* ===== Feature Cards ===== */}
       <section className="px-4 py-12 max-w-6xl mx-auto">
         <motion.div
@@ -180,6 +205,11 @@ export default function Dashboard() {
           <p className="text-muted-foreground mt-2">From water sample to safety in seconds</p>
         </motion.div>
         <WorkflowSection />
+      </section>
+
+      {/* ===== Applications ===== */}
+      <section className="px-4 py-12 max-w-6xl mx-auto">
+        <ApplicationsSection />
       </section>
     </div>
   );

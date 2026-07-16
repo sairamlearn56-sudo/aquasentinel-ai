@@ -1,6 +1,6 @@
 import React from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, Radio, BrainCircuit, TrendingUp, MapPin, Settings, Droplets, User, LogOut, Waves, BarChart3, Megaphone, FileText } from "lucide-react";
+import { LayoutDashboard, Radio, BrainCircuit, TrendingUp, MapPin, Settings, Droplets, User, LogOut, Waves, BarChart3, Megaphone, FileText, ClipboardList } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageContext";
 import { useAuth } from "@/lib/AuthContext";
 import LanguageSelector from "@/components/LanguageSelector";
@@ -22,6 +22,7 @@ export default function Sidebar() {
     { to: "/analytics", icon: BarChart3, label: "Analytics" },
     { to: "/notifications", icon: Megaphone, label: "Notifications" },
     { to: "/community-reporting", icon: FileText, label: "Community Reports" },
+    { to: "/reports", icon: ClipboardList, label: "Reports" },
     { to: "/settings", icon: Settings, label: t("settings") },
     { to: "/profile", icon: User, label: "Profile" },
   ];

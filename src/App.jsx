@@ -19,6 +19,7 @@ import WaterSourceDetail from '@/pages/WaterSourceDetail';
 import Analytics from '@/pages/Analytics';
 import Notifications from '@/pages/Notifications';
 import CommunityReporting from '@/pages/CommunityReporting';
+import Reports from '@/pages/Reports';
 import { LanguageProvider } from '@/lib/LanguageContext';
 import { VoiceProvider } from '@/lib/VoiceContext';
 import VoiceIndicator from '@/components/VoiceIndicator';
@@ -68,6 +69,7 @@ const AuthenticatedApp = () => {
         <Route path="/analytics" element={<Analytics />} />
         <Route path="/notifications" element={<Notifications />} />
         <Route path="/community-reporting" element={<CommunityReporting />} />
+        <Route path="/reports" element={<Reports />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
