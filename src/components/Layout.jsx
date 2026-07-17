@@ -3,7 +3,6 @@ import { Outlet, useLocation } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import Sidebar from "@/components/Sidebar";
 import WaterRippleBackground from "@/components/WaterRippleBackground";
-import UtilityBar from "@/components/UtilityBar";
 
 export default function Layout() {
   const location = useLocation();
@@ -12,11 +11,7 @@ export default function Layout() {
     <div className="min-h-screen relative overflow-hidden">
       <WaterRippleBackground />
       <Sidebar />
-      {/* Desktop Utility Bar — top-right, visible on every page */}
-      <div className="hidden lg:flex fixed top-4 right-6 z-50">
-        <UtilityBar />
-      </div>
-      <main className="lg:ml-[17rem] pt-20 lg:pt-12 relative z-10">
+      <main className="lg:ml-[17rem] pt-20 lg:pt-6 relative z-10">
         <div className="p-4 sm:p-6 lg:p-8 max-w-6xl mx-auto">
           <AnimatePresence mode="wait">
             <motion.div

@@ -13,9 +13,6 @@ import AIAnalysis from '@/pages/AIAnalysis';
 import History from '@/pages/History';
 import CommunityMap from '@/pages/CommunityMap';
 import Settings from '@/pages/Settings';
-import AppSettings from '@/pages/settings/AppSettings';
-import LanguageSettings from '@/pages/settings/LanguageSettings';
-import NotificationsSettings from '@/pages/settings/NotificationsSettings';
 import Profile from '@/pages/Profile';
 import WaterTracker from '@/pages/WaterTracker';
 import WaterSourceDetail from '@/pages/WaterSourceDetail';
@@ -62,9 +59,6 @@ const AuthenticatedApp = () => {
         <Route path="/history" element={<History />} />
         <Route path="/map" element={<CommunityMap />} />
         <Route path="/settings" element={<Settings />} />
-        <Route path="/settings/app" element={<AppSettings />} />
-        <Route path="/settings/language" element={<LanguageSettings />} />
-        <Route path="/settings/notifications" element={<NotificationsSettings />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/tracker" element={<WaterTracker />} />
         <Route path="/tracker/:id" element={<WaterSourceDetail />} />

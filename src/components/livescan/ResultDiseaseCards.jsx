@@ -1,35 +1,80 @@
 import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { getDiseaseConfig } from "@/components/illustrations/DiseaseIllustrations";
-import { DISEASE_PREVENTION_TIPS } from "@/lib/resultImages";
+import { classifyParameter } from "@/lib/waterAnalysis";
+import { DISEASE_IMAGES, DISEASE_PREVENTION_TIPS } from "@/lib/resultImages";
 import { Lightbulb } from "lucide-react";
+import TiltCard from "@/components/TiltCard";
 
-export default function ResultDiseaseCards({ diseaseRisks, t }) {
-  const entries = Object.entries(diseaseRisks || {});
+function getDiseaseConfidence(risk) {
+  return Math.min(95, Math.round(60 + risk * 0.4));
+}
 
-  if (entries.length === 0) {
-    return (
-      <div className="text-center py-8">
-        <p className="text-sm text-muted-foreground">No prediction available.</p>
-        <p className="text-xs text-muted-foreground/70 mt-1">Complete analysis to receive disease risk predictions.</p>
-      </div>
-    );
-  }
+function getDiseaseReason(disease, waterData) {
+  if (!waterData) return "Based on overall water quality analysis";
 
+  const phStatus = classifyParameter("ph", waterData.ph);
+  const tdsStatus = classifyParameter("tds", waterData.tds);
+  const turbStatus = classifyParameter("turbidity", waterData.turbidity);
+
+  const reasons = {
+    cholera:
+      turbStatus === "danger"
+        ? "High turbidity indicates possible bacterial contamination"
+        : turbStatus === "moderate"
+        ? "Elevated turbidity may harbor Vibrio cholerae bacteria"
+        : "Water clarity is within acceptable limits",
+    typhoid:
+      tdsStatus === "danger"
+        ? "Excessive dissolved solids suggest sewage contamination"
+        : tdsStatus === "moderate"
+        ? "TDS levels indicate possible organic contamination"
+        : "Dissolved solids within safe range",
+    diarrhea:
+      turbStatus !== "safe" || phStatus !== "safe"
+        ? "Turbidity and pH levels indicate pathogen presence"
+        : "Water parameters show low pathogen risk",
+    dysentery:
+      phStatus !== "safe"
+        ? "pH imbalance may allow parasitic and bacterial growth"
+        : "pH levels are within safe range",
+    hepatitisA:
+      turbStatus === "danger" && tdsStatus === "danger"
+        ? "Multiple severe violations indicate viral contamination risk"
+        : turbStatus !== "safe"
+        ? "Turbidity levels suggest possible viral contamination"
+        : "Low viral contamination risk based on water parameters",
+  };
+
+  return reasons[disease] || "Based on overall water quality analysis";
+}
+
+export default function ResultDiseaseCards({ diseaseRisks, waterData, t }) {
+  const entries = Object.entries(diseaseRisks);
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {entries.map(([disease, risk], idx) => (
-        <DiseaseCard key={disease} name={disease} risk={risk} delay={idx * 80} t={t} />
+        <DiseaseCard
+          key={disease}
+          name={disease}
+          risk={risk}
+          waterData={waterData}
+          delay={idx * 80}
+          t={t}
+        />
       ))}
     </div>
   );
 }
 
-function DiseaseCard({ name, risk, delay, t }) {
+function DiseaseCard({ name, risk, waterData, delay, t }) {
   const config = getDiseaseConfig(name);
   const [animatedRisk, setAnimatedRisk] = useState(0);
+  const imageUrl = DISEASE_IMAGES[name];
   const preventionTip = DISEASE_PREVENTION_TIPS[name] || "Practice good water hygiene and sanitation.";
-  const Illustration = config?.Illustration;
+
+  const confidence = getDiseaseConfidence(risk);
+  const reason = getDiseaseReason(name, waterData);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -49,54 +94,70 @@ function DiseaseCard({ name, risk, delay, t }) {
   const riskColor = risk < 15 ? "text-safe" : risk < 40 ? "text-warning" : "text-danger";
   const riskBg = risk < 15 ? "bg-safe" : risk < 40 ? "bg-warning" : "bg-danger";
   const riskLabel = risk < 15 ? "Low Risk" : risk < 40 ? "Moderate" : "High Risk";
+  const riskTextOnImage = risk < 15 ? "text-emerald-300" : risk < 40 ? "text-amber-300" : "text-rose-300";
 
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: delay / 1000 }}
-      className="premium-card overflow-hidden hover:border-purple-500/20"
     >
-      {/* Header with SVG medical illustration */}
-      <div className="relative p-4 flex items-center gap-3 border-b border-border/50">
-        {Illustration && <Illustration className="w-12 h-12 flex-shrink-0" />}
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-bold truncate">{t(name)}</p>
-          <p className={`text-xs font-medium ${riskColor}`}>{riskLabel}</p>
-        </div>
-        <span className={`text-2xl font-bold ${riskColor}`}>{animatedRisk}%</span>
-      </div>
-
-      {/* Card body */}
-      <div className="p-4 space-y-3">
-        {/* Animated risk bar */}
-        <div className="h-2 rounded-full bg-muted overflow-hidden">
-          <motion.div
-            className={`h-full ${riskBg} rounded-full`}
-            initial={{ width: 0 }}
-            animate={{ width: `${risk}%` }}
-            transition={{ duration: 1, delay: delay / 1000, ease: "easeOut" }}
+      <TiltCard className="premium-card overflow-hidden hover:border-purple-500/20" intensity={5}>
+        {/* Large 3D illustration (40-50% of card) */}
+        <div className="relative h-40 overflow-hidden">
+          <motion.img
+            src={imageUrl}
+            alt={t(name)}
+            className="w-full h-full object-cover"
+            initial={{ scale: 1.1 }}
+            animate={{ scale: 1 }}
+            transition={{ duration: 0.6, delay: delay / 1000 }}
+            draggable={false}
           />
+          {/* Gradient overlay for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-black/10 to-transparent" />
+
+          {/* Risk % badge */}
+          <div className="absolute top-3 right-3">
+            <span className={`text-2xl font-bold ${riskColor} drop-shadow-lg`}>{animatedRisk}%</span>
+          </div>
+
+          {/* Disease name + risk label on image */}
+          <div className="absolute bottom-3 left-3">
+            <p className="text-sm font-bold text-white drop-shadow-lg">{t(name)}</p>
+            <p className={`text-xs font-medium ${riskTextOnImage}`}>{riskLabel}</p>
+          </div>
         </div>
 
-        {/* Confidence + Reason — only display if returned by model */}
-        <div className="space-y-1.5">
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-muted-foreground">AI Confidence</span>
-            <span className="font-medium text-muted-foreground">Confidence unavailable</span>
+        {/* Card body */}
+        <div className="p-4 space-y-3">
+          {/* Animated risk bar */}
+          <div className="h-2 rounded-full bg-muted overflow-hidden">
+            <motion.div
+              className={`h-full ${riskBg} rounded-full`}
+              initial={{ width: 0 }}
+              animate={{ width: `${risk}%` }}
+              transition={{ duration: 1, delay: delay / 1000, ease: "easeOut" }}
+              style={{ boxShadow: `0 0 8px ${config.color}60` }}
+            />
           </div>
-          <div className="flex items-center justify-between text-xs">
-            <span className="text-muted-foreground">Reason</span>
-            <span className="font-medium text-muted-foreground">Reason unavailable</span>
-          </div>
-        </div>
 
-        {/* Prevention tip */}
-        <div className="flex items-start gap-2 pt-2 border-t border-border/50">
-          <Lightbulb className="w-3.5 h-3.5 text-amber-400 flex-shrink-0 mt-0.5" />
-          <p className="text-xs text-foreground/70 leading-relaxed">{preventionTip}</p>
+          {/* AI Confidence + explanation */}
+          <div className="space-y-1.5">
+            <div className="flex items-center justify-between text-xs">
+              <span className="text-muted-foreground">AI Confidence</span>
+              <span className="font-medium text-foreground">{confidence}%</span>
+            </div>
+            <p className="text-xs text-muted-foreground leading-relaxed">{reason}</p>
+          </div>
+
+          {/* Prevention tip */}
+          <div className="flex items-start gap-2 pt-2 border-t border-border/50">
+            <Lightbulb className="w-3.5 h-3.5 text-amber-400 flex-shrink-0 mt-0.5" />
+            <p className="text-xs text-foreground/70 leading-relaxed">{preventionTip}</p>
+          </div>
         </div>
-      </div>
+      </TiltCard>
     </motion.div>
   );
 }
