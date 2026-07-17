@@ -1,5 +1,11 @@
 # Base44 Project
 
+<h2 align="center">AquaSentinel AI Dashboard</h2>
+
+<p align="center">
+  <img src="assets/dashboard.png" width="1000">
+</p>
+
 Use this repository to run and edit the app locally, then publish changes back through Base44.
 
 Any change pushed to the repo will also be reflected in the Base44 Builder.
