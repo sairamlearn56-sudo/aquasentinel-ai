@@ -6,37 +6,37 @@
 
 @layer base {
   :root {
-    /* ===== Premium Healthcare Light Theme ===== */
-    --background: 210 14% 99.4%;
-    --foreground: 222 40% 13%;
+    /* ===== Light Mode — Apple / Stripe / OpenAI Light ===== */
+    --background: 210 40% 98%;
+    --foreground: 221 39% 11%;
     --card: 0 0% 100%;
-    --card-foreground: 222 40% 13%;
+    --card-foreground: 221 39% 11%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 40% 13%;
-    --primary: 186 78% 40%;
+    --popover-foreground: 221 39% 11%;
+    --primary: 189 95% 43%;
     --primary-foreground: 0 0% 100%;
     --secondary: 152 56% 42%;
     --secondary-foreground: 0 0% 100%;
-    --muted: 210 12% 95.5%;
-    --muted-foreground: 215 10% 46%;
-    --accent: 186 78% 40%;
+    --muted: 210 20% 96%;
+    --muted-foreground: 220 9% 46%;
+    --accent: 189 95% 43%;
     --accent-foreground: 0 0% 100%;
     --destructive: 6 72% 55%;
     --destructive-foreground: 0 0% 100%;
-    --border: 210 12% 89%;
-    --input: 210 12% 89%;
-    --ring: 186 78% 40%;
-    --aqua: 186 78% 40%;
+    --border: 220 12% 90%;
+    --input: 220 12% 90%;
+    --ring: 189 95% 43%;
+    --aqua: 189 95% 43%;
     --teal: 170 58% 38%;
     --safe: 152 56% 42%;
     --warning: 36 82% 49%;
     --danger: 6 72% 55%;
     --purple: 252 58% 60%;
-    --blue: 202 78% 49%;
+    --blue: 217 93% 60%;
     --coral: 6 72% 55%;
     --gold: 42 85% 54%;
     --orange: 24 82% 53%;
-    --chart-1: 186 78% 40%;
+    --chart-1: 189 95% 43%;
     --chart-2: 152 56% 42%;
     --chart-3: 252 58% 60%;
     --chart-4: 36 82% 49%;
@@ -47,58 +47,59 @@
     --font-display: 'Sora', 'Manrope', ui-sans-serif, system-ui, sans-serif;
     --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 215 10% 46%;
-    --sidebar-primary: 186 78% 40%;
+    --sidebar-foreground: 220 9% 46%;
+    --sidebar-primary: 189 95% 43%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 12% 95.5%;
-    --sidebar-accent-foreground: 222 40% 13%;
-    --sidebar-border: 210 12% 89%;
-    --sidebar-ring: 186 78% 40%;
+    --sidebar-accent: 210 20% 96%;
+    --sidebar-accent-foreground: 221 39% 11%;
+    --sidebar-border: 220 12% 90%;
+    --sidebar-ring: 189 95% 43%;
   }
 
   .dark {
-    --background: 210 14% 99.4%;
-    --foreground: 222 40% 13%;
-    --card: 0 0% 100%;
-    --card-foreground: 222 40% 13%;
-    --popover: 0 0% 100%;
-    --popover-foreground: 222 40% 13%;
-    --primary: 186 78% 40%;
+    /* ===== Dark Mode — OpenAI / Linear / Vercel ===== */
+    --background: 220 49% 8%;
+    --foreground: 0 0% 100%;
+    --card: 217 32% 18%;
+    --card-foreground: 0 0% 100%;
+    --popover: 222 47% 11%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 189 95% 50%;
     --primary-foreground: 0 0% 100%;
-    --secondary: 152 56% 42%;
+    --secondary: 152 60% 50%;
     --secondary-foreground: 0 0% 100%;
-    --muted: 210 12% 95.5%;
-    --muted-foreground: 215 10% 46%;
-    --accent: 186 78% 40%;
+    --muted: 221 39% 11%;
+    --muted-foreground: 218 11% 65%;
+    --accent: 189 95% 50%;
     --accent-foreground: 0 0% 100%;
-    --destructive: 6 72% 55%;
+    --destructive: 6 75% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 210 12% 89%;
-    --input: 210 12% 89%;
-    --ring: 186 78% 40%;
-    --aqua: 186 78% 40%;
-    --teal: 170 58% 38%;
-    --safe: 152 56% 42%;
-    --warning: 36 82% 49%;
-    --danger: 6 72% 55%;
-    --purple: 252 58% 60%;
-    --blue: 202 78% 49%;
-    --coral: 6 72% 55%;
-    --gold: 42 85% 54%;
-    --orange: 24 82% 53%;
-    --chart-1: 186 78% 40%;
-    --chart-2: 152 56% 42%;
-    --chart-3: 252 58% 60%;
-    --chart-4: 36 82% 49%;
-    --chart-5: 6 72% 55%;
-    --sidebar-background: 0 0% 100%;
-    --sidebar-foreground: 215 10% 46%;
-    --sidebar-primary: 186 78% 40%;
+    --border: 216 22% 24%;
+    --input: 215 25% 20%;
+    --ring: 189 95% 50%;
+    --aqua: 189 95% 50%;
+    --teal: 172 65% 48%;
+    --safe: 152 60% 50%;
+    --warning: 38 92% 58%;
+    --danger: 6 75% 60%;
+    --purple: 255 70% 70%;
+    --blue: 217 93% 65%;
+    --coral: 6 75% 60%;
+    --gold: 42 85% 60%;
+    --orange: 24 82% 58%;
+    --chart-1: 189 95% 50%;
+    --chart-2: 152 60% 50%;
+    --chart-3: 255 70% 70%;
+    --chart-4: 38 92% 58%;
+    --chart-5: 6 75% 60%;
+    --sidebar-background: 222 47% 11%;
+    --sidebar-foreground: 218 11% 65%;
+    --sidebar-primary: 189 95% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 210 12% 95.5%;
-    --sidebar-accent-foreground: 222 40% 13%;
-    --sidebar-border: 210 12% 89%;
-    --sidebar-ring: 186 78% 40%;
+    --sidebar-accent: 215 30% 22%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 216 22% 20%;
+    --sidebar-ring: 189 95% 50%;
   }
 }
 
@@ -107,38 +108,65 @@
     background-color: hsl(var(--background));
   }
 
-  /* ===== Clean Solid Cards ===== */
+  /* ===== Light Mode: Clean Solid Cards ===== */
   .glass {
     background: hsl(0 0% 100%);
     border: 1px solid hsl(var(--border) / 0.7);
     box-shadow: 0 1px 2px hsl(210 20% 20% / 0.025), 0 2px 8px hsl(210 20% 20% / 0.02);
+    transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
   }
 
   .glass-strong {
     background: hsl(0 0% 100%);
     border: 1px solid hsl(var(--border) / 0.8);
     box-shadow: 0 1px 3px hsl(210 20% 20% / 0.03), 0 4px 14px hsl(210 20% 20% / 0.025);
+    transition: background-color 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
   }
 
-  /* ===== Premium Healthcare Cards ===== */
   .premium-card {
     background: hsl(0 0% 100%);
     border: 1px solid hsl(var(--border) / 0.5);
     border-radius: 20px;
-    box-shadow:
-      0 1px 2px hsl(210 20% 20% / 0.03),
-      0 3px 12px hsl(210 20% 20% / 0.022);
-    transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease, border-color 0.28s ease;
+    box-shadow: 0 1px 2px hsl(210 20% 20% / 0.03), 0 3px 12px hsl(210 20% 20% / 0.022);
+    transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.28s ease, border-color 0.28s ease, background-color 0.25s ease;
   }
   .premium-card:hover {
     transform: translateY(-2px);
     border-color: hsl(var(--primary) / 0.15);
-    box-shadow:
-      0 2px 6px hsl(210 20% 20% / 0.045),
-      0 8px 24px hsl(210 20% 20% / 0.055);
+    box-shadow: 0 2px 6px hsl(210 20% 20% / 0.045), 0 8px 24px hsl(210 20% 20% / 0.055);
   }
 
-  /* ===== Subtle Soft Shadow ===== */
+  /* ===== Dark Mode: Glassmorphism Cards ===== */
+  .dark .glass {
+    background: hsl(217 32% 18% / 0.65);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid hsl(0 0% 100% / 0.08);
+    box-shadow: 0 1px 0 hsl(0 0% 100% / 0.03) inset, 0 2px 8px hsl(220 49% 4% / 0.15);
+  }
+
+  .dark .glass-strong {
+    background: hsl(222 47% 11% / 0.8);
+    backdrop-filter: blur(24px) saturate(180%);
+    -webkit-backdrop-filter: blur(24px) saturate(180%);
+    border: 1px solid hsl(0 0% 100% / 0.1);
+    box-shadow: 0 1px 0 hsl(0 0% 100% / 0.04) inset, 0 4px 16px hsl(220 49% 4% / 0.2);
+  }
+
+  .dark .premium-card {
+    background: hsl(217 32% 18% / 0.6);
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+    border: 1px solid hsl(0 0% 100% / 0.08);
+    box-shadow: 0 1px 0 hsl(0 0% 100% / 0.03) inset, 0 4px 16px hsl(220 49% 4% / 0.15);
+  }
+  .dark .premium-card:hover {
+    transform: translateY(-2px);
+    border-color: hsl(0 0% 100% / 0.12);
+    box-shadow: 0 1px 0 hsl(0 0% 100% / 0.05) inset, 0 8px 24px hsl(220 49% 4% / 0.25);
+  }
+
+  /* ===== Soft Glow ===== */
   .glow-primary {
     box-shadow: 0 2px 8px hsl(var(--primary) / 0.1);
     transition: box-shadow 0.25s ease, transform 0.2s ease;
@@ -152,7 +180,11 @@
 
   /* ===== Gradient Text ===== */
   .gradient-text {
-    background: linear-gradient(135deg, hsl(186 78% 40%), hsl(202 78% 49%));
+    background: linear-gradient(135deg, hsl(189 95% 43%), hsl(217 93% 60%));
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent;
+  }
+  .dark .gradient-text {
+    background: linear-gradient(135deg, hsl(189 95% 55%), hsl(217 93% 70%));
     -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent;
   }
   .gradient-text-warm {
@@ -163,6 +195,7 @@
   /* ===== Mesh Background ===== */
   .mesh-bg { position: fixed; inset: 0; z-index: 0; overflow: hidden; pointer-events: none; }
   .mesh-orb { position: absolute; border-radius: 50%; filter: blur(100px); opacity: 0.07; will-change: transform; }
+  .dark .mesh-orb { opacity: 0.1; }
 
   /* ===== Wave Divider ===== */
   .wave-divider { position: absolute; bottom: 0; left: 0; right: 0; height: 120px; pointer-events: none; overflow: hidden; }
@@ -221,14 +254,20 @@
   }
   body {
     background:
-      radial-gradient(ellipse 100% 60% at 50% -10%, hsl(186 78% 55% / 0.03), transparent 50%),
+      radial-gradient(ellipse 100% 60% at 50% -10%, hsl(189 95% 55% / 0.03), transparent 50%),
       radial-gradient(ellipse 80% 50% at 100% 100%, hsl(152 56% 55% / 0.02), transparent 50%),
       hsl(var(--background));
     @apply text-foreground font-body;
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
     -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility; line-height: 1.7; letter-spacing: -0.006em;
-    transition: background-color 0.3s ease, color 0.3s ease;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+  .dark body {
+    background:
+      radial-gradient(ellipse 100% 60% at 50% -10%, hsl(189 95% 50% / 0.06), transparent 50%),
+      radial-gradient(ellipse 80% 50% at 100% 100%, hsl(152 60% 50% / 0.04), transparent 50%),
+      hsl(var(--background));
   }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-heading);

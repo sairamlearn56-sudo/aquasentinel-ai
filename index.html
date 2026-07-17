@@ -4,14 +4,31 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="https://base44.com/logo_v2.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#0B1220" />
+    <meta name="theme-color" content="#F8FAFC" id="theme-color-meta" />
     <meta name="description" content="AquaSentinel AI — Real-time water quality monitoring powered by AI. Personalized safety guidance and disease risk alerts for your family." />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link rel="manifest" href="/manifest.json" />
     <title>AquaSentinel AI — Your Water Health Guardian</title>
   </head>
-  <body style="background-color: #0B1220;">
+  <body>
+    <script>
+      (function () {
+        var theme = localStorage.getItem("aqua-theme");
+        if (!theme) {
+          theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+        }
+        var root = document.documentElement;
+        if (theme === "dark") {
+          root.classList.add("dark");
+          root.style.backgroundColor = "#0B1220";
+          var meta = document.getElementById("theme-color-meta");
+          if (meta) meta.setAttribute("content", "#0B1220");
+        } else {
+          root.style.backgroundColor = "#F8FAFC";
+        }
+      })();
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
