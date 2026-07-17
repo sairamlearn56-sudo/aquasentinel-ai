@@ -5,13 +5,13 @@ import moment from "moment";
 
 const STATUS_CONFIG = {
   connected: { color: "text-safe", bg: "bg-safe/10", border: "border-safe/20", dot: "bg-safe", icon: Wifi, label: "Connected" },
-  connecting: { color: "text-warning", bg: "bg-warning/10", border: "border-warning/20", dot: "bg-warning", icon: Loader2, label: "Connecting" },
+  waiting: { color: "text-warning", bg: "bg-warning/10", border: "border-warning/20", dot: "bg-warning", icon: Loader2, label: "Waiting" },
   disconnected: { color: "text-danger", bg: "bg-danger/10", border: "border-danger/20", dot: "bg-danger", icon: WifiOff, label: "Offline" },
 };
 
 export default function ConnectionStatusBadge({ compact = false }) {
   const { status, lastUpdate } = useHardwareStatus();
-  const c = STATUS_CONFIG[status] || STATUS_CONFIG.connecting;
+  const c = STATUS_CONFIG[status] || STATUS_CONFIG.waiting;
   const Icon = c.icon;
 
   if (compact) {
@@ -25,7 +25,7 @@ export default function ConnectionStatusBadge({ compact = false }) {
 
   return (
     <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border ${c.bg} ${c.border} ${c.color}`}>
-      <Icon className={`w-3.5 h-3.5 ${status === "connecting" ? "animate-spin" : ""}`} />
+      <Icon className={`w-3.5 h-3.5 ${status === "waiting" ? "animate-spin" : ""}`} />
       <div className="flex items-center gap-1.5">
         <span className="text-[12px] font-medium">{c.label}</span>
         {status === "connected" && lastUpdate && (
