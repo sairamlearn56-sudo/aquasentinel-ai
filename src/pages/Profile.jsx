@@ -15,8 +15,8 @@ export default function Profile() {
     <div className="max-w-2xl mx-auto space-y-6">
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-            <Shield className="w-6 h-6 text-primary" />
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-pink-600 flex items-center justify-center shadow-lg shadow-purple-500/25">
+            <Shield className="w-6 h-6 text-white" />
           </div>
           <div>
             <h1 className="text-2xl font-heading font-bold">Profile</h1>
@@ -28,8 +28,9 @@ export default function Profile() {
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }}>
         <TiltCard className="premium-card p-6" intensity={3}>
           <div className="flex items-center gap-4">
-            <div className="relative w-20 h-20 rounded-xl bg-primary flex items-center justify-center text-white text-2xl font-heading font-semibold">
+            <div className="relative w-20 h-20 rounded-3xl bg-gradient-to-br from-cyan-400 via-blue-500 to-purple-500 flex items-center justify-center text-white text-2xl font-heading font-bold shadow-lg shadow-cyan-500/30">
               {initials}
+              <div className="absolute inset-0 rounded-3xl bg-gradient-to-br from-white/25 to-transparent" />
             </div>
             <div className="flex-1">
               <h2 className="text-xl font-heading font-bold">{user?.full_name || "Guest User"}</h2>
@@ -53,7 +54,7 @@ export default function Profile() {
             <div className="flex-1">
               <h3 className="font-heading font-semibold text-sm">Sign in to save your data</h3>
               <p className="text-xs text-muted-foreground mt-1">Create an account to save scans, access history, and get personalized alerts.</p>
-              <button onClick={() => navigate("/register")} className="mt-3 px-4 py-2 rounded-xl bg-primary text-primary-foreground text-sm font-medium hover:opacity-90 transition-all">
+              <button onClick={() => navigate("/register")} className="mt-3 px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white text-sm font-medium hover:shadow-lg hover:shadow-cyan-500/25 transition-all">
                 Create Account
               </button>
             </div>

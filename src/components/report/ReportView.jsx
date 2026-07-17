@@ -44,9 +44,9 @@ function getSensorExplanation(type, value) {
 }
 
 const riskConfig = {
-  safe: { gradient: "from-safe to-primary", border: "border-safe/20", bg: "bg-safe/5" },
-  moderate: { gradient: "from-warning to-orange-500", border: "border-warning/20", bg: "bg-warning/5" },
-  danger: { gradient: "from-danger to-danger", border: "border-danger/20", bg: "bg-danger/5" },
+  safe: { gradient: "from-emerald-500 via-teal-500 to-cyan-500", border: "border-emerald-500/20", bg: "bg-emerald-500/5" },
+  moderate: { gradient: "from-amber-400 via-orange-500 to-yellow-500", border: "border-amber-500/20", bg: "bg-amber-500/5" },
+  danger: { gradient: "from-rose-500 via-red-500 to-coral-600", border: "border-rose-500/20", bg: "bg-rose-500/5" },
 };
 
 export default function ReportView({ scan, onBack, onDeleted }) {
@@ -167,8 +167,10 @@ export default function ReportView({ scan, onBack, onDeleted }) {
       </motion.div>
 
       {/* ===== Hero Section ===== */}
-      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.05 }} className={`relative overflow-hidden rounded-xl border ${rc.border}`}>
+      <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.05 }} className={`relative overflow-hidden rounded-[2rem] border ${rc.border}`}>
+        <div className={`absolute inset-0 bg-gradient-to-br ${rc.gradient} opacity-10`} />
         <div className={`absolute inset-0 ${rc.bg}`} />
+        <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full blur-3xl opacity-20 bg-gradient-to-br from-white to-transparent" />
         <div className="relative p-6 sm:p-8">
           <div className="flex flex-col lg:flex-row items-center gap-6 lg:gap-8">
             <div className="w-full lg:w-2/5 flex justify-center">

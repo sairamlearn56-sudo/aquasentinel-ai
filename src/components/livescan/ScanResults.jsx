@@ -52,22 +52,22 @@ export default function ScanResults({ result, familyMember, t, isSpeaking, onRep
 
   const riskConfig = {
     safe: {
-      gradient: "from-safe to-primary",
-      glow: "",
-      bg: "bg-safe/5",
-      border: "border-safe/20",
+      gradient: "from-emerald-500 via-teal-500 to-cyan-500",
+      glow: "shadow-emerald-500/25",
+      bg: "bg-emerald-500/5",
+      border: "border-emerald-500/20",
     },
     moderate: {
-      gradient: "from-warning to-orange-500",
-      glow: "",
-      bg: "bg-warning/5",
-      border: "border-warning/20",
+      gradient: "from-amber-400 via-orange-500 to-yellow-500",
+      glow: "shadow-amber-500/25",
+      bg: "bg-amber-500/5",
+      border: "border-amber-500/20",
     },
     danger: {
-      gradient: "from-danger to-danger",
-      glow: "",
-      bg: "bg-danger/5",
-      border: "border-danger/20",
+      gradient: "from-rose-500 via-red-500 to-coral-600",
+      glow: "shadow-rose-500/25",
+      bg: "bg-rose-500/5",
+      border: "border-rose-500/20",
     },
   };
 
@@ -109,14 +109,14 @@ export default function ScanResults({ result, familyMember, t, isSpeaking, onRep
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }}
-        className={`relative overflow-hidden rounded-xl border ${rc.border}`}
+        className={`relative overflow-hidden rounded-[2rem] border ${rc.border}`}
       >
         {/* Gradient background */}
         <div className={`absolute inset-0 bg-gradient-to-br ${rc.gradient} opacity-10`} />
         <div className={`absolute inset-0 ${rc.bg}`} />
 
         {/* Decorative orbs */}
-
+        <div className="absolute -top-20 -right-20 w-64 h-64 rounded-full blur-3xl opacity-20 bg-gradient-to-br from-white to-transparent" />
 
         <div className="relative p-6 sm:p-8">
           {/* Top bar: title + actions */}
@@ -133,14 +133,14 @@ export default function ScanResults({ result, familyMember, t, isSpeaking, onRep
             <div className="flex gap-2">
               <button
                 onClick={onReplayVoice}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl glass border border-border hover:bg-muted/40 transition-colors text-sm font-medium"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl glass border border-border hover:bg-muted/40 transition-colors text-sm font-medium"
               >
                 {isSpeaking ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
                 AquaVoice
               </button>
               <button
                 onClick={(e) => { createRipple(e); onNewScan(); }}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground hover:opacity-90 transition-all text-sm font-medium"
+                className="relative overflow-hidden inline-flex items-center gap-2 px-5 py-2.5 rounded-2xl bg-gradient-to-r from-cyan-500 to-blue-500 text-white hover:shadow-lg hover:shadow-cyan-500/25 transition-all text-sm font-medium"
               >
                 <Activity className="w-4 h-4" />
                 New Scan
@@ -263,10 +263,11 @@ export default function ScanResults({ result, familyMember, t, isSpeaking, onRep
       >
         <button
           onClick={() => setShowReport(!showReport)}
-          className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-purple text-white font-medium text-sm hover:opacity-90 active:scale-[0.98] transition-all"
+          className="group relative inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-purple-500 via-violet-500 to-indigo-500 text-white font-heading font-semibold text-base shadow-xl shadow-purple-500/25 hover:shadow-2xl hover:shadow-purple-500/40 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300 overflow-hidden"
         >
-          <Sparkles className="w-4 h-4" />
-          {showReport ? "Hide AI Report" : "Generate AI Water Report"}
+          <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+          <Sparkles className="w-5 h-5 relative z-10" />
+          <span className="relative z-10">{showReport ? "Hide AI Report" : "Generate AI Water Report"}</span>
         </button>
       </motion.div>
 

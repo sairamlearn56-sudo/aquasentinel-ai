@@ -55,7 +55,7 @@ export default function WaterTracker() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-cyan-500/20 border-t-cyan-500 rounded-full animate-spin" />
       </div>
     );
   }
@@ -65,8 +65,8 @@ export default function WaterTracker() {
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
-            <Droplets className="w-6 h-6 text-primary" />
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-cyan-500 to-blue-600 flex items-center justify-center shadow-lg shadow-cyan-500/25">
+            <Droplets className="w-6 h-6 text-white" />
           </div>
           <div>
             <h1 className="text-2xl font-heading font-bold">Water Tracker</h1>
@@ -84,7 +84,7 @@ export default function WaterTracker() {
             value={searchQuery}
             onChange={(e) => { setSearchQuery(e.target.value); setSelectedName(null); }}
             placeholder="Type the sample name you gave while scanning..."
-            className="w-full pl-10 pr-4 py-3 rounded-xl glass border border-border text-sm focus:outline-none focus:border-cyan-500/40"
+            className="w-full pl-10 pr-4 py-3 rounded-2xl glass border border-border text-sm focus:outline-none focus:border-cyan-500/40"
           />
         </div>
         {suggestions.length > 0 && !selectedName && (
@@ -137,15 +137,15 @@ export default function WaterTracker() {
                 <LineChart data={chartData}>
                   <defs>
                     <linearGradient id="trackerLineGrad" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
-                      <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                      <stop offset="0%" stopColor="hsl(189 94% 50%)" stopOpacity={0.3} />
+                      <stop offset="100%" stopColor="hsl(189 94% 50%)" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" opacity={0.3} />
                   <XAxis dataKey="name" stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} />
                   <YAxis domain={[0, 100]} stroke="hsl(var(--muted-foreground))" fontSize={11} tickLine={false} axisLine={false} width={30} />
                   <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "12px", fontSize: "12px", backdropFilter: "blur(20px)" }} />
-                  <Line type="monotone" dataKey="score" stroke="hsl(var(--primary))" strokeWidth={2.5} dot={{ fill: "hsl(var(--primary))", r: 4, strokeWidth: 2, stroke: "hsl(var(--card))" }} activeDot={{ r: 6, fill: "hsl(var(--blue))" }} fill="url(#trackerLineGrad)" />
+                  <Line type="monotone" dataKey="score" stroke="hsl(189 94% 50%)" strokeWidth={2.5} dot={{ fill: "hsl(189 94% 50%)", r: 4, strokeWidth: 2, stroke: "hsl(var(--card))" }} activeDot={{ r: 6, fill: "hsl(217 91% 60%)" }} fill="url(#trackerLineGrad)" />
                 </LineChart>
               </ResponsiveContainer>
             ) : (
@@ -167,7 +167,7 @@ export default function WaterTracker() {
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.3, delay: Math.min(idx * 0.03, 0.4) }}
-                  className="glass rounded-xl p-4 border border-border flex items-center justify-between gap-3"
+                  className="glass rounded-2xl p-4 border border-border flex items-center justify-between gap-3"
                 >
                   <div>
                     <p className="text-sm font-medium">{moment(scan.created_date).format("lll")}</p>
@@ -184,12 +184,12 @@ export default function WaterTracker() {
           </div>
         </>
       ) : selectedName ? (
-        <div className="glass rounded-xl p-12 text-center">
+        <div className="glass rounded-3xl p-12 text-center">
           <Droplets className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
           <p className="text-muted-foreground">No scans found with that sample name.</p>
         </div>
       ) : (
-        <div className="glass rounded-xl p-12 text-center">
+        <div className="glass rounded-3xl p-12 text-center">
           <Search className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
           <p className="text-muted-foreground">Search for a sample name above to view its tracking graph.</p>
           {sampleNames.length > 0 && (

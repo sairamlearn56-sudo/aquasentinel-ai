@@ -122,9 +122,10 @@ export default function LiveScanSequence({
       <div className="w-full max-w-md mb-4">
         <div className="h-3 rounded-full bg-muted overflow-hidden">
           <motion.div
-            className="h-full bg-primary rounded-full"
+            className="h-full bg-gradient-to-r from-primary to-teal rounded-full"
             animate={{ width: `${percent}%` }}
             transition={{ duration: 0.4, ease: "easeOut" }}
+            style={{ boxShadow: "0 0 12px hsl(194 100% 50% / 0.4)" }}
           />
         </div>
       </div>
@@ -158,14 +159,14 @@ export default function LiveScanSequence({
         >
           <button
             onClick={onResume}
-            className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-primary text-primary-foreground font-medium hover:opacity-90 active:scale-[0.98] transition-all"
+            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-gradient-to-r from-primary to-teal text-white font-semibold shadow-lg shadow-primary/25 hover:shadow-xl hover:shadow-primary/40 hover:scale-[1.03] active:scale-[0.98] transition-all"
           >
             <Play className="w-4 h-4 fill-current" />
             Resume Monitoring
           </button>
           <button
             onClick={onCancel}
-            className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl border border-border text-foreground font-medium hover:bg-muted/50 transition-colors"
+            className="inline-flex items-center gap-2 px-8 py-3.5 rounded-full glass border border-border text-foreground font-semibold hover:bg-muted/50 transition-all"
           >
             <X className="w-4 h-4" />
             Cancel Scan
@@ -176,7 +177,7 @@ export default function LiveScanSequence({
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           onClick={onStop}
-          className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-danger text-white font-medium hover:opacity-90 active:scale-[0.98] transition-all"
+          className="inline-flex items-center gap-2 px-10 py-3.5 rounded-full bg-gradient-to-r from-red-500 to-rose-600 text-white font-semibold shadow-lg shadow-red-500/25 hover:shadow-xl hover:shadow-red-500/40 hover:scale-[1.03] active:scale-[0.98] transition-all"
         >
           <Pause className="w-4 h-4 fill-current" />
           Stop Monitoring

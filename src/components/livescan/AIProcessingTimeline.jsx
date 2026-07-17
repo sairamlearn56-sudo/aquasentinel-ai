@@ -47,8 +47,12 @@ export default function AIProcessingTimeline({ onComplete }) {
           animate={{ rotate: -360 }}
           transition={{ duration: 6, repeat: Infinity, ease: "linear" }}
         />
-        {/* Static glow background */}
-        <div className="absolute inset-6 rounded-full bg-primary/5" />
+        {/* Pulsing glow */}
+        <motion.div
+          className="absolute inset-6 rounded-full bg-cyan-500/10"
+          animate={{ scale: [1, 1.1, 1], opacity: [0.5, 0.8, 0.5] }}
+          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+        />
         {/* Center icon — swaps per step */}
         <div className="absolute inset-0 flex items-center justify-center">
           <AnimatePresence mode="wait">

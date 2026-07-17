@@ -30,8 +30,16 @@ export default function Dashboard() {
     <div className="relative pb-32">
       {/* ===== Hero Section ===== */}
       <div className="relative min-h-[calc(100vh-6rem)] flex flex-col items-center justify-center px-4 py-10 overflow-hidden">
-        {/* Static subtle background */}
-        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
+        {/* Layered gradient background */}
+        <div className="absolute inset-0 -z-10 bg-gradient-to-b from-cyan-500/8 via-transparent to-purple-500/8" />
+
+        {/* Soft gradient orbs */}
+        <div className="absolute inset-0 -z-10 overflow-hidden">
+          <div className="absolute top-10 left-1/4 w-72 h-72 bg-cyan-500/8 rounded-full blur-3xl animate-mesh-drift" />
+          <div className="absolute bottom-10 right-1/4 w-96 h-96 bg-purple-500/8 rounded-full blur-3xl animate-mesh-drift" style={{ animationDelay: "5s" }} />
+          <div className="absolute top-1/3 right-1/3 w-64 h-64 bg-blue-500/8 rounded-full blur-3xl animate-mesh-drift" style={{ animationDelay: "10s" }} />
+          <div className="absolute bottom-1/3 left-1/3 w-48 h-48 bg-emerald-500/6 rounded-full blur-3xl animate-mesh-drift" style={{ animationDelay: "7s" }} />
+        </div>
 
         {/* Center content */}
         <div className="flex flex-col items-center text-center max-w-3xl mx-auto z-10">
@@ -43,7 +51,7 @@ export default function Dashboard() {
             className="relative"
           >
             <div className="absolute inset-0 blur-3xl bg-cyan-500/20 rounded-full" />
-            <div className="relative rounded-full glass-strong border border-border p-5">
+            <div className="relative rounded-full glass-strong border border-cyan-500/20 p-5 shadow-xl shadow-cyan-500/10">
               <WaterDrop3D size={110} />
             </div>
           </motion.div>
@@ -55,7 +63,10 @@ export default function Dashboard() {
             transition={{ duration: 0.6, delay: 0.15 }}
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass border border-cyan-500/20 mb-6 mt-4"
           >
-            <span className="w-2 h-2 rounded-full bg-safe" />
+            <span className="relative flex h-2 w-2">
+              <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75 animate-ping" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+            </span>
             <span className="text-xs font-medium text-muted-foreground">AI-Powered Water Health Platform</span>
           </motion.div>
 
@@ -74,7 +85,7 @@ export default function Dashboard() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.35 }}
-            className="text-base sm:text-lg text-muted-foreground font-heading font-medium mt-4"
+            className="text-xl sm:text-2xl text-secondary font-heading font-semibold mt-4"
           >
             Your AI Water Health Guardian
           </motion.p>
@@ -99,15 +110,16 @@ export default function Dashboard() {
           >
             <button
               onClick={(e) => { createRipple(e); navigate("/monitor"); }}
-              className="inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-primary text-primary-foreground font-medium text-sm hover:opacity-90 active:scale-[0.98] transition-all"
+              className="group relative inline-flex items-center gap-3 px-10 py-4 rounded-full bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 text-white font-heading font-semibold text-base sm:text-lg shadow-xl shadow-cyan-500/25 hover:shadow-2xl hover:shadow-cyan-500/40 hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 overflow-hidden animate-glow-pulse"
             >
-              <Activity className="w-4 h-4" />
-              {t("startMonitoring")}
-              <ArrowRight className="w-4 h-4" />
+              <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+              <Activity className="w-5 h-5 relative z-10" />
+              <span className="relative z-10">{t("startMonitoring")}</span>
+              <ArrowRight className="w-5 h-5 relative z-10 group-hover:translate-x-1 transition-transform" />
             </button>
             <button
               onClick={(e) => { createRipple(e); navigate("/analysis"); }}
-              className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl border border-border text-foreground font-medium hover:bg-muted/50 transition-colors"
+              className="inline-flex items-center gap-2 px-8 py-4 rounded-full glass border border-cyan-500/20 text-foreground font-medium hover:bg-cyan-500/5 hover:border-cyan-500/40 transition-all duration-300"
             >
               Learn More
               <ArrowRight className="w-4 h-4" />

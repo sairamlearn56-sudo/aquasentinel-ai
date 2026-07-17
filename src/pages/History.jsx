@@ -11,10 +11,10 @@ import HistoryTimelineCard from "@/components/history/HistoryTimelineCard";
 import moment from "moment";
 
 const FILTERS = [
-  { key: "all", label: "All", activeClass: "bg-primary text-primary-foreground" },
-  { key: "safe", label: "Safe", activeClass: "bg-safe text-white" },
-  { key: "moderate", label: "Moderate", activeClass: "bg-warning text-black" },
-  { key: "danger", label: "Danger", activeClass: "bg-danger text-white" },
+  { key: "all", label: "All", color: "from-cyan-500 to-blue-500" },
+  { key: "safe", label: "Safe", color: "from-emerald-500 to-teal-500" },
+  { key: "moderate", label: "Moderate", color: "from-amber-500 to-orange-500" },
+  { key: "danger", label: "Danger", color: "from-rose-500 to-red-500" },
 ];
 
 export default function History() {
@@ -92,7 +92,7 @@ export default function History() {
         action={
           <Link
             to="/monitor"
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-medium hover:opacity-90 transition-all"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-semibold hover:shadow-lg hover:shadow-emerald-500/25 transition-all"
           >
             <TrendingUp className="w-5 h-5" />
             {t("startMonitoring")}
@@ -112,8 +112,8 @@ export default function History() {
         className="flex items-center justify-between"
       >
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-safe/10 flex items-center justify-center">
-            <TrendingUp className="w-6 h-6 text-safe" />
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg shadow-emerald-500/25">
+            <TrendingUp className="w-6 h-6 text-white" />
           </div>
           <div>
             <h1 className="text-2xl font-heading font-bold">{t("historyTitle")}</h1>
@@ -153,7 +153,7 @@ export default function History() {
         <motion.div
           initial={{ opacity: 0, y: -5 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex items-center justify-between glass rounded-xl px-4 py-3"
+          className="flex items-center justify-between glass rounded-2xl px-4 py-3"
         >
           <p className="text-sm">
             Showing records for{" "}
@@ -178,12 +178,12 @@ export default function History() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by sample name, source, or location..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl glass border border-border text-sm focus:outline-none focus:border-emerald-500/40"
+            className="w-full pl-10 pr-4 py-2.5 rounded-2xl glass border border-border text-sm focus:outline-none focus:border-emerald-500/40"
           />
         </div>
         <button
           onClick={() => setSortBy(sortBy === "newest" ? "oldest" : "newest")}
-          className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl glass border border-border text-sm font-medium hover:bg-muted/50 transition-colors whitespace-nowrap"
+          className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-2xl glass border border-border text-sm font-medium hover:bg-muted/50 transition-colors whitespace-nowrap"
         >
           <ArrowUpDown className="w-4 h-4" />
           {sortBy === "newest" ? "Newest" : "Oldest"}
@@ -198,7 +198,7 @@ export default function History() {
             onClick={() => setFilter(f.key)}
             className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
               filter === f.key
-                ? f.activeClass
+                ? `bg-gradient-to-r ${f.color} text-white shadow-lg`
                 : "glass text-muted-foreground hover:text-foreground"
             }`}
           >
@@ -209,7 +209,7 @@ export default function History() {
 
       {/* Timeline */}
       {filteredScans.length === 0 ? (
-        <div className="glass rounded-xl p-12 text-center">
+        <div className="glass rounded-3xl p-12 text-center">
           <Clock className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
           <p className="text-muted-foreground">No water quality records found.</p>
         </div>

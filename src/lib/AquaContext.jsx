@@ -8,7 +8,7 @@ const AquaContext = createContext(null);
 
 export function AquaProvider({ children }) {
   const { lang, prefs, loadingPrefs } = useLanguage();
-  const { speak, stop, isSpeaking, isLoading, voiceError, clearError } = useVoice();
+  const { speak, stop, isSpeaking, isLoading } = useVoice();
 
   const [mood, setMood] = useState("idle");
   const [chatOpen, setChatOpen] = useState(false);
@@ -92,7 +92,6 @@ export function AquaProvider({ children }) {
 
   const askQuestion = useCallback(async (question) => {
     if (!question.trim()) return;
-    clearError();
     setThinking(true);
     setMood("thinking");
     setMessages((prev) => [...prev, { role: "user", content: question }]);
@@ -176,7 +175,7 @@ Respond warmly and naturally in ${langName}. If the language is not English, use
       setMood("speaking");
       speak(fallback, lang, prefs?.voice_speed || 0.9, "chat");
     }
-  }, [latestScan, lang, prefs, speak, clearError]);
+  }, [latestScan, lang, prefs, speak]);
 
   return (
     <AquaContext.Provider
@@ -188,8 +187,6 @@ Respond warmly and naturally in ${langName}. If the language is not English, use
         thinking,
         isSpeaking,
         isLoading,
-        voiceError,
-        clearError,
         lang,
         wave,
         startAnalysis,

@@ -72,8 +72,8 @@ export default function AIWaterReport({ result, t }) {
       >
         {/* Heading */}
         <div className="flex items-center gap-3 pb-4 border-b border-border/50">
-          <div className="w-12 h-12 rounded-xl bg-purple/10 flex items-center justify-center">
-            <Sparkles className="w-6 h-6 text-purple" />
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500/20 to-indigo-500/20 flex items-center justify-center">
+            <Sparkles className="w-6 h-6 text-purple-400" />
           </div>
           <div>
             <h2 className="text-xl sm:text-2xl font-heading font-bold">AI Water Analysis</h2>
@@ -121,7 +121,7 @@ export default function AIWaterReport({ result, t }) {
         )}
 
         {/* Immediate Actions */}
-        <div className="rounded-xl bg-emerald-500/10 border border-emerald-500/20 p-5">
+        <div className="rounded-2xl bg-emerald-500/10 border border-emerald-500/20 p-5">
           <div className="flex items-center gap-2 mb-3">
             <CheckCircle2 className="w-5 h-5 text-emerald-400" />
             <h3 className="font-heading font-semibold text-emerald-400">Immediate Actions</h3>
@@ -137,7 +137,7 @@ export default function AIWaterReport({ result, t }) {
         </div>
 
         {/* Risk Level */}
-        <div className="flex items-center justify-between rounded-xl glass border border-border/50 p-5">
+        <div className="flex items-center justify-between rounded-2xl glass border border-border/50 p-5">
           <div className="flex items-center gap-2">
             <Shield className="w-5 h-5 text-primary" />
             <h3 className="font-heading font-semibold">Risk Level</h3>
@@ -146,7 +146,7 @@ export default function AIWaterReport({ result, t }) {
         </div>
 
         {/* WHO Recommendation */}
-        <div className="rounded-xl bg-blue-500/10 border border-blue-500/20 p-5">
+        <div className="rounded-2xl bg-blue-500/10 border border-blue-500/20 p-5">
           <div className="flex items-center gap-2 mb-2">
             <Globe className="w-5 h-5 text-blue-400" />
             <h3 className="font-heading font-semibold text-blue-400">WHO Recommendation</h3>
@@ -159,7 +159,7 @@ export default function AIWaterReport({ result, t }) {
         </div>
 
         {/* AI Confidence */}
-        <div className="rounded-xl glass border border-border/50 p-5">
+        <div className="rounded-2xl glass border border-border/50 p-5">
           <div className="flex items-center justify-between mb-3">
             <div className="flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-purple-400" />
@@ -169,7 +169,7 @@ export default function AIWaterReport({ result, t }) {
           </div>
           <div className="h-2.5 rounded-full bg-muted overflow-hidden">
             <motion.div
-              className="h-full bg-purple rounded-full"
+              className="h-full bg-gradient-to-r from-purple-500 to-indigo-500 rounded-full"
               initial={{ width: 0 }}
               animate={{ width: `${aiConfidence}%` }}
               transition={{ duration: 1.2, ease: "easeOut" }}
@@ -183,7 +183,7 @@ export default function AIWaterReport({ result, t }) {
 
 function ReportSection({ icon: Icon, title, color, bg, children }) {
   return (
-    <div className={`rounded-xl ${bg} border border-border/30 p-5`}>
+    <div className={`rounded-2xl ${bg} border border-border/30 p-5`}>
       <div className="flex items-center gap-2 mb-3">
         <Icon className={`w-5 h-5 ${color}`} />
         <h3 className="font-heading font-semibold">{title}</h3>

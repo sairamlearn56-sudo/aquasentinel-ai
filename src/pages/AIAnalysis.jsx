@@ -10,10 +10,10 @@ import RiskBadge from "@/components/RiskBadge";
 import moment from "moment";
 
 const FILTERS = [
-  { key: "all", label: "All", activeClass: "bg-primary text-primary-foreground" },
-  { key: "safe", label: "Safe", activeClass: "bg-safe text-white" },
-  { key: "moderate", label: "Moderate", activeClass: "bg-warning text-black" },
-  { key: "danger", label: "Unsafe", activeClass: "bg-danger text-white" },
+  { key: "all", label: "All", color: "from-purple-500 to-violet-600" },
+  { key: "safe", label: "Safe", color: "from-emerald-500 to-teal-500" },
+  { key: "moderate", label: "Moderate", color: "from-amber-500 to-orange-500" },
+  { key: "danger", label: "Unsafe", color: "from-rose-500 to-red-500" },
 ];
 
 export default function AIAnalysis() {
@@ -76,7 +76,7 @@ export default function AIAnalysis() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+        <div className="w-8 h-8 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin" />
       </div>
     );
   }
@@ -86,7 +86,7 @@ export default function AIAnalysis() {
     if (scanLoading) {
       return (
         <div className="flex items-center justify-center py-20">
-          <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+          <div className="w-8 h-8 border-4 border-purple-500/20 border-t-purple-500 rounded-full animate-spin" />
         </div>
       );
     }
@@ -97,7 +97,7 @@ export default function AIAnalysis() {
           description="This scan report may have been deleted."
           illustration="history"
           action={
-            <button onClick={() => navigate("/analysis")} className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-medium">
+            <button onClick={() => navigate("/analysis")} className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-purple-500 to-violet-600 text-white font-medium">
               <FileSearch className="w-5 h-5" /> Back to Reports
             </button>
           }
@@ -120,7 +120,7 @@ export default function AIAnalysis() {
         title={t("noScansYet")}
         description={t("noScansYetDesc")}
         action={
-          <button onClick={() => navigate("/monitor")} className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-primary-foreground font-medium hover:opacity-90 transition-all">
+          <button onClick={() => navigate("/monitor")} className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-purple-500 to-violet-600 text-white font-medium hover:shadow-lg hover:shadow-purple-500/25 transition-all">
             <Radio className="w-5 h-5" /> {t("startMonitoring")}
           </button>
         }
@@ -134,8 +134,8 @@ export default function AIAnalysis() {
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
         <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-xl bg-purple/10 flex items-center justify-center">
-            <FileSearch className="w-6 h-6 text-purple" />
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-purple-500 to-violet-600 flex items-center justify-center shadow-lg shadow-purple-500/25">
+            <FileSearch className="w-6 h-6 text-white" />
           </div>
           <div>
             <h1 className="text-2xl font-heading font-bold">Water Diagnostic Reports</h1>
@@ -153,12 +153,12 @@ export default function AIAnalysis() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by sample name, source, or location..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-xl glass border border-border text-sm focus:outline-none focus:border-purple-500/40"
+            className="w-full pl-10 pr-4 py-2.5 rounded-2xl glass border border-border text-sm focus:outline-none focus:border-purple-500/40"
           />
         </div>
         <button
           onClick={() => setSortBy(sortBy === "newest" ? "oldest" : "newest")}
-          className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl glass border border-border text-sm font-medium hover:bg-muted/50 transition-colors whitespace-nowrap"
+          className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-2xl glass border border-border text-sm font-medium hover:bg-muted/50 transition-colors whitespace-nowrap"
         >
           <ArrowUpDown className="w-4 h-4" />
           {sortBy === "newest" ? "Newest" : "Oldest"}
@@ -172,7 +172,7 @@ export default function AIAnalysis() {
             key={f.key}
             onClick={() => setFilter(f.key)}
             className={`px-4 py-2 rounded-xl text-sm font-medium transition-all ${
-              filter === f.key ? f.activeClass : "glass text-muted-foreground hover:text-foreground"
+              filter === f.key ? `bg-gradient-to-r ${f.color} text-white shadow-lg` : "glass text-muted-foreground hover:text-foreground"
             }`}
           >
             {f.label}
@@ -182,7 +182,7 @@ export default function AIAnalysis() {
 
       {/* Report list */}
       {filteredScans.length === 0 ? (
-        <div className="glass rounded-xl p-12 text-center">
+        <div className="glass rounded-3xl p-12 text-center">
           <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
           <p className="text-muted-foreground">No reports found matching your search.</p>
         </div>

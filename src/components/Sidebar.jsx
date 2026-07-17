@@ -12,25 +12,26 @@ export default function Sidebar() {
   const location = useLocation();
 
   const navItems = [
-    { to: "/", icon: LayoutDashboard, label: t("dashboard") },
-    { to: "/monitor", icon: Radio, label: t("liveMonitor") },
-    { to: "/analysis", icon: BrainCircuit, label: t("aiAnalysis") },
-    { to: "/history", icon: TrendingUp, label: t("history") },
-    { to: "/tracker", icon: Waves, label: "Water Tracker" },
-    { to: "/map", icon: MapPin, label: t("communityMap") },
-    { to: "/settings", icon: Settings, label: t("settings") },
-    { to: "/profile", icon: User, label: "Profile" },
+    { to: "/", icon: LayoutDashboard, label: t("dashboard"), accent: "189 94% 50%", text: "text-cyan-400" },
+    { to: "/monitor", icon: Radio, label: t("liveMonitor"), accent: "217 91% 60%", text: "text-blue-400" },
+    { to: "/analysis", icon: BrainCircuit, label: t("aiAnalysis"), accent: "258 90% 70%", text: "text-purple-400" },
+    { to: "/history", icon: TrendingUp, label: t("history"), accent: "173 80% 50%", text: "text-teal-400" },
+    { to: "/tracker", icon: Waves, label: "Water Tracker", accent: "189 94% 50%", text: "text-cyan-300" },
+    { to: "/map", icon: MapPin, label: t("communityMap"), accent: "160 84% 45%", text: "text-emerald-400" },
+    { to: "/settings", icon: Settings, label: t("settings"), accent: "243 75% 60%", text: "text-indigo-400" },
+    { to: "/profile", icon: User, label: "Profile", accent: "258 90% 70%", text: "text-purple-300" },
   ];
 
   return (
     <>
       {/* ===== Desktop Floating Glass Sidebar ===== */}
-      <aside className="hidden lg:flex fixed left-4 top-4 bottom-4 w-60 flex-col glass-strong z-40 overflow-hidden">
+      <aside className="hidden lg:flex fixed left-4 top-4 bottom-4 w-60 flex-col glass-strong rounded-3xl z-40 overflow-hidden">
         {/* Logo */}
         <div className="p-5 pb-3">
           <div className="flex items-center gap-3">
-            <div className="relative w-11 h-11 rounded-xl bg-primary flex items-center justify-center">
-              <Droplets className="w-5 h-5 text-primary-foreground" />
+            <div className="relative w-11 h-11 rounded-2xl bg-gradient-to-br from-cyan-500 to-emerald-500 flex items-center justify-center shadow-lg shadow-cyan-500/30">
+              <Droplets className="w-5 h-5 text-white" />
+              <div className="absolute inset-0 rounded-2xl bg-gradient-to-br from-white/25 to-transparent" />
             </div>
             <div>
               <h1 className="font-heading font-bold text-sm leading-tight tracking-tight">AquaSentinel</h1>
@@ -48,15 +49,15 @@ export default function Sidebar() {
               <NavLink
                 key={item.to}
                 to={item.to}
-                className={`group relative flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-colors ${
-                  isActive ? "bg-primary/10" : ""
-                }`}
+                className="group relative flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200"
+                style={isActive ? { background: `hsl(${item.accent} / 0.1)`, boxShadow: `0 0 16px hsl(${item.accent} / 0.1)` } : {}}
               >
                 {isActive && (
-                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full bg-primary" />
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full bg-gradient-to-b from-cyan-500 to-emerald-500" />
                 )}
-                <Icon className={`w-[18px] h-[18px] flex-shrink-0 ${isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"}`} />
+                <Icon className={`w-[18px] h-[18px] flex-shrink-0 transition-all group-hover:scale-110 ${isActive ? item.text : "text-muted-foreground group-hover:text-foreground"}`} />
                 <span className={isActive ? "text-foreground" : "text-muted-foreground group-hover:text-foreground"}>{item.label}</span>
+                {isActive && <div className="ml-auto w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse" />}
               </NavLink>
             );
           })}
@@ -65,7 +66,7 @@ export default function Sidebar() {
         {/* Footer — Profile + Controls */}
         <div className="p-3 border-t border-border/50 space-y-2">
           <div className="flex items-center gap-2.5 p-2.5 rounded-2xl bg-muted/25">
-            <div className="w-9 h-9 rounded-xl bg-primary flex items-center justify-center text-primary-foreground text-sm font-heading font-semibold flex-shrink-0">
+            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-500 to-emerald-500 flex items-center justify-center text-white text-sm font-heading font-bold flex-shrink-0">
               {user?.full_name?.[0]?.toUpperCase() || "G"}
             </div>
             <div className="flex-1 min-w-0">
@@ -87,8 +88,8 @@ export default function Sidebar() {
       <div className="lg:hidden fixed top-0 left-0 right-0 z-40 glass-strong border-b border-border/50">
         <div className="flex items-center justify-between px-4 py-3">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-primary flex items-center justify-center">
-              <Droplets className="w-4 h-4 text-primary-foreground" />
+            <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-cyan-500 to-emerald-500 flex items-center justify-center shadow-md shadow-cyan-500/20">
+              <Droplets className="w-4 h-4 text-white" />
             </div>
             <span className="font-heading font-bold text-sm tracking-tight">AquaSentinel AI</span>
           </div>
@@ -105,8 +106,8 @@ export default function Sidebar() {
               <NavLink
                 key={item.to}
                 to={item.to}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-colors ${
-                  isActive ? "bg-primary/10 text-primary border border-primary/15" : "text-muted-foreground hover:bg-muted/50"
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium whitespace-nowrap transition-all ${
+                  isActive ? "bg-cyan-500/10 text-cyan-400 border border-cyan-500/15" : "text-muted-foreground hover:bg-muted/50"
                 }`}
               >
                 <Icon className="w-4 h-4" />

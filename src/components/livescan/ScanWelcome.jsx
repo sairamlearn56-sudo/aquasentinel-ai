@@ -22,8 +22,41 @@ export default function ScanWelcome({ isConnected, onStart, sampleName, onSample
 
   return (
     <div className="relative min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center px-4 py-10 overflow-hidden">
-      {/* Static subtle background */}
-      <div className="absolute inset-0 -z-10 bg-gradient-to-b from-primary/5 via-transparent to-transparent pointer-events-none" />
+      {/* Layered gradient background */}
+      <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
+        {/* Drifting orbs */}
+        <div className="absolute top-10 left-1/4 w-80 h-80 bg-cyan-500/8 rounded-full blur-3xl animate-mesh-drift" />
+        <div className="absolute bottom-10 right-1/4 w-96 h-96 bg-blue-500/8 rounded-full blur-3xl animate-mesh-drift" style={{ animationDelay: "5s" }} />
+        <div className="absolute top-1/3 right-1/3 w-64 h-64 bg-emerald-500/6 rounded-full blur-3xl animate-mesh-drift" style={{ animationDelay: "10s" }} />
+        {/* Ripple circles */}
+        {[0, 1, 2, 3].map((i) => (
+          <motion.div
+            key={i}
+            className="absolute rounded-full border border-cyan-500/8"
+            style={{ width: 200, height: 200, left: "50%", top: "45%" }}
+            animate={{ scale: [1, 6], opacity: [0.12, 0] }}
+            transition={{ duration: 8, repeat: Infinity, delay: i * 2, ease: "easeOut" }}
+          />
+        ))}
+      </div>
+
+      {/* Floating particles */}
+      <div className="absolute inset-0 -z-10 overflow-hidden pointer-events-none">
+        {[...Array(10)].map((_, i) => (
+          <div
+            key={i}
+            className="absolute rounded-full bg-cyan-500/12 animate-float-up"
+            style={{
+              width: `${4 + (i % 3) * 3}px`,
+              height: `${4 + (i % 3) * 3}px`,
+              left: `${(i * 5) % 100}%`,
+              bottom: "0",
+              animationDelay: `${i * 0.8}s`,
+              animationDuration: `${10 + (i % 5) * 2}s`,
+            }}
+          />
+        ))}
+      </div>
 
       {/* Scanner device */}
       <motion.div
@@ -82,7 +115,7 @@ export default function ScanWelcome({ isConnected, onStart, sampleName, onSample
           value={sampleName || ""}
           onChange={(e) => onSampleNameChange(e.target.value)}
           placeholder="e.g., Kitchen Tap Morning"
-          className="w-full px-4 py-2.5 rounded-xl glass border border-border text-sm focus:outline-none focus:border-primary/40"
+          className="w-full px-4 py-2.5 rounded-2xl glass border border-border text-sm focus:outline-none focus:border-cyan-500/40"
         />
       </motion.div>
 
@@ -93,10 +126,11 @@ export default function ScanWelcome({ isConnected, onStart, sampleName, onSample
         transition={{ duration: 0.6, delay: 0.5 }}
         onClick={(e) => { if (isConnected) { createRipple(e); onStart(); } }}
         disabled={!isConnected}
-        className="mt-8 inline-flex items-center gap-2 px-8 py-3.5 rounded-xl bg-primary text-primary-foreground font-medium text-sm hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        className="mt-8 group relative inline-flex items-center gap-3 px-12 py-4 rounded-full bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 text-white font-heading font-semibold text-lg shadow-xl shadow-cyan-500/25 hover:shadow-2xl hover:shadow-cyan-500/40 hover:scale-[1.03] active:scale-[0.98] transition-all duration-300 animate-glow-pulse overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
       >
-        <Activity className="w-4 h-4" />
-        Start Monitoring
+        <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+        <Activity className="w-5 h-5 relative z-10" />
+        <span className="relative z-10">Start Monitoring</span>
       </motion.button>
 
       {/* ESP32 disconnect message */}
@@ -116,10 +150,10 @@ export default function ScanWelcome({ isConnected, onStart, sampleName, onSample
 
 function StatusBadge({ icon: Icon, label, status, color }) {
   const colors = {
-    emerald: "text-safe bg-safe/10 border-safe/20",
-    amber: "text-warning bg-warning/10 border-warning/20",
-    cyan: "text-primary bg-primary/10 border-primary/20",
-    purple: "text-purple bg-purple/10 border-purple/20",
+    emerald: "text-emerald-400 bg-emerald-500/10 border-emerald-500/20",
+    amber: "text-amber-400 bg-amber-500/10 border-amber-500/20",
+    cyan: "text-cyan-400 bg-cyan-500/10 border-cyan-500/20",
+    purple: "text-purple-400 bg-purple-500/10 border-purple-500/20",
   };
   return (
     <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full border text-xs font-medium ${colors[color]}`}>

@@ -22,9 +22,9 @@ export default function HealthScoreRing({ score, size = 200, stroke = 14, riskLe
 
   const gradId = `scoreGrad-${riskLevel}-${size}`;
   const colorMap = {
-    safe: { c1: "#34D399", c2: "#2DD4BF", glow: "rgba(52,211,153,0.2)" },
-    moderate: { c1: "#FBBF24", c2: "#FBBF24", glow: "rgba(251,191,36,0.2)" },
-    danger: { c1: "#F87171", c2: "#F87171", glow: "rgba(248,113,113,0.2)" },
+    safe: { c1: "#10b981", c2: "#06b6d4", glow: "rgba(16,185,129,0.3)" },
+    moderate: { c1: "#f59e0b", c2: "#f97316", glow: "rgba(245,158,11,0.3)" },
+    danger: { c1: "#ef4444", c2: "#f43f5e", glow: "rgba(239,68,68,0.3)" },
   };
   const cg = colorMap[riskLevel] || colorMap.safe;
 
