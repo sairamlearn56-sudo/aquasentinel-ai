@@ -1,200 +1,66 @@
-import React, { useState } from "react";
+import React from "react";
+import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Settings as SettingsIcon, Globe, Volume2, Gauge, Bell, Users, Check } from "lucide-react";
-import { useLanguage } from "@/lib/LanguageContext";
-import { useVoice } from "@/lib/VoiceContext";
-import LanguageSelector from "@/components/LanguageSelector";
-import FamilyMemberSelector from "@/components/FamilyMemberSelector";
+import { UserRound, ShieldCheck, Languages, BellRing, Settings2, LogOut, ChevronRight } from "lucide-react";
+import { useAuth } from "@/lib/AuthContext";
+import PageHeader from "@/components/PageHeader";
+
+const SETTING_ITEMS = [
+  { icon: UserRound, label: "Personal Information", desc: "Manage your personal details and profile photo", to: "/settings/personal", gradient: "from-blue-500 to-cyan-500" },
+  { icon: ShieldCheck, label: "Account & Privacy", desc: "Email, password, and account security", to: "/settings/account", gradient: "from-purple-500 to-violet-600" },
+  { icon: Languages, label: "Language & Region", desc: "Set your preferred language and timezone", to: "/settings/language", gradient: "from-emerald-500 to-teal-600" },
+  { icon: BellRing, label: "Notifications", desc: "Manage alerts and voice guidance", to: "/settings/notifications", gradient: "from-amber-500 to-orange-600" },
+  { icon: Settings2, label: "App Settings", desc: "Theme, display, and app preferences", to: "/settings/app", gradient: "from-indigo-500 to-purple-600" },
+];
 
 export default function Settings() {
-  const { t, lang, setLang, prefs, updatePrefs } = useLanguage();
-  const { speak } = useVoice();
-  const [saving, setSaving] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [localPrefs, setLocalPrefs] = useState({
-    voice_enabled: prefs?.voice_enabled ?? true,
-    voice_speed: prefs?.voice_speed ?? 0.9,
-    notifications_enabled: prefs?.notifications_enabled ?? true,
-    default_family_member: prefs?.default_family_member ?? "adult",
-  });
-
-  const handleSave = async () => {
-    setSaving(true);
-    await updatePrefs(localPrefs);
-    setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2500);
-  };
-
-  const handleTestVoice = () => {
-    speak(t("voiceSafe"), lang, localPrefs.voice_speed);
-  };
+  const navigate = useNavigate();
+  const { logout, isGuest } = useAuth();
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6">
-      {/* Header */}
-      <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-        <div className="flex items-center gap-3">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-500/25">
-            <SettingsIcon className="w-6 h-6 text-white" />
-          </div>
-          <h1 className="text-2xl font-heading font-bold">{t("settingsTitle")}</h1>
-        </div>
-      </motion.div>
+    <PageHeader title="Settings" subtitle="Manage your account and preferences">
+      <div className="max-w-3xl mx-auto space-y-4">
+        {SETTING_ITEMS.map((item, idx) => {
+          const Icon = item.icon;
+          return (
+            <motion.button
+              key={item.to}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: idx * 0.05 }}
+              onClick={() => navigate(item.to)}
+              className="w-full premium-card p-5 flex items-center gap-4 hover:border-primary/20 transition-all group text-left"
+            >
+              <div className={`w-12 h-12 rounded-2xl bg-gradient-to-br ${item.gradient} flex items-center justify-center shadow-lg flex-shrink-0`}>
+                <Icon className="w-6 h-6 text-white" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h2 className="text-[18px] font-medium">{item.label}</h2>
+                <p className="text-[13px] text-muted-foreground mt-0.5">{item.desc}</p>
+              </div>
+              <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-foreground group-hover:translate-x-0.5 transition-all flex-shrink-0" />
+            </motion.button>
+          );
+        })}
 
-      {/* Language */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.1 }}
-        className="premium-card p-6"
-      >
-        <div className="flex items-center gap-2 mb-4">
-          <div className="w-9 h-9 rounded-xl bg-emerald-500/15 flex items-center justify-center">
-            <Globe className="w-5 h-5 text-emerald-400" />
-          </div>
-          <h2 className="font-heading font-semibold">{t("language")}</h2>
-        </div>
-        <LanguageSelector />
-      </motion.div>
-
-      {/* Voice Guidance */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.2 }}
-        className="premium-card p-6"
-      >
-        <div className="flex items-center gap-2 mb-4">
-          <div className="w-9 h-9 rounded-xl bg-cyan-500/15 flex items-center justify-center">
-            <Volume2 className="w-5 h-5 text-cyan-400" />
-          </div>
-          <h2 className="font-heading font-semibold">{t("voiceGuidance")}</h2>
-        </div>
-
-        {/* Voice toggle */}
-        <div className="flex items-center justify-between p-4 rounded-2xl bg-muted/20 mb-4">
-          <span className="text-sm font-medium">{t("voiceGuidance")}</span>
-          <button
-            onClick={() => setLocalPrefs((p) => ({ ...p, voice_enabled: !p.voice_enabled }))}
-            className={`relative w-12 h-6 rounded-full transition-colors ${localPrefs.voice_enabled ? "bg-cyan-500" : "bg-muted-foreground/30"}`}
-          >
-            <span
-              className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${
-                localPrefs.voice_enabled ? "translate-x-6" : "translate-x-0.5"
-              }`}
-            />
-          </button>
-        </div>
-
-        {/* Voice speed */}
-        <div className="p-4 rounded-2xl bg-muted/20 mb-4">
-          <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-medium flex items-center gap-2">
-              <Gauge className="w-4 h-4" />
-              {t("voiceSpeed")}
-            </span>
-            <span className="text-sm text-cyan-400 font-semibold">{localPrefs.voice_speed.toFixed(1)}x</span>
-          </div>
-          <input
-            type="range"
-            min="0.5"
-            max="1.5"
-            step="0.1"
-            value={localPrefs.voice_speed}
-            onChange={(e) => setLocalPrefs((p) => ({ ...p, voice_speed: parseFloat(e.target.value) }))}
-            className="w-full accent-cyan-500"
-          />
-          <div className="flex justify-between text-xs text-muted-foreground mt-1">
-            <span>Slow</span>
-            <span>Normal</span>
-            <span>Fast</span>
-          </div>
-        </div>
-
-        {/* Test voice */}
-        <button
-          onClick={handleTestVoice}
-          className="w-full py-2.5 rounded-2xl bg-cyan-500/10 text-cyan-400 font-medium text-sm hover:bg-cyan-500/20 transition-colors flex items-center justify-center gap-2"
+        {/* Logout */}
+        <motion.button
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.3, delay: 0.3 }}
+          onClick={() => logout()}
+          className="w-full premium-card p-5 flex items-center gap-4 hover:border-rose-500/20 transition-all group text-left"
         >
-          <Volume2 className="w-4 h-4" />
-          Test Voice
-        </button>
-      </motion.div>
-
-      {/* Default Family Member */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.3 }}
-        className="premium-card p-6"
-      >
-        <div className="flex items-center gap-2 mb-4">
-          <div className="w-9 h-9 rounded-xl bg-purple-500/15 flex items-center justify-center">
-            <Users className="w-5 h-5 text-purple-400" />
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-500 to-red-600 flex items-center justify-center shadow-lg flex-shrink-0">
+            <LogOut className="w-6 h-6 text-white" />
           </div>
-          <h2 className="font-heading font-semibold">{t("defaultFamilyMember")}</h2>
-        </div>
-        <FamilyMemberSelector
-          value={localPrefs.default_family_member}
-          onChange={(val) => setLocalPrefs((p) => ({ ...p, default_family_member: val }))}
-        />
-      </motion.div>
-
-      {/* Notifications */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.4 }}
-        className="premium-card p-6"
-      >
-        <div className="flex items-center gap-2 mb-4">
-          <div className="w-9 h-9 rounded-xl bg-amber-500/15 flex items-center justify-center">
-            <Bell className="w-5 h-5 text-amber-400" />
+          <div className="flex-1">
+            <h2 className="text-[18px] font-medium text-rose-500">{isGuest ? "Exit Guest Mode" : "Log Out"}</h2>
+            <p className="text-[13px] text-muted-foreground mt-0.5">Sign out of your account</p>
           </div>
-          <h2 className="font-heading font-semibold">{t("notifications")}</h2>
-        </div>
-        <div className="flex items-center justify-between p-4 rounded-2xl bg-muted/20">
-          <span className="text-sm font-medium">{t("notifications")}</span>
-          <button
-            onClick={() => setLocalPrefs((p) => ({ ...p, notifications_enabled: !p.notifications_enabled }))}
-            className={`relative w-12 h-6 rounded-full transition-colors ${localPrefs.notifications_enabled ? "bg-amber-500" : "bg-muted-foreground/30"}`}
-          >
-            <span
-              className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform ${
-                localPrefs.notifications_enabled ? "translate-x-6" : "translate-x-0.5"
-              }`}
-            />
-          </button>
-        </div>
-      </motion.div>
-
-      {/* Save Button */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: 0.5 }}
-        className="flex justify-end gap-3"
-      >
-        {saved && (
-          <span className="inline-flex items-center gap-1 text-sm text-emerald-400 font-medium animate-fade-in">
-            <Check className="w-4 h-4" />
-            {t("saved")}
-          </span>
-        )}
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="inline-flex items-center gap-2 px-6 py-3 rounded-2xl bg-gradient-to-r from-indigo-500 to-purple-600 text-white font-semibold hover:shadow-lg hover:shadow-indigo-500/25 transition-all disabled:opacity-50"
-        >
-          {saving ? (
-            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-          ) : (
-            <Check className="w-5 h-5" />
-          )}
-          {t("save")}
-        </button>
-      </motion.div>
-    </div>
+          <ChevronRight className="w-5 h-5 text-muted-foreground group-hover:text-rose-500 group-hover:translate-x-0.5 transition-all flex-shrink-0" />
+        </motion.button>
+      </div>
+    </PageHeader>
   );
 }

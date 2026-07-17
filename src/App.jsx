@@ -14,6 +14,11 @@ import History from '@/pages/History';
 import CommunityMap from '@/pages/CommunityMap';
 import Settings from '@/pages/Settings';
 import Profile from '@/pages/Profile';
+import PersonalInfo from '@/pages/settings/PersonalInfo';
+import AccountPrivacy from '@/pages/settings/AccountPrivacy';
+import LanguageRegion from '@/pages/settings/LanguageRegion';
+import NotificationsSettings from '@/pages/settings/NotificationsSettings';
+import AppSettingsPage from '@/pages/settings/AppSettingsPage';
 import WaterTracker from '@/pages/WaterTracker';
 import WaterSourceDetail from '@/pages/WaterSourceDetail';
 import { LanguageProvider } from '@/lib/LanguageContext';
@@ -59,6 +64,11 @@ const AuthenticatedApp = () => {
         <Route path="/history" element={<History />} />
         <Route path="/map" element={<CommunityMap />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/settings/personal" element={<PersonalInfo />} />
+        <Route path="/settings/account" element={<AccountPrivacy />} />
+        <Route path="/settings/language" element={<LanguageRegion />} />
+        <Route path="/settings/notifications" element={<NotificationsSettings />} />
+        <Route path="/settings/app" element={<AppSettingsPage />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/tracker" element={<WaterTracker />} />
         <Route path="/tracker/:id" element={<WaterSourceDetail />} />

@@ -1,9 +1,8 @@
 import React from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, Radio, BrainCircuit, TrendingUp, MapPin, Settings, Droplets, User, LogOut, Waves } from "lucide-react";
+import { LayoutDashboard, Radio, BrainCircuit, TrendingUp, MapPin, Settings, Droplets, User, LogOut, Waves, Languages, BellRing, Settings2, UserRound } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageContext";
 import { useAuth } from "@/lib/AuthContext";
-import LanguageSelector from "@/components/LanguageSelector";
 import ThemeToggle from "@/components/ThemeToggle";
 
 export default function Sidebar() {
@@ -77,8 +76,11 @@ export default function Sidebar() {
               <LogOut className="w-3.5 h-3.5" />
             </button>
           </div>
-          <div className="flex items-center justify-between gap-2 px-1">
-            <LanguageSelector compact />
+          <div className="flex items-center justify-between gap-1 px-1">
+            <NavLink to="/settings/language" className="p-2 rounded-xl hover:bg-muted/50 transition-colors text-muted-foreground hover:text-foreground" title="Language"><Languages className="w-4 h-4" /></NavLink>
+            <NavLink to="/settings/notifications" className="p-2 rounded-xl hover:bg-muted/50 transition-colors text-muted-foreground hover:text-foreground" title="Notifications"><BellRing className="w-4 h-4" /></NavLink>
+            <NavLink to="/settings" className="p-2 rounded-xl hover:bg-muted/50 transition-colors text-muted-foreground hover:text-foreground" title="Settings"><Settings2 className="w-4 h-4" /></NavLink>
+            <NavLink to="/profile" className="p-2 rounded-xl hover:bg-muted/50 transition-colors text-muted-foreground hover:text-foreground" title="Profile"><UserRound className="w-4 h-4" /></NavLink>
             <ThemeToggle compact />
           </div>
         </div>
@@ -93,8 +95,11 @@ export default function Sidebar() {
             </div>
             <span className="font-heading font-bold text-sm tracking-tight">AquaSentinel AI</span>
           </div>
-          <div className="flex items-center gap-2">
-            <LanguageSelector compact />
+          <div className="flex items-center gap-1">
+            <NavLink to="/settings/language" className="p-2 rounded-lg hover:bg-muted/50 transition-colors text-muted-foreground" title="Language"><Languages className="w-4 h-4" /></NavLink>
+            <NavLink to="/settings/notifications" className="p-2 rounded-lg hover:bg-muted/50 transition-colors text-muted-foreground" title="Notifications"><BellRing className="w-4 h-4" /></NavLink>
+            <NavLink to="/settings" className="p-2 rounded-lg hover:bg-muted/50 transition-colors text-muted-foreground" title="Settings"><Settings2 className="w-4 h-4" /></NavLink>
+            <NavLink to="/profile" className="p-2 rounded-lg hover:bg-muted/50 transition-colors text-muted-foreground" title="Profile"><UserRound className="w-4 h-4" /></NavLink>
             <ThemeToggle compact />
           </div>
         </div>
