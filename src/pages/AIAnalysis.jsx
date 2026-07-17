@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, FileSearch, Radio, ArrowUpDown, FileText, ChevronDown, Sparkles, Activity, ShieldCheck, AlertTriangle, Database } from "lucide-react";
+import { Search, FileSearch, Radio, ArrowUpDown, FileText, ChevronDown, Sparkles, Activity, Download } from "lucide-react";
+import { jsPDF } from "jspdf";
 import { base44 } from "@/api/base44Client";
 import { useLanguage } from "@/lib/LanguageContext";
 import EmptyState from "@/components/EmptyState";
@@ -10,6 +11,8 @@ import RiskBadge from "@/components/RiskBadge";
 import WaterGradeBadge, { getWaterGrade } from "@/components/report/WaterGradeBadge";
 import RiskTimeline from "@/components/report/RiskTimeline";
 import ReportCompare from "@/components/report/ReportCompare";
+import StatCardGrid from "@/components/report/StatCardGrid";
+import AISummary from "@/components/report/AISummary";
 import { classifyParameter } from "@/lib/waterAnalysis";
 import moment from "moment";
 
@@ -35,19 +38,64 @@ function getTopDiseases(diseaseRisks, limit = 2) {
     .slice(0, limit);
 }
 
-function StatCard({ icon: Icon, label, value, sublabel, color }) {
-  return (
-    <div className="premium-card p-4 flex items-center gap-3">
-      <div className={`w-10 h-10 rounded-xl ${color} flex items-center justify-center flex-shrink-0`}>
-        <Icon className="w-5 h-5" />
-      </div>
-      <div className="min-w-0">
-        <p className="text-xs text-muted-foreground truncate">{label}</p>
-        <p className="text-xl font-heading font-bold leading-tight">{value}</p>
-        {sublabel && <p className="text-[10px] text-muted-foreground">{sublabel}</p>}
-      </div>
-    </div>
-  );
+function downloadScanPDF(scan) {
+  const doc = new jsPDF();
+  const margin = 20;
+  let y = 25;
+
+  doc.setFontSize(22);
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(6, 107, 180);
+  doc.text("AquaSentinel", margin, y);
+  y += 10;
+  doc.setFontSize(13);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(80, 80, 80);
+  doc.text("Water Quality Diagnostic Report", margin, y);
+  y += 8;
+  doc.setDrawColor(200, 200, 200);
+  doc.line(margin, y, 190, y);
+  y += 12;
+
+  doc.setFontSize(11);
+  doc.setTextColor(40, 40, 40);
+  doc.setFont("helvetica", "bold");
+  doc.text("Report Details", margin, y); y += 7;
+  doc.setFont("helvetica", "normal");
+  doc.text(`Sample Name: ${scan.sample_name || "Untitled"}`, margin, y); y += 6;
+  doc.text(`Date: ${moment(scan.created_date).format("lll")}`, margin, y); y += 6;
+  doc.text(`Scan ID: ${scan.id?.slice(-8) || "N/A"}`, margin, y); y += 6;
+  if (scan.water_source_name) { doc.text(`Water Source: ${scan.water_source_name}`, margin, y); y += 6; }
+  if (scan.location_name) { doc.text(`Location: ${scan.location_name}`, margin, y); y += 6; }
+  y += 4;
+
+  doc.setFont("helvetica", "bold");
+  doc.text(`Health Score: ${scan.health_score}/100`, margin, y); y += 6;
+  doc.text(`Risk Level: ${scan.risk_level.toUpperCase()}`, margin, y); y += 6;
+  const aiConfidence = scan.ai_confidence || Math.min(98, 82 + Math.round((100 - scan.health_score) * 0.15));
+  doc.text(`AI Confidence: ${aiConfidence}%`, margin, y); y += 10;
+
+  doc.setFont("helvetica", "bold");
+  doc.text("Sensor Readings", margin, y); y += 7;
+  doc.setFont("helvetica", "normal");
+  doc.text(`pH: ${formatSensorValue("ph", scan.ph)}`, margin, y); y += 6;
+  doc.text(`TDS: ${formatSensorValue("tds", scan.tds)} ppm`, margin, y); y += 6;
+  doc.text(`Temperature: ${formatSensorValue("temperature", scan.temperature)} C`, margin, y); y += 6;
+  doc.text(`Turbidity: ${formatSensorValue("turbidity", scan.turbidity)} NTU`, margin, y); y += 10;
+
+  const risks = typeof scan.disease_risks === "string" ? JSON.parse(scan.disease_risks) : scan.disease_risks;
+  if (risks && Object.keys(risks).length > 0) {
+    doc.setFont("helvetica", "bold");
+    doc.text("Disease Risk Assessment", margin, y); y += 7;
+    doc.setFont("helvetica", "normal");
+    Object.entries(risks).sort(([, a], [, b]) => b - a).forEach(([disease, risk]) => {
+      const name = disease === "hepatitisA" ? "Hepatitis A" : disease.charAt(0).toUpperCase() + disease.slice(1);
+      doc.text(`${name}: ${risk}%`, margin, y);
+      y += 6;
+    });
+  }
+
+  doc.save(`aquasentinel-${scan.id?.slice(-8) || "report"}.pdf`);
 }
 
 export default function AIAnalysis() {
@@ -62,6 +110,7 @@ export default function AIAnalysis() {
   const [filter, setFilter] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
   const [expandedId, setExpandedId] = useState(null);
+  const [timeRange, setTimeRange] = useState("30d");
 
   useEffect(() => {
     async function loadData() {
@@ -106,15 +155,6 @@ export default function AIAnalysis() {
     }
     return result;
   }, [scans, searchQuery, filter, sortBy]);
-
-  const stats = useMemo(() => {
-    if (scans.length === 0) return null;
-    const avgScore = Math.round(scans.reduce((s, x) => s + x.health_score, 0) / scans.length);
-    const safeCount = scans.filter(s => s.risk_level === "safe").length;
-    const dangerCount = scans.filter(s => s.risk_level === "danger").length;
-    const safePct = Math.round((safeCount / scans.length) * 100);
-    return { avgScore, safeCount, dangerCount, safePct };
-  }, [scans]);
 
   // ===== Loading state =====
   if (loading) {
@@ -176,7 +216,7 @@ export default function AIAnalysis() {
 
   // ===== List View =====
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="font-manrope max-w-5xl mx-auto space-y-6">
       {/* Header */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
         <div className="flex items-center justify-between gap-3 flex-wrap">
@@ -185,26 +225,22 @@ export default function AIAnalysis() {
               <FileSearch className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-heading font-bold">AI Diagnostic Center</h1>
-              <p className="text-sm text-muted-foreground mt-0.5">{scans.length} report{scans.length !== 1 ? "s" : ""} on record</p>
+              <h1 className="text-4xl font-extrabold leading-tight">AI Diagnostic Center</h1>
+              <p className="text-sm text-muted-foreground mt-1">{scans.length} report{scans.length !== 1 ? "s" : ""} on record</p>
             </div>
           </div>
           <ReportCompare scans={scans} onNavigate={(id) => navigate(`/analysis/${id}`)} t={t} />
         </div>
       </motion.div>
 
-      {/* Aggregate Stats */}
-      {stats && (
-        <motion.div initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.05 }} className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <StatCard icon={Database} label="Total Reports" value={scans.length} color="bg-purple-500/15 text-purple-400" />
-          <StatCard icon={Activity} label="Avg Health Score" value={`${stats.avgScore}/100`} color="bg-primary/15 text-primary" />
-          <StatCard icon={ShieldCheck} label="Safe Reports" value={`${stats.safeCount}`} sublabel={`${stats.safePct}% of total`} color="bg-safe/15 text-safe" />
-          <StatCard icon={AlertTriangle} label="Unsafe Reports" value={`${stats.dangerCount}`} color="bg-danger/15 text-danger" />
-        </motion.div>
-      )}
+      {/* Summary Cards */}
+      <StatCardGrid scans={scans} timeRange={timeRange} />
 
-      {/* AI Risk Timeline */}
-      <RiskTimeline scans={scans} />
+      {/* AI Risk Trend Chart */}
+      <RiskTimeline scans={scans} timeRange={timeRange} onTimeRangeChange={setTimeRange} />
+
+      {/* AI Summary */}
+      <AISummary scans={scans} timeRange={timeRange} />
 
       {/* Search + Sort */}
       <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }} className="flex items-center gap-3">
@@ -262,7 +298,7 @@ export default function AIAnalysis() {
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.3, delay: Math.min(idx * 0.04, 0.4) }}
-                className={`premium-card overflow-hidden ${isExpanded ? "border-purple-500/20" : ""}`}
+                className={`premium-card overflow-hidden transition-all hover:shadow-xl ${isExpanded ? "border-purple-500/20 shadow-lg" : ""}`}
               >
                 <div
                   onClick={() => setExpandedId(isExpanded ? null : scan.id)}
@@ -270,45 +306,48 @@ export default function AIAnalysis() {
                 >
                   <div className="flex items-start justify-between gap-3 mb-3">
                     <div className="flex items-center gap-3 min-w-0 flex-1">
-                      <WaterGradeBadge score={scan.health_score} />
+                      <WaterGradeBadge score={scan.health_score} size="lg" />
                       <div className="min-w-0 flex-1">
-                        <p className="font-semibold text-sm truncate">{scan.sample_name || "Untitled Scan"}</p>
+                        <p className="font-semibold text-lg truncate">{scan.sample_name || "Untitled Scan"}</p>
                         <p className="text-xs text-muted-foreground mt-0.5">{moment(scan.created_date).format("lll")}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-2 flex-shrink-0">
-                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg glass border border-border text-xs">
+                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg glass border border-border text-xs">
                         <Sparkles className="w-3 h-3 text-purple-400" />
                         <span className="font-bold">{aiConfidence}%</span>
                       </span>
                       <RiskBadge level={scan.risk_level} label={t(scan.risk_level)} size="sm" />
-                      <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform ${isExpanded ? "rotate-180" : ""}`} />
+                      <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-300 ${isExpanded ? "rotate-180" : ""}`} />
                     </div>
                   </div>
 
-                  {/* Quick metrics row */}
-                  <div className="flex items-center gap-4 text-xs flex-wrap">
+                  {/* Key sensor values */}
+                  <div className="flex items-center gap-4 text-xs flex-wrap mb-2">
                     <span className="text-muted-foreground">Score: <span className="font-bold text-foreground">{scan.health_score}/100</span></span>
                     <span className="text-muted-foreground">Grade: <span className={`font-bold ${grade.color}`}>{grade.letter}</span></span>
                     <span className="text-muted-foreground">pH: <span className="font-semibold text-foreground">{formatSensorValue("ph", scan.ph)}</span></span>
-                    <span className="text-muted-foreground">TDS: <span className="font-semibold text-foreground">{formatSensorValue("tds", scan.tds)}</span></span>
+                    <span className="text-muted-foreground">TDS: <span className="font-semibold text-foreground">{formatSensorValue("tds", scan.tds)} ppm</span></span>
                     {scan.water_source_name && <span className="text-muted-foreground truncate">{scan.water_source_name}</span>}
                   </div>
 
-                  {/* Top diseases preview */}
+                  {/* Top predicted diseases */}
                   {topDiseases.length > 0 && (
-                    <div className="flex items-center gap-2 mt-2">
-                      {topDiseases.map(([disease, risk]) => (
-                        <span key={disease} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md glass border border-border text-[10px]">
-                          <span className="text-muted-foreground capitalize">{disease}</span>
-                          <span className={`font-bold ${risk < 15 ? "text-safe" : risk < 40 ? "text-warning" : "text-danger"}`}>{risk}%</span>
-                        </span>
-                      ))}
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {topDiseases.map(([disease, risk]) => {
+                        const name = disease === "hepatitisA" ? "Hepatitis A" : disease.charAt(0).toUpperCase() + disease.slice(1);
+                        return (
+                          <span key={disease} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md glass border border-border text-[10px]">
+                            <span className="text-muted-foreground">{name}</span>
+                            <span className={`font-bold ${risk < 15 ? "text-safe" : risk < 40 ? "text-warning" : "text-danger"}`}>{risk}%</span>
+                          </span>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
 
-                {/* Expandable content */}
+                {/* Expandable details */}
                 <AnimatePresence>
                   {isExpanded && (
                     <motion.div
@@ -332,8 +371,8 @@ export default function AIAnalysis() {
                             const color = status === "safe" ? "text-safe" : status === "moderate" ? "text-warning" : "text-danger";
                             return (
                               <div key={key} className="rounded-xl glass border border-border/50 p-3 text-center">
-                                <p className="text-[10px] text-muted-foreground uppercase">{label}</p>
-                                <p className={`text-lg font-bold ${color}`}>{val}{val !== "N/A" && unit && <span className="text-xs text-muted-foreground ml-0.5">{unit}</span>}</p>
+                                <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{label}</p>
+                                <p className={`text-xl font-bold ${color}`}>{val}{val !== "N/A" && unit && <span className="text-xs text-muted-foreground ml-0.5">{unit}</span>}</p>
                               </div>
                             );
                           })}
@@ -341,18 +380,26 @@ export default function AIAnalysis() {
 
                         {/* AI analysis excerpt */}
                         {scan.ai_analysis && (
-                          <p className="text-xs text-muted-foreground leading-relaxed mt-3 line-clamp-3">
+                          <p className="text-sm text-muted-foreground leading-relaxed mt-3 line-clamp-3">
                             {scan.ai_analysis.split("\n\n")[0]}
                           </p>
                         )}
 
-                        {/* View full report button */}
-                        <button
-                          onClick={() => navigate(`/analysis/${scan.id}`)}
-                          className="mt-3 inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-gradient-to-r from-purple-500 to-violet-600 text-white text-sm font-medium hover:shadow-lg transition-all"
-                        >
-                          <FileText className="w-4 h-4" /> View Full Report
-                        </button>
+                        {/* Action buttons */}
+                        <div className="flex items-center gap-3 mt-4">
+                          <button
+                            onClick={() => navigate(`/analysis/${scan.id}`)}
+                            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-purple-500 to-violet-600 text-white text-sm font-medium hover:shadow-lg hover:shadow-purple-500/25 transition-all"
+                          >
+                            <FileText className="w-4 h-4" /> View Full Report
+                          </button>
+                          <button
+                            onClick={(e) => { e.stopPropagation(); downloadScanPDF(scan); }}
+                            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl glass border border-border text-sm font-medium hover:bg-muted/50 transition-colors"
+                          >
+                            <Download className="w-4 h-4" /> Download PDF
+                          </button>
+                        </div>
                       </div>
                     </motion.div>
                   )}

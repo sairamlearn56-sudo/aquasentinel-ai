@@ -75,7 +75,8 @@ module.exports = {
   			heading: ['Sora', 'Manrope', 'ui-sans-serif', 'system-ui', 'sans-serif'],
   			body: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
   			display: ['Sora', 'Manrope', 'ui-sans-serif', 'system-ui', 'sans-serif'],
-  			mono: ['var(--font-mono)']
+  			mono: ['var(--font-mono)'],
+  			manrope: ['Manrope', 'ui-sans-serif', 'system-ui', 'sans-serif']
   		},
   		keyframes: {
   			'accordion-down': {
