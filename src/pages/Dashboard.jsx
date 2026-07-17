@@ -8,10 +8,12 @@ import FeatureGrid from "@/components/landing/FeatureGrid";
 import WhyAquaSentinel from "@/components/landing/WhyAquaSentinel";
 import WorkflowSection from "@/components/landing/WorkflowSection";
 import ConnectionStatusBadge from "@/components/ConnectionStatusBadge";
+import { useHardwareStatus } from "@/lib/HardwareStatusContext";
 
 export default function Dashboard() {
   const { t } = useLanguage();
   const navigate = useNavigate();
+  const { demoMode, toggleDemoMode } = useHardwareStatus();
 
   const createRipple = (e) => {
     const button = e.currentTarget;
@@ -76,9 +78,19 @@ export default function Dashboard() {
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="mb-2"
+            className="mb-2 flex items-center gap-2"
           >
             <ConnectionStatusBadge />
+            <button
+              onClick={toggleDemoMode}
+              className={`px-3 py-1.5 rounded-xl text-[12px] font-medium border transition-colors ${
+                demoMode
+                  ? "bg-purple-500/15 text-purple-400 border-purple-500/30"
+                  : "glass text-muted-foreground border-border hover:text-foreground"
+              }`}
+            >
+              {demoMode ? "Exit Demo" : "Demo Mode"}
+            </button>
           </motion.div>
 
           {/* Title */}

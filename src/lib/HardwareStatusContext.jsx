@@ -2,24 +2,31 @@ import React, { createContext, useState, useEffect, useRef, useContext } from "r
 import { base44 } from "@/api/base44Client";
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getDatabase, ref, onValue } from "firebase/database";
+import { generateSensorData } from "@/lib/waterAnalysis";
 
 const HardwareStatusContext = createContext(null);
 
 const STALE_TIMEOUT = 15000; // 15s without data → disconnected
 const CHECK_INTERVAL = 5000; // Check every 5s
 const RECONNECT_DELAY = 10000; // Auto-retry after 10s
+const SIM_INTERVAL = 2000; // Simulated data every 2s
 
 export function HardwareStatusProvider({ children }) {
   const [status, setStatus] = useState("waiting"); // waiting | connected | disconnected
   const [waterData, setWaterData] = useState(null);
   const [lastUpdate, setLastUpdate] = useState(null);
   const [retryTrigger, setRetryTrigger] = useState(0);
+  const [demoMode, setDemoMode] = useState(false);
   const firebaseDbRef = useRef(null);
   const unsubscribeRef = useRef(null);
   const lastDataTimeRef = useRef(null);
+  const demoModeRef = useRef(false);
 
-  // Set up / re-setup Firebase listener
+  useEffect(() => { demoModeRef.current = demoMode; }, [demoMode]);
+
+  // Set up / re-setup Firebase listener (skipped in demo mode)
   useEffect(() => {
+    if (demoMode) return;
     let cancelled = false;
 
     async function setup() {
@@ -78,11 +85,29 @@ export function HardwareStatusProvider({ children }) {
         unsubscribeRef.current = null;
       }
     };
-  }, [retryTrigger]);
+  }, [retryTrigger, demoMode]);
 
-  // Stale check — mark disconnected if no data for STALE_TIMEOUT
+  // Demo mode — generate simulated sensor data
+  useEffect(() => {
+    if (!demoMode) return;
+
+    const pushSim = () => {
+      const data = generateSensorData();
+      setWaterData(data);
+      setStatus("connected");
+      setLastUpdate(new Date());
+      lastDataTimeRef.current = Date.now();
+    };
+
+    pushSim(); // immediate
+    const interval = setInterval(pushSim, SIM_INTERVAL);
+    return () => clearInterval(interval);
+  }, [demoMode]);
+
+  // Stale check — mark disconnected if no data for STALE_TIMEOUT (skipped in demo)
   useEffect(() => {
     const interval = setInterval(() => {
+      if (demoModeRef.current) return;
       if (lastDataTimeRef.current) {
         const elapsed = Date.now() - lastDataTimeRef.current;
         if (elapsed > STALE_TIMEOUT) {
@@ -93,13 +118,13 @@ export function HardwareStatusProvider({ children }) {
     return () => clearInterval(interval);
   }, []);
 
-  // Auto-retry when disconnected
+  // Auto-retry when disconnected (skipped in demo)
   useEffect(() => {
-    if (status === "disconnected") {
+    if (status === "disconnected" && !demoMode) {
       const timer = setTimeout(() => setRetryTrigger((c) => c + 1), RECONNECT_DELAY);
       return () => clearTimeout(timer);
     }
-  }, [status]);
+  }, [status, demoMode]);
 
   const retry = () => {
     setStatus("waiting");
@@ -107,8 +132,22 @@ export function HardwareStatusProvider({ children }) {
     setRetryTrigger((c) => c + 1);
   };
 
+  const toggleDemoMode = () => {
+    setDemoMode((prev) => {
+      const next = !prev;
+      if (!next) {
+        // Exiting demo mode — reset and reconnect to Firebase
+        setStatus("waiting");
+        lastDataTimeRef.current = null;
+        setWaterData(null);
+        setRetryTrigger((c) => c + 1);
+      }
+      return next;
+    });
+  };
+
   return (
-    <HardwareStatusContext.Provider value={{ status, waterData, lastUpdate, retry }}>
+    <HardwareStatusContext.Provider value={{ status, waterData, lastUpdate, retry, demoMode, toggleDemoMode }}>
       {children}
     </HardwareStatusContext.Provider>
   );

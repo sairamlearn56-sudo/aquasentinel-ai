@@ -1,5 +1,5 @@
 import React from "react";
-import { Wifi, WifiOff, Loader2 } from "lucide-react";
+import { Wifi, WifiOff, Loader2, FlaskConical } from "lucide-react";
 import { useHardwareStatus } from "@/lib/HardwareStatusContext";
 import moment from "moment";
 
@@ -10,7 +10,27 @@ const STATUS_CONFIG = {
 };
 
 export default function ConnectionStatusBadge({ compact = false }) {
-  const { status, lastUpdate } = useHardwareStatus();
+  const { status, lastUpdate, demoMode } = useHardwareStatus();
+
+  if (demoMode) {
+    const demoCls = "text-purple-400 bg-purple-500/10 border-purple-500/20";
+    if (compact) {
+      return (
+        <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-lg border ${demoCls}`}>
+          <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
+          <span className="text-[11px] font-medium">Demo</span>
+        </div>
+      );
+    }
+    return (
+      <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border ${demoCls}`}>
+        <FlaskConical className="w-3.5 h-3.5" />
+        <span className="text-[12px] font-medium">Demo Mode</span>
+        <span className="text-[10px] text-muted-foreground">· Simulated Data</span>
+      </div>
+    );
+  }
+
   const c = STATUS_CONFIG[status] || STATUS_CONFIG.waiting;
   const Icon = c.icon;
 
