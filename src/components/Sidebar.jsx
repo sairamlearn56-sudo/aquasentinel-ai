@@ -1,6 +1,6 @@
 import React from "react";
-import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, Radio, BrainCircuit, TrendingUp, MapPin, Settings, Droplets, User, LogOut, Waves } from "lucide-react";
+import { NavLink, useLocation, Link } from "react-router-dom";
+import { LayoutDashboard, Radio, BrainCircuit, TrendingUp, MapPin, Settings2, Droplets, UserRound, LogOut, Waves } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageContext";
 import { useAuth } from "@/lib/AuthContext";
 import LanguageSelector from "@/components/LanguageSelector";
@@ -18,8 +18,7 @@ export default function Sidebar() {
     { to: "/history", icon: TrendingUp, label: t("history"), accent: "173 80% 50%", text: "text-teal-400" },
     { to: "/tracker", icon: Waves, label: "Water Tracker", accent: "189 94% 50%", text: "text-cyan-300" },
     { to: "/map", icon: MapPin, label: t("communityMap"), accent: "160 84% 45%", text: "text-emerald-400" },
-    { to: "/settings", icon: Settings, label: t("settings"), accent: "243 75% 60%", text: "text-indigo-400" },
-    { to: "/profile", icon: User, label: "Profile", accent: "258 90% 70%", text: "text-purple-300" },
+    { to: "/profile", icon: UserRound, label: "Profile", accent: "258 90% 70%", text: "text-purple-300" },
   ];
 
   return (
@@ -80,6 +79,9 @@ export default function Sidebar() {
           <div className="flex items-center justify-between gap-2 px-1">
             <LanguageSelector compact />
             <ThemeToggle compact />
+            <Link to="/settings" className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-indigo-400 hover:bg-indigo-500/10 transition-colors" title="Settings">
+              <Settings2 className="w-4 h-4" />
+            </Link>
           </div>
         </div>
       </aside>
@@ -96,6 +98,9 @@ export default function Sidebar() {
           <div className="flex items-center gap-2">
             <LanguageSelector compact />
             <ThemeToggle compact />
+            <Link to="/settings" className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-indigo-400 hover:bg-indigo-500/10 transition-colors" title="Settings">
+              <Settings2 className="w-4 h-4" />
+            </Link>
           </div>
         </div>
         <nav className="flex items-center gap-1 px-2 pb-2 overflow-x-auto scrollbar-thin">
