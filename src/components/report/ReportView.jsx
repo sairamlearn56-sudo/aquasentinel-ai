@@ -92,7 +92,8 @@ export default function ReportView({ scan, allScans = [], onBack, onDeleted, onN
   const handlePrint = () => { window.print(); };
 
   return (
-    <div className="max-w-5xl mx-auto space-y-6">
+    <div className="ai-page max-w-5xl mx-auto space-y-6" style={{ fontFamily: "'Manrope', ui-sans-serif, system-ui, sans-serif" }}>
+      <style>{`.ai-page h1,.ai-page h2,.ai-page h3,.ai-page h4,.ai-page h5,.ai-page h6,.ai-page .font-heading{font-family:'Manrope',ui-sans-serif,system-ui,sans-serif}`}</style>
       {/* ===== Report Header ===== */}
       <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
         <div className="flex items-start justify-between gap-4 flex-wrap">
