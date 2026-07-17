@@ -14,6 +14,7 @@ export default function AquaChat({ onClose }) {
     isSpeaking,
     isLoading,
     lang,
+    voiceError,
     stopSpeaking,
     startListening,
     stopListening,
@@ -106,7 +107,7 @@ export default function AquaChat({ onClose }) {
             <div>
               <p className="font-semibold text-sm leading-tight">Aqua</p>
               <p className="text-xs text-muted-foreground leading-tight">
-                {thinking ? "Thinking..." : isLoading ? "Generating voice..." : isSpeaking ? "Speaking..." : listening ? "Listening..." : "AI Health Guide"}
+                {thinking ? "Thinking..." : isLoading ? "Generating Voice..." : isSpeaking ? "Playing Voice..." : voiceError ? voiceError : listening ? "Listening..." : "AI Health Guide"}
               </p>
             </div>
           </div>
@@ -187,7 +188,7 @@ export default function AquaChat({ onClose }) {
                 className="w-full flex items-center justify-center gap-2 py-2.5 bg-danger/10 text-danger hover:bg-danger/15 transition-colors text-sm font-medium"
               >
                 <Square className="w-3.5 h-3.5 fill-current" />
-                {isLoading ? "Generating voice..." : "Stop Speaking"}
+                {isLoading ? "Generating Voice..." : "Stop Speaking"}
               </button>
             </motion.div>
           )}
