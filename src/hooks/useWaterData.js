@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef } from "react";
 import { base44 } from "@/api/base44Client";
 import { initializeApp, getApps, getApp } from "firebase/app";
 import { getDatabase, ref, onValue } from "firebase/database";
@@ -8,9 +8,7 @@ let firebaseDb = null;
 export function useWaterData() {
   const [waterData, setWaterData] = useState(null);
   const [isConnected, setIsConnected] = useState(false);
-  const [lastUpdated, setLastUpdated] = useState(null);
   const initRef = useRef(false);
-  const lastUpdatedRef = useRef(null);
 
   useEffect(() => {
     let unsubscribe = null;
@@ -28,13 +26,16 @@ export function useWaterData() {
           return;
         }
 
+        // Strip any path from the URL — Firebase expects just the origin
         const cleanURL = databaseURL.replace(/^(https?:\/\/[^/]+).*$/, "$1");
 
+        // Initialize Firebase (reuse existing app if already created)
         if (!firebaseDb) {
           const app = getApps().length ? getApp() : initializeApp({ databaseURL: cleanURL });
           firebaseDb = getDatabase(app);
         }
 
+        // Listen to /waterData for real-time updates
         const waterRef = ref(firebaseDb, "waterData");
         unsubscribe = onValue(
           waterRef,
@@ -49,10 +50,6 @@ export function useWaterData() {
                 timestamp: raw.timestamp ?? raw.time ?? raw.Timestamp,
               });
               setIsConnected(true);
-              lastUpdatedRef.current = Date.now();
-              setLastUpdated(Date.now());
-            } else {
-              setIsConnected(false);
             }
           },
           (err) => {
@@ -68,30 +65,10 @@ export function useWaterData() {
 
     init();
 
-    // Connection loss detection — if no data for 10s, mark disconnected
-    const lossInterval = setInterval(() => {
-      if (lastUpdatedRef.current && Date.now() - lastUpdatedRef.current > 10000) {
-        setIsConnected(false);
-      }
-    }, 5000);
-
     return () => {
       if (unsubscribe) unsubscribe();
-      clearInterval(lossInterval);
     };
   }, []);
 
-  const sensorStatus = useMemo(() => {
-    if (!waterData) return { ph: false, tds: false, turbidity: false, temperature: false };
-    return {
-      ph: waterData.ph != null && !isNaN(waterData.ph),
-      tds: waterData.tds != null && !isNaN(waterData.tds),
-      turbidity: waterData.turbidity != null && !isNaN(waterData.turbidity),
-      temperature: waterData.temperature != null && !isNaN(waterData.temperature),
-    };
-  }, [waterData]);
-
-  const allSensorsConnected = sensorStatus.ph && sensorStatus.tds && sensorStatus.turbidity && sensorStatus.temperature;
-
-  return { waterData, isConnected, sensorStatus, allSensorsConnected, lastUpdated };
+  return { waterData, isConnected };
 }

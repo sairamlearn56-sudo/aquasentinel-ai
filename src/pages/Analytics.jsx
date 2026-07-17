@@ -1,26 +1,17 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { BarChart3, Download, TrendingUp, Droplets, Cloud, Activity, Target, MapPin } from "lucide-react";
+import { BarChart3, Download, TrendingUp, Droplets, Thermometer, Cloud, Activity, Target, AlertCircle, MapPin } from "lucide-react";
 import { LineChart, Line, BarChart, Bar, AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from "recharts";
 import { base44 } from "@/api/base44Client";
 import PageHeader from "@/components/shared/PageHeader";
 import LoadingState from "@/components/shared/LoadingState";
-import { useTheme } from "@/lib/ThemeContext";
+
+const CHART_TOOLTIP = { background: "hsl(221 40% 13%)", border: "1px solid hsl(219 37% 21%)", borderRadius: 8, fontSize: 12 };
+const AXIS_TICK = { fontSize: 10, fill: "hsl(215 20% 65%)" };
+const GRID_STROKE = "hsl(219 37% 21%)";
 
 export default function Analytics() {
-  const { theme } = useTheme();
-  const isDark = theme === "dark";
-
-  const CHART_TOOLTIP = {
-    background: isDark ? "hsl(221 40% 13%)" : "#ffffff",
-    border: `1px solid ${isDark ? "hsl(219 37% 21%)" : "hsl(214 32% 91%)"}`,
-    borderRadius: 8,
-    fontSize: 12,
-    color: isDark ? "hsl(210 40% 96%)" : "hsl(222 47% 11%)",
-  };
-  const AXIS_TICK = { fontSize: 10, fill: isDark ? "hsl(215 20% 65%)" : "hsl(215 16% 47%)" };
-  const GRID_STROKE = isDark ? "hsl(219 37% 21%)" : "hsl(214 32% 91%)";
-
   const [scans, setScans] = useState([]);
+  const [alerts, setAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [range, setRange] = useState("7d");
 
@@ -29,8 +20,12 @@ export default function Analytics() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const scanData = await base44.entities.Scan.list("-created_date", 200);
+      const [scanData, alertData] = await Promise.all([
+        base44.entities.Scan.list("-created_date", 200),
+        base44.entities.Alert.list("-created_date", 100),
+      ]);
       setScans(scanData || []);
+      setAlerts(alertData || []);
     } catch (e) { console.error(e); } finally { setLoading(false); }
   };
 
@@ -62,7 +57,7 @@ export default function Analytics() {
   }, [filteredScans]);
 
   const stats = useMemo(() => {
-    if (filteredScans.length === 0) return { avgScore: 0, avgTDS: 0, avgTurbidity: 0, avgPh: 0, avgTemp: 0, safeCount: 0, totalScans: 0 };
+    if (filteredScans.length === 0) return { avgScore: 0, avgTDS: 0, avgTurbidity: 0, avgPh: 0, avgTemp: 0, safeCount: 0, alertCount: 0 };
     const avg = (arr, fn = (x) => x) => arr.reduce((a, b) => a + fn(b), 0) / arr.length;
     return {
       avgScore: Math.round(avg(filteredScans, (s) => s.health_score || 0)),
@@ -71,9 +66,9 @@ export default function Analytics() {
       avgPh: (avg(filteredScans, (s) => s.ph || 0)).toFixed(1),
       avgTemp: (avg(filteredScans, (s) => s.temperature || 0)).toFixed(1),
       safeCount: filteredScans.filter((s) => s.risk_level === "safe").length,
-      totalScans: filteredScans.length,
+      alertCount: alerts.length,
     };
-  }, [filteredScans]);
+  }, [filteredScans, alerts]);
 
   const riskDistribution = useMemo(() => {
     const dist = { safe: 0, moderate: 0, danger: 0 };
@@ -129,6 +124,7 @@ export default function Analytics() {
         }
       />
 
+      {/* KPI Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <KPICard label="Water Safety Score" value={stats.avgScore} suffix="/100" icon={Target} color="text-primary" />
         <KPICard label="Avg TDS" value={stats.avgTDS} suffix=" ppm" icon={Droplets} color="text-blue" />
@@ -136,6 +132,7 @@ export default function Analytics() {
         <KPICard label="Avg pH" value={stats.avgPh} icon={Activity} color="text-safe" />
       </div>
 
+      {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
         <ChartCard title="Water Quality Score Trend">
           <ResponsiveContainer width="100%" height={220}>
@@ -203,12 +200,13 @@ export default function Analytics() {
           )}
         </ChartCard>
 
-        <ChartCard title="Scan Risk Levels" className="lg:col-span-1">
+        <ChartCard title="Alert Statistics" className="lg:col-span-1">
           <ResponsiveContainer width="100%" height={220}>
             <BarChart data={[
-              { name: "Safe", value: stats.safeCount, fill: "hsl(158 64% 52%)" },
-              { name: "Moderate", value: filteredScans.filter((s) => s.risk_level === "moderate").length, fill: "hsl(43 96% 56%)" },
-              { name: "Danger", value: filteredScans.filter((s) => s.risk_level === "danger").length, fill: "hsl(0 91% 71%)" },
+              { name: "Critical", value: alerts.filter((a) => a.risk_level === "critical").length, fill: "hsl(0 91% 71%)" },
+              { name: "High Risk", value: alerts.filter((a) => a.risk_level === "high_risk").length, fill: "hsl(24 82% 55%)" },
+              { name: "Warning", value: alerts.filter((a) => a.risk_level === "warning").length, fill: "hsl(43 96% 56%)" },
+              { name: "Safe", value: alerts.filter((a) => a.risk_level === "safe").length, fill: "hsl(158 64% 52%)" },
             ]}>
               <CartesianGrid strokeDasharray="3 3" stroke={GRID_STROKE} />
               <XAxis dataKey="name" tick={AXIS_TICK} />

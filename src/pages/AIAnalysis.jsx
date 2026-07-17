@@ -1,15 +1,12 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Search, FileSearch, Radio, ArrowUpDown, FileText, ArrowLeft, Sparkles, Activity } from "lucide-react";
+import { Search, FileSearch, Radio, ArrowUpDown, FileText } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useLanguage } from "@/lib/LanguageContext";
 import EmptyState from "@/components/EmptyState";
 import ReportView from "@/components/report/ReportView";
-import AnalysisLoading from "@/components/analysis/AnalysisLoading";
 import RiskBadge from "@/components/RiskBadge";
-import SensorCard from "@/components/SensorCard";
-import HealthScoreRing from "@/components/HealthScoreRing";
 import moment from "moment";
 
 const FILTERS = [
@@ -30,8 +27,6 @@ export default function AIAnalysis() {
   const [searchQuery, setSearchQuery] = useState("");
   const [filter, setFilter] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
-  const [analyzeTriggered, setAnalyzeTriggered] = useState(false);
-  const [analyzing, setAnalyzing] = useState(false);
 
   useEffect(() => {
     async function loadData() {
@@ -44,8 +39,6 @@ export default function AIAnalysis() {
   }, []);
 
   useEffect(() => {
-    setAnalyzeTriggered(false);
-    setAnalyzing(false);
     if (scanId) {
       setScanLoading(true);
       async function loadScan() {
@@ -79,14 +72,6 @@ export default function AIAnalysis() {
     return result;
   }, [scans, searchQuery, filter, sortBy]);
 
-  const handleAnalyze = () => {
-    setAnalyzing(true);
-    setTimeout(() => {
-      setAnalyzing(false);
-      setAnalyzeTriggered(true);
-    }, 2800);
-  };
-
   // ===== Loading state (initial) =====
   if (loading) {
     return (
@@ -119,83 +104,12 @@ export default function AIAnalysis() {
         />
       );
     }
-
-    // ===== AI Analysis Loading Animation =====
-    if (analyzing) {
-      return <AnalysisLoading />;
-    }
-
-    // ===== Full Report (after AI Analysis button clicked) =====
-    if (analyzeTriggered) {
-      return (
-        <ReportView
-          scan={selectedScan}
-          onBack={() => navigate("/analysis")}
-          onDeleted={() => navigate("/analysis")}
-        />
-      );
-    }
-
-    // ===== Scan Preview with AI Analysis Button =====
     return (
-      <div className="max-w-3xl mx-auto space-y-6">
-        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-          <div className="flex items-center gap-3">
-            <button onClick={() => navigate("/analysis")} className="p-2 rounded-xl glass hover:bg-muted/50 transition-colors flex-shrink-0">
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            <div>
-              <h1 className="text-2xl font-heading font-bold">{selectedScan.sample_name || "Untitled Scan"}</h1>
-              <p className="text-sm text-muted-foreground mt-0.5">{moment(selectedScan.created_date).format("lll")}</p>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Scan Overview */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }} className="premium-card p-6">
-          <div className="flex flex-col sm:flex-row items-center gap-6">
-            <div className="relative flex-shrink-0">
-              <HealthScoreRing score={selectedScan.health_score} riskLevel={selectedScan.risk_level} size={100} stroke={8} />
-            </div>
-            <div className="flex-1 text-center sm:text-left">
-              <RiskBadge level={selectedScan.risk_level} label={t(selectedScan.risk_level)} size="lg" />
-              <p className="text-sm text-muted-foreground mt-2">
-                Health Score: <span className="font-bold text-foreground">{selectedScan.health_score}/100</span>
-              </p>
-              <p className="text-xs text-muted-foreground mt-1">
-                Tap "AI Analysis" below to generate a detailed diagnostic report
-              </p>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Sensor Readings Preview */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.15 }}>
-          <h2 className="text-sm font-heading font-semibold text-muted-foreground uppercase tracking-wide mb-4 px-1">Sensor Readings</h2>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <SensorCard type="ph" value={selectedScan.ph} label={t("pH")} delay={0} explanation="" />
-            <SensorCard type="tds" value={selectedScan.tds} label={t("tds")} delay={0} explanation="" />
-            <SensorCard type="temperature" value={selectedScan.temperature} label={t("temperature")} delay={0} explanation="" />
-            <SensorCard type="turbidity" value={selectedScan.turbidity} label={t("turbidity")} delay={0} explanation="" />
-          </div>
-        </motion.div>
-
-        {/* AI Analysis Button */}
-        <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.2 }} className="flex justify-center pt-2">
-          <button
-            onClick={handleAnalyze}
-            className="inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-purple text-white font-medium text-sm hover:opacity-90 active:scale-[0.98] transition-all"
-          >
-            <Sparkles className="w-5 h-5" />
-            AI Analysis
-          </button>
-        </motion.div>
-
-        <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.4, delay: 0.3 }} className="text-center text-xs text-muted-foreground flex items-center justify-center gap-1.5">
-          <Activity className="w-3 h-3" />
-          AI will analyze disease risks, water quality, and generate recommendations
-        </motion.p>
-      </div>
+      <ReportView
+        scan={selectedScan}
+        onBack={() => navigate("/analysis")}
+        onDeleted={() => navigate("/analysis")}
+      />
     );
   }
 

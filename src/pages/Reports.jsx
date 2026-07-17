@@ -1,218 +1,197 @@
 import React, { useState, useEffect, useMemo } from "react";
-import { ClipboardList, Download, FileText, Sparkles, TrendingUp, AlertCircle, Activity } from "lucide-react";
+import { FileText, Download, FileSpreadsheet, Printer, Calendar } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import PageHeader from "@/components/shared/PageHeader";
 import LoadingState from "@/components/shared/LoadingState";
-import TableEmptyState from "@/components/shared/TableEmptyState";
-import RiskBadge from "@/components/RiskBadge";
+
+const REPORT_TYPES = [
+  { key: "daily", label: "Daily Report", desc: "Today's water quality summary" },
+  { key: "weekly", label: "Weekly Report", desc: "Past 7 days overview" },
+  { key: "monthly", label: "Monthly Report", desc: "Past 30 days analysis" },
+  { key: "annual", label: "Annual Report", desc: "Full year review" },
+];
 
 export default function Reports() {
   const [scans, setScans] = useState([]);
+  const [alerts, setAlerts] = useState([]);
+  const [healthReports, setHealthReports] = useState([]);
+  const [sensors, setSensors] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [aiSummary, setAiSummary] = useState("");
-  const [generatingAI, setGeneratingAI] = useState(false);
+  const [activeReport, setActiveReport] = useState(null);
+  const [generating, setGenerating] = useState(false);
 
-  useEffect(() => { loadScans(); }, []);
+  useEffect(() => { loadData(); }, []);
 
-  const loadScans = async () => {
+  const loadData = async () => {
     try {
-      setLoading(true);
-      const data = await base44.entities.Scan.list("-created_date", 200);
-      setScans(data || []);
+      const [s, a, h, sen] = await Promise.all([
+        base44.entities.Scan.list("-created_date", 500),
+        base44.entities.Alert.list("-created_date", 200),
+        base44.entities.CommunityHealthReport.list("-created_date", 200),
+        base44.entities.Sensor.list("-created_date", 100),
+      ]);
+      setScans(s || []);
+      setAlerts(a || []);
+      setHealthReports(h || []);
+      setSensors(sen || []);
     } catch (e) { console.error(e); } finally { setLoading(false); }
   };
 
-  const weeklyScans = useMemo(() => {
-    const cutoff = Date.now() - 7 * 86400000;
-    return scans.filter((s) => new Date(s.created_date) >= cutoff);
-  }, [scans]);
+  const getReportData = (type) => {
+    const days = type === "daily" ? 1 : type === "weekly" ? 7 : type === "monthly" ? 30 : 365;
+    const cutoff = Date.now() - days * 86400000;
+    const periodScans = scans.filter((s) => new Date(s.created_date) >= cutoff);
+    const periodAlerts = alerts.filter((a) => new Date(a.created_date) >= cutoff);
+    const periodHealth = healthReports.filter((h) => new Date(h.created_date || h.report_date) >= cutoff);
 
-  const monthlyScans = useMemo(() => {
-    const cutoff = Date.now() - 30 * 86400000;
-    return scans.filter((s) => new Date(s.created_date) >= cutoff);
-  }, [scans]);
+    const avgScore = periodScans.length ? Math.round(periodScans.reduce((a, s) => a + (s.health_score || 0), 0) / periodScans.length) : 0;
+    const safeCount = periodScans.filter((s) => s.risk_level === "safe").length;
+    const dangerCount = periodScans.filter((s) => s.risk_level === "danger").length;
+    const totalAffected = periodHealth.reduce((a, h) => a + (h.people_affected || 0), 0);
+    const onlineSensors = sensors.filter((s) => s.status === "online").length;
+    const activeAlerts = periodAlerts.filter((a) => a.status === "active").length;
 
-  const computeSummary = (list) => {
-    if (list.length === 0) return { count: 0, avgScore: 0, safe: 0, moderate: 0, danger: 0, avgPh: 0, avgTds: 0 };
-    const avg = (fn) => list.reduce((a, b) => a + fn(b), 0) / list.length;
     return {
-      count: list.length,
-      avgScore: Math.round(avg((s) => s.health_score || 0)),
-      safe: list.filter((s) => s.risk_level === "safe").length,
-      moderate: list.filter((s) => s.risk_level === "moderate").length,
-      danger: list.filter((s) => s.risk_level === "danger").length,
-      avgPh: (avg((s) => s.ph || 0)).toFixed(1),
-      avgTds: Math.round(avg((s) => s.tds || 0)),
+      type: REPORT_TYPES.find((r) => r.key === type)?.label,
+      period: `${new Date(Date.now() - days * 86400000).toLocaleDateString()} – ${new Date().toLocaleDateString()}`,
+      generatedAt: new Date().toLocaleString(),
+      summary: {
+        totalScans: periodScans.length,
+        avgScore,
+        safeCount,
+        dangerCount,
+        safePercentage: periodScans.length ? Math.round((safeCount / periodScans.length) * 100) : 0,
+        totalAlerts: periodAlerts.length,
+        activeAlerts,
+        totalHealthReports: periodHealth.length,
+        totalAffected,
+        onlineSensors,
+        totalSensors: sensors.length,
+      },
+      diseaseSummary: {
+        fever: periodHealth.reduce((a, h) => a + (h.fever_cases || 0), 0),
+        diarrhea: periodHealth.reduce((a, h) => a + (h.diarrhea_cases || 0), 0),
+        cholera: periodHealth.reduce((a, h) => a + (h.cholera_suspected || 0), 0),
+        typhoid: periodHealth.reduce((a, h) => a + (h.typhoid_suspected || 0), 0),
+        hepatitis: periodHealth.reduce((a, h) => a + (h.hepatitis_suspected || 0), 0),
+      },
     };
   };
 
-  const weekly = computeSummary(weeklyScans);
-  const monthly = computeSummary(monthlyScans);
-
-  const generateAISummary = async () => {
-    setGeneratingAI(true);
-    try {
-      const recentScans = scans.slice(0, 20).map((s) => ({
-        date: new Date(s.created_date).toLocaleDateString(),
-        score: s.health_score,
-        risk: s.risk_level,
-        ph: s.ph,
-        tds: s.tds,
-        turbidity: s.turbidity,
-        temperature: s.temperature,
-      }));
-
-      const response = await base44.integrations.Core.InvokeLLM({
-        prompt: `You are AquaSentinel AI's report generator. Based on the following water quality scan data, generate a professional summary report.
-
-Scan data (most recent 20 scans):
-${JSON.stringify(recentScans, null, 2)}
-
-Weekly summary: ${weekly.count} scans, avg score ${weekly.avgScore}, ${weekly.safe} safe, ${weekly.moderate} moderate, ${weekly.danger} danger.
-Monthly summary: ${monthly.count} scans, avg score ${monthly.avgScore}, ${monthly.safe} safe, ${monthly.moderate} moderate, ${monthly.danger} danger.
-
-Generate a concise professional report summary (3-4 paragraphs) covering:
-1. Overall water quality assessment
-2. Key findings and trends
-3. Risk analysis
-4. Recommendations
-
-Use plain text, no markdown.`,
-      });
-
-      setAiSummary(response || "Unable to generate summary.");
-    } catch (e) {
-      setAiSummary("Unable to generate AI summary at this time.");
-    } finally {
-      setGeneratingAI(false);
-    }
+  const generateReport = (type) => {
+    setGenerating(true);
+    setTimeout(() => {
+      setActiveReport(getReportData(type));
+      setGenerating(false);
+    }, 500);
   };
 
   const exportCSV = () => {
-    const headers = ["Date", "Sample Name", "pH", "TDS", "Turbidity", "Temperature", "Health Score", "Risk Level"];
-    const rows = scans.map((s) => [
-      new Date(s.created_date).toLocaleString(),
-      `"${s.sample_name || "Untitled"}"`,
-      s.ph, s.tds, s.turbidity, s.temperature, s.health_score, s.risk_level,
-    ]);
-    const csv = [headers, ...rows].map((r) => r.join(",")).join("\n");
+    if (!activeReport) return;
+    const rows = [
+      ["AquaSentinel AI Report", activeReport.type],
+      ["Period", activeReport.period],
+      ["Generated", activeReport.generatedAt],
+      [],
+      ["Summary", ""],
+      ["Total Scans", activeReport.summary.totalScans],
+      ["Average Score", activeReport.summary.avgScore],
+      ["Safe Scans", activeReport.summary.safeCount],
+      ["Danger Scans", activeReport.summary.dangerCount],
+      ["Safe Percentage", `${activeReport.summary.safePercentage}%`],
+      ["Total Alerts", activeReport.summary.totalAlerts],
+      ["Active Alerts", activeReport.summary.activeAlerts],
+      ["Health Reports", activeReport.summary.totalHealthReports],
+      ["People Affected", activeReport.summary.totalAffected],
+      ["Online Sensors", `${activeReport.summary.onlineSensors}/${activeReport.summary.totalSensors}`],
+      [],
+      ["Disease Summary", ""],
+      ["Fever Cases", activeReport.diseaseSummary.fever],
+      ["Diarrhea Cases", activeReport.diseaseSummary.diarrhea],
+      ["Cholera Suspected", activeReport.diseaseSummary.cholera],
+      ["Typhoid Suspected", activeReport.diseaseSummary.typhoid],
+      ["Hepatitis Suspected", activeReport.diseaseSummary.hepatitis],
+    ];
+    const csv = rows.map((r) => r.join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a"); a.href = url; a.download = "aquasentinel_report.csv"; a.click();
+    const a = document.createElement("a"); a.href = url; a.download = `aquasentinel_${activeReport.type.toLowerCase().replace(/\s/g, "_")}_report.csv`; a.click();
     URL.revokeObjectURL(url);
   };
 
-  const exportPDF = () => { window.print(); };
+  const printReport = () => window.print();
 
-  if (loading) return <div className="p-8"><LoadingState text="Loading reports..." /></div>;
+  if (loading) return <div className="p-8"><LoadingState text="Loading report data..." /></div>;
 
   return (
     <div className="p-4 sm:p-6 lg:p-8 max-w-5xl mx-auto">
-      <PageHeader
-        title="Reports"
-        subtitle="Comprehensive water quality reports and summaries"
-        icon={ClipboardList}
-        actions={
-          <>
-            <button onClick={exportCSV} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/30 text-sm font-medium hover:bg-muted/50 border border-border">
-              <Download className="w-3.5 h-3.5" /> CSV
-            </button>
-            <button onClick={exportPDF} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/30 text-sm font-medium hover:bg-muted/50 border border-border">
-              <FileText className="w-3.5 h-3.5" /> PDF
-            </button>
-          </>
-        }
-      />
+      <PageHeader title="Reports" subtitle="Generate comprehensive water quality and health reports" icon={FileText} />
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-6">
-        <SummaryCard title="Weekly Summary" period="Last 7 Days" data={weekly} />
-        <SummaryCard title="Monthly Summary" period="Last 30 Days" data={monthly} />
-      </div>
-
-      {/* AI Summary */}
-      <div className="premium-card p-5 mb-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <div className="w-9 h-9 rounded-xl bg-purple/10 flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-purple" />
+      {/* Report type cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        {REPORT_TYPES.map((r) => (
+          <button key={r.key} onClick={() => generateReport(r.key)} disabled={generating} className="premium-card p-5 text-left hover:border-primary/30 transition-colors disabled:opacity-50">
+            <div className="w-10 h-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center mb-3">
+              <Calendar className="w-5 h-5 text-primary" />
             </div>
-            <h3 className="font-heading font-semibold text-base">AI-Generated Report Summary</h3>
-          </div>
-          <button
-            onClick={generateAISummary}
-            disabled={generatingAI || scans.length === 0}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-purple text-white text-sm font-medium hover:opacity-90 disabled:opacity-40"
-          >
-            {generatingAI ? <div className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
-            {aiSummary ? "Regenerate" : "Generate"}
+            <h3 className="text-sm font-heading font-semibold mb-1">{r.label}</h3>
+            <p className="text-xs text-muted-foreground">{r.desc}</p>
           </button>
-        </div>
-        {aiSummary ? (
-          <div className="text-sm text-foreground/75 leading-relaxed whitespace-pre-wrap">{aiSummary}</div>
-        ) : (
-          <p className="text-sm text-muted-foreground">Click "Generate" to create an AI-powered summary of your water quality data.</p>
-        )}
+        ))}
       </div>
 
-      {/* Recent Reports Table */}
-      <div className="premium-card p-5">
-        <h3 className="font-heading font-semibold text-base mb-4">Recent Reports</h3>
-        {scans.length === 0 ? (
-          <TableEmptyState title="No reports" description="No scan reports available yet." icon={ClipboardList} />
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left text-xs text-muted-foreground border-b border-border">
-                  <th className="pb-2 font-medium">Date</th>
-                  <th className="pb-2 font-medium">Sample</th>
-                  <th className="pb-2 font-medium">Score</th>
-                  <th className="pb-2 font-medium">Risk</th>
-                </tr>
-              </thead>
-              <tbody>
-                {scans.slice(0, 10).map((s) => (
-                  <tr key={s.id} className="border-b border-border/50">
-                    <td className="py-2 text-xs text-muted-foreground">{new Date(s.created_date).toLocaleDateString()}</td>
-                    <td className="py-2 text-xs font-medium">{s.sample_name || "Untitled"}</td>
-                    <td className="py-2 text-xs font-bold">{s.health_score}/100</td>
-                    <td className="py-2"><RiskBadge level={s.risk_level} size="sm" /></td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+      {/* Report preview */}
+      {activeReport && (
+        <div className="premium-card p-6">
+          <div className="flex items-center justify-between mb-6 pb-4 border-b border-border">
+            <div>
+              <h2 className="text-lg font-heading font-bold">{activeReport.type}</h2>
+              <p className="text-xs text-muted-foreground">{activeReport.period}</p>
+            </div>
+            <div className="flex gap-2">
+              <button onClick={exportCSV} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/30 text-sm font-medium hover:bg-muted/50 border border-border">
+                <FileSpreadsheet className="w-3.5 h-3.5" /> CSV
+              </button>
+              <button onClick={printReport} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-muted/30 text-sm font-medium hover:bg-muted/50 border border-border">
+                <Printer className="w-3.5 h-3.5" /> Print
+              </button>
+            </div>
           </div>
-        )}
-      </div>
+
+          {/* Summary grid */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
+            <ReportStat label="Total Scans" value={activeReport.summary.totalScans} />
+            <ReportStat label="Avg Score" value={`${activeReport.summary.avgScore}/100`} />
+            <ReportStat label="Safe Water" value={`${activeReport.summary.safePercentage}%`} />
+            <ReportStat label="Active Alerts" value={activeReport.summary.activeAlerts} />
+            <ReportStat label="People Affected" value={activeReport.summary.totalAffected} />
+            <ReportStat label="Health Reports" value={activeReport.summary.totalHealthReports} />
+            <ReportStat label="Online Sensors" value={`${activeReport.summary.onlineSensors}/${activeReport.summary.totalSensors}`} />
+            <ReportStat label="Danger Scans" value={activeReport.summary.dangerCount} />
+          </div>
+
+          {/* Disease summary */}
+          <div className="mb-6">
+            <h3 className="text-sm font-heading font-semibold mb-3">Disease Risk Summary</h3>
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+              <DiseaseStat label="Fever" value={activeReport.diseaseSummary.fever} color="text-warning" />
+              <DiseaseStat label="Diarrhea" value={activeReport.diseaseSummary.diarrhea} color="text-danger" />
+              <DiseaseStat label="Cholera" value={activeReport.diseaseSummary.cholera} color="text-danger" />
+              <DiseaseStat label="Typhoid" value={activeReport.diseaseSummary.typhoid} color="text-warning" />
+              <DiseaseStat label="Hepatitis" value={activeReport.diseaseSummary.hepatitis} color="text-orange" />
+            </div>
+          </div>
+
+          <div className="text-xs text-muted-foreground text-right">Generated on {activeReport.generatedAt}</div>
+        </div>
+      )}
     </div>
   );
 }
 
-function SummaryCard({ title, period, data }) {
-  return (
-    <div className="premium-card p-5">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="font-heading font-semibold text-sm">{title}</h3>
-        <span className="text-xs text-muted-foreground">{period}</span>
-      </div>
-      <div className="grid grid-cols-2 gap-3">
-        <Stat label="Total Scans" value={data.count} color="text-primary" />
-        <Stat label="Avg Score" value={data.avgScore} color="text-foreground" />
-        <Stat label="Safe" value={data.safe} color="text-safe" />
-        <Stat label="Moderate" value={data.moderate} color="text-warning" />
-        <Stat label="Unsafe" value={data.danger} color="text-danger" />
-        <Stat label="Avg pH" value={data.avgPh} color="text-blue" />
-      </div>
-    </div>
-  );
+function ReportStat({ label, value }) {
+  return <div className="bg-muted/20 rounded-lg p-3"><p className="text-xs text-muted-foreground mb-0.5">{label}</p><p className="text-lg font-heading font-bold tabular-nums">{value}</p></div>;
 }
-
-function Stat({ label, value, color }) {
-  return (
-    <div className="rounded-xl bg-muted/20 p-3">
-      <p className="text-[10px] text-muted-foreground mb-0.5">{label}</p>
-      <p className={`text-lg font-heading font-bold tabular-nums ${color}`}>{value}</p>
-    </div>
-  );
+function DiseaseStat({ label, value, color }) {
+  return <div className="bg-muted/20 rounded-lg p-3 text-center"><p className={`text-2xl font-heading font-bold tabular-nums ${color}`}>{value}</p><p className="text-xs text-muted-foreground">{label}</p></div>;
 }
