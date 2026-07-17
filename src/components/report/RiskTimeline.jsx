@@ -125,7 +125,7 @@ function CustomTooltip({ active, payload }) {
           </div>
           <div className="flex items-center justify-between gap-3 mt-1">
             <span className="text-muted-foreground">AI Confidence</span>
-            <span className="font-medium">{d.ai_confidence || Math.min(98, 82 + Math.round((100 - d.score) * 0.15))}%</span>
+            <span className="font-medium">{d.ai_confidence != null ? `${d.ai_confidence}%` : "N/A"}</span>
           </div>
           {d.topDisease && (
             <div className="flex items-center justify-between gap-3 mt-1">

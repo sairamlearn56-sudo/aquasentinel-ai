@@ -1,15 +1,16 @@
 import React, { useMemo } from "react";
 import { motion } from "framer-motion";
-import { AlertCircle, TrendingUp, TrendingDown, Bug, MapPin, Activity, Sparkles, Award } from "lucide-react";
+import { AlertCircle, TrendingUp, TrendingDown, Bug, MapPin, Activity, Sparkles, Award, Database } from "lucide-react";
 import { classifyParameter } from "@/lib/waterAnalysis";
 import { getWaterGrade } from "@/components/report/WaterGradeBadge";
-import moment from "moment";
 
-function getDiseaseRisks(scan) {
-  if (!scan) return {};
-  const risks = typeof scan.disease_risks === "string" ? JSON.parse(scan.disease_risks) : (scan.disease_risks || {});
-  if (!risks.hepatitisE) risks.hepatitisE = risks.hepatitisA ? Math.round(risks.hepatitisA * 0.6) : 5;
-  return risks;
+function parseDiseaseRisks(scan) {
+  if (!scan?.disease_risks) return null;
+  try {
+    return typeof scan.disease_risks === "string" ? JSON.parse(scan.disease_risks) : scan.disease_risks;
+  } catch (e) {
+    return null;
+  }
 }
 
 export default function AIInsightsPanel({ scans }) {
@@ -17,7 +18,7 @@ export default function AIInsightsPanel({ scans }) {
     if (scans.length === 0) return null;
     const latest = scans[0];
 
-    // Primary contamination source
+    // Primary contamination source — from actual sensor values
     const params = [
       { key: "turbidity", label: "Turbidity" },
       { key: "tds", label: "TDS" },
@@ -26,13 +27,13 @@ export default function AIInsightsPanel({ scans }) {
     ];
     let worstParam = "None";
     let worstStatus = "safe";
-    params.forEach(p => {
+    params.forEach((p) => {
       const status = classifyParameter(p.key, latest[p.key]);
       if (status === "danger" && worstStatus !== "danger") { worstParam = p.label; worstStatus = status; }
       else if (status === "moderate" && worstStatus === "safe") { worstParam = p.label; worstStatus = status; }
     });
 
-    // Trend
+    // Trend — compare previous readings with current
     let trend = "stable";
     if (scans.length >= 4) {
       const chronological = [...scans].reverse();
@@ -46,18 +47,19 @@ export default function AIInsightsPanel({ scans }) {
       }
     }
 
-    // Top disease
-    const risks = getDiseaseRisks(latest);
-    const topDisease = Object.entries(risks).sort(([, a], [, b]) => b - a)[0];
+    // Top disease — from actual stored disease_risks
+    const risks = parseDiseaseRisks(latest);
+    const topDisease = risks ? Object.entries(risks).sort(([, a], [, b]) => b - a)[0] : null;
 
-    // Highest-risk location
-    const withLocations = scans.filter(s => s.location_name);
+    // Highest-risk location — from actual scan data
+    const withLocations = scans.filter((s) => s.location_name);
     const riskiestLocation = withLocations.length > 0
-      ? withLocations.reduce((min, s) => s.health_score < min.health_score ? s : min)
+      ? withLocations.reduce((min, s) => (s.health_score < min.health_score ? s : min))
       : null;
 
-    // Confidence
-    const confidence = latest.ai_confidence || Math.min(98, 82 + Math.round((100 - latest.health_score) * 0.15));
+    // AI confidence — from actual stored field
+    const confidence = latest.ai_confidence != null ? latest.ai_confidence : null;
+
     const grade = getWaterGrade(latest.health_score);
 
     return { latest, worstParam, trend, topDisease, riskiestLocation, confidence, grade };
@@ -72,12 +74,26 @@ export default function AIInsightsPanel({ scans }) {
   const items = [
     { icon: AlertCircle, label: "Primary Contamination", value: worstParam, color: "text-orange-400", bg: "bg-orange-500/15" },
     { icon: TrendIcon, label: "Quality Trend", value: trend.charAt(0).toUpperCase() + trend.slice(1), color: trendColor, bg: "bg-muted/50" },
-    { icon: Bug, label: "Most Likely Disease", value: topDisease ? (topDisease[0] === "hepatitisA" ? "Hepatitis A" : topDisease[0] === "hepatitisE" ? "Hepatitis E" : topDisease[0].charAt(0).toUpperCase() + topDisease[0].slice(1)) : "N/A", sub: topDisease ? `${topDisease[1]}%` : "", color: "text-rose-400", bg: "bg-rose-500/15" },
-    { icon: MapPin, label: "Highest-Risk Location", value: riskiestLocation?.location_name || "Unknown", sub: riskiestLocation ? `${riskiestLocation.health_score}/100` : "", color: "text-amber-400", bg: "bg-amber-500/15" },
+    {
+      icon: Bug,
+      label: "Most Likely Disease",
+      value: topDisease ? (topDisease[0] === "hepatitisA" ? "Hepatitis A" : topDisease[0].charAt(0).toUpperCase() + topDisease[0].slice(1)) : "No data",
+      sub: topDisease ? `${topDisease[1]}%` : "",
+      color: "text-rose-400",
+      bg: "bg-rose-500/15",
+    },
+    {
+      icon: MapPin,
+      label: "Highest-Risk Location",
+      value: riskiestLocation?.location_name || "No location data",
+      sub: riskiestLocation ? `${riskiestLocation.health_score}/100` : "",
+      color: "text-amber-400",
+      bg: "bg-amber-500/15",
+    },
     { icon: Activity, label: "Most Abnormal Sensor", value: worstParam !== "None" ? worstParam : "All Normal", color: worstParam !== "None" ? "text-warning" : "text-safe", bg: "bg-muted/50" },
-    { icon: Sparkles, label: "AI Confidence", value: `${confidence}%`, color: "text-primary", bg: "bg-primary/15" },
+    { icon: Sparkles, label: "AI Confidence", value: confidence != null ? `${confidence}%` : "Unavailable", color: confidence != null ? "text-primary" : "text-muted-foreground", bg: "bg-primary/15" },
     { icon: Award, label: "Health Grade", value: grade.letter, sub: grade.label, color: grade.color, bg: grade.bg },
-    { icon: Activity, label: "Reports Analyzed", value: scans.length, color: "text-violet-400", bg: "bg-violet-500/15" },
+    { icon: Database, label: "Reports Analyzed", value: scans.length, color: "text-violet-400", bg: "bg-violet-500/15" },
   ];
 
   return (
@@ -88,7 +104,7 @@ export default function AIInsightsPanel({ scans }) {
         </div>
         <div>
           <h2 className="text-2xl font-bold">AI Insights</h2>
-          <p className="text-xs text-muted-foreground">Decision-support intelligence dashboard</p>
+          <p className="text-xs text-muted-foreground">Decision-support intelligence from actual sensor data</p>
         </div>
       </div>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">

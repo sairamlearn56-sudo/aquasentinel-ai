@@ -19,6 +19,23 @@ function getHeatLevel(riskLevel) {
 }
 
 function ConfidenceMeter({ confidence }) {
+  if (confidence == null) {
+    return (
+      <div className="flex flex-col items-center justify-center">
+        <div className="relative" style={{ width: 96, height: 96 }}>
+          <svg width={96} height={96} className="-rotate-90">
+            <circle cx={48} cy={48} r={38} fill="none" stroke="hsl(var(--muted))" strokeWidth={7} opacity={0.2} />
+          </svg>
+          <div className="absolute inset-0 flex flex-col items-center justify-center">
+            <span className="text-sm font-bold text-muted-foreground">N/A</span>
+          </div>
+        </div>
+        <span className="text-xs font-medium mt-1 text-muted-foreground">Confidence</span>
+        <span className="text-[10px] text-muted-foreground">Unavailable</span>
+      </div>
+    );
+  }
+
   const level = confidence >= 90 ? "Very High" : confidence >= 75 ? "High" : confidence >= 50 ? "Medium" : "Low";
   const color = confidence >= 90 ? "#10b981" : confidence >= 75 ? "#06b6d4" : confidence >= 50 ? "#f59e0b" : "#ef4444";
   const radius = 38;
@@ -51,7 +68,7 @@ export default function StatusOverview({ scans }) {
   const data = useMemo(() => {
     const latest = scans[0];
     if (!latest) return null;
-    const confidence = latest.ai_confidence || Math.min(98, 82 + Math.round((100 - latest.health_score) * 0.15));
+    const confidence = latest.ai_confidence != null ? latest.ai_confidence : null;
     const heatIdx = getHeatLevel(latest.risk_level);
     return { latest, confidence, heatIdx };
   }, [scans]);

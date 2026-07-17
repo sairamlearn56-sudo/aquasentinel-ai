@@ -1,18 +1,22 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { Cpu, Wifi, Clock, Activity } from "lucide-react";
+import { Cpu, Wifi, Clock, Activity, Database } from "lucide-react";
 import moment from "moment";
 
 export default function RealTimeStatus({ scans }) {
   const latest = scans[0];
-  const modelsRunning = 4;
-  const sensorsOnline = 4;
+
+  // Derive sensor status from actual scan data
+  const sensorKeys = ["ph", "tds", "temperature", "turbidity"];
+  const sensorsOnline = latest
+    ? sensorKeys.filter((s) => latest[s] != null && latest[s] >= 0).length
+    : 0;
 
   const items = [
-    { icon: Activity, label: "AI Status", value: "Monitoring", color: "text-safe", dot: true },
-    { icon: Cpu, label: "Models Running", value: modelsRunning, color: "text-primary" },
-    { icon: Wifi, label: "Sensors Online", value: `${sensorsOnline}/4`, color: "text-safe" },
-    { icon: Clock, label: "Last Analysis", value: latest ? moment(latest.created_date).fromNow() : "N/A", color: "text-muted-foreground" },
+    { icon: Activity, label: "AI Status", value: latest ? "Active" : "Idle", color: latest ? "text-safe" : "text-muted-foreground", dot: !!latest },
+    { icon: Database, label: "Reports", value: scans.length, color: "text-violet-400" },
+    { icon: Wifi, label: "Sensors Online", value: `${sensorsOnline}/4`, color: sensorsOnline > 0 ? "text-safe" : "text-muted-foreground" },
+    { icon: Clock, label: "Last Analysis", value: latest ? moment(latest.created_date).fromNow() : "No data", color: "text-muted-foreground" },
   ];
 
   return (

@@ -427,7 +427,7 @@ export default function AIAnalysis() {
         <div className="grid grid-cols-1 gap-4">
           {filteredScans.map((scan, idx) => {
             const isExpanded = expandedId === scan.id;
-            const aiConfidence = scan.ai_confidence || Math.min(98, 82 + Math.round((100 - scan.health_score) * 0.15));
+            const aiConfidence = scan.ai_confidence != null ? scan.ai_confidence : null;
             const topDiseases = getTopDiseases(scan.disease_risks, 2);
             const grade = getWaterGrade(scan.health_score);
             const sensorStatus = getSensorStatus(scan);
@@ -455,7 +455,7 @@ export default function AIAnalysis() {
                     <div className="flex items-center gap-2 flex-shrink-0">
                       <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg glass border border-border text-xs">
                         <Sparkles className="w-3 h-3 text-purple-400" />
-                        <span className="font-bold">{aiConfidence}%</span>
+                        <span className="font-bold">{aiConfidence != null ? `${aiConfidence}%` : "N/A"}</span>
                       </span>
                       <RiskBadge level={scan.risk_level} label={t(scan.risk_level)} size="sm" />
                       <ChevronDown className={`w-4 h-4 text-muted-foreground transition-transform duration-300 ${isExpanded ? "rotate-180" : ""}`} />

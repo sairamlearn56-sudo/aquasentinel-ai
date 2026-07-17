@@ -19,11 +19,13 @@ function filterByRange(scans, rangeKey) {
   return scans.filter((s) => new Date(s.created_date).getTime() >= cutoff);
 }
 
-function getDiseaseRisks(scan) {
-  if (!scan) return {};
-  const risks = typeof scan.disease_risks === "string" ? JSON.parse(scan.disease_risks) : (scan.disease_risks || {});
-  if (!risks.hepatitisE) risks.hepatitisE = risks.hepatitisA ? Math.round(risks.hepatitisA * 0.6) : 5;
-  return risks;
+function parseDiseaseRisks(scan) {
+  if (!scan?.disease_risks) return null;
+  try {
+    return typeof scan.disease_risks === "string" ? JSON.parse(scan.disease_risks) : scan.disease_risks;
+  } catch (e) {
+    return null;
+  }
 }
 
 export default function AISummary({ scans, timeRange }) {
@@ -33,7 +35,7 @@ export default function AISummary({ scans, timeRange }) {
 
     if (filtered.length === 0) {
       return {
-        text: `AI has analyzed available water quality data. No reports found for ${range.label}. Start a new scan to receive AI-powered intelligence and risk predictions.`,
+        text: `No analysis available yet. Connect IoT sensors or upload laboratory water reports to begin AI analysis.`,
         level: "neutral",
       };
     }
@@ -41,7 +43,7 @@ export default function AISummary({ scans, timeRange }) {
     const latest = filtered[0];
     const chronological = [...filtered].reverse();
 
-    // Trend
+    // Trend — compare previous readings with current
     let trend = "stable";
     if (chronological.length >= 4) {
       const recent = chronological.slice(-3);
@@ -54,26 +56,26 @@ export default function AISummary({ scans, timeRange }) {
       }
     }
 
-    // Issues
+    // Issues — from actual sensor values
     const issues = [];
     if (classifyParameter("turbidity", latest.turbidity) !== "safe") issues.push("increased turbidity");
     if (classifyParameter("ph", latest.ph) !== "safe") issues.push("abnormal pH");
     if (classifyParameter("tds", latest.tds) !== "safe") issues.push("elevated TDS");
     if (classifyParameter("temperature", latest.temperature) !== "safe") issues.push("elevated temperature");
 
-    // Top disease with confidence
-    const risks = getDiseaseRisks(latest);
-    const topDisease = Object.entries(risks).sort(([, a], [, b]) => b - a)[0];
-    const diseaseConfidence = topDisease ? Math.min(95, Math.round(60 + topDisease[1] * 0.4)) : 0;
+    // Top disease from actual stored data
+    const risks = parseDiseaseRisks(latest);
+    const topDisease = risks ? Object.entries(risks).sort(([, a], [, b]) => b - a)[0] : null;
+    const aiConfidence = latest.ai_confidence != null ? latest.ai_confidence : null;
 
-    let text = `AI has analyzed the latest water quality reports. `;
+    let text = `AI has analyzed ${filtered.length} water quality report${filtered.length !== 1 ? "s" : ""} from ${range.label}. `;
 
     if (trend === "declining") {
-      text += `Water quality has declined over ${range.label}`;
+      text += `Water quality has declined compared to previous readings`;
     } else if (trend === "improving") {
-      text += `Water quality has improved over ${range.label}`;
+      text += `Water quality has improved compared to previous readings`;
     } else {
-      text += `Water quality remains stable over ${range.label}`;
+      text += `Water quality remains stable compared to previous readings`;
     }
 
     if (issues.length > 0) {
@@ -83,9 +85,13 @@ export default function AISummary({ scans, timeRange }) {
     }
 
     if (topDisease && topDisease[1] > 15) {
-      const diseaseName = topDisease[0] === "hepatitisA" ? "Hepatitis A" : topDisease[0] === "hepatitisE" ? "Hepatitis E" : topDisease[0].charAt(0).toUpperCase() + topDisease[0].slice(1);
+      const diseaseName = topDisease[0] === "hepatitisA" ? "Hepatitis A" : topDisease[0].charAt(0).toUpperCase() + topDisease[0].slice(1);
       const riskLevel = topDisease[1] > 70 ? "CRITICAL" : topDisease[1] > 40 ? "HIGH" : "MODERATE";
-      text += ` ${diseaseName} risk is currently ${riskLevel} with ${diseaseConfidence}% confidence.`;
+      if (aiConfidence != null) {
+        text += ` ${diseaseName} risk is currently ${riskLevel} with ${aiConfidence}% confidence.`;
+      } else {
+        text += ` ${diseaseName} risk is currently ${riskLevel}.`;
+      }
     }
 
     if (latest.risk_level === "safe") {
