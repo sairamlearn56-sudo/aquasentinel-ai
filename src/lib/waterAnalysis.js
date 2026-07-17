@@ -9,6 +9,24 @@ export const SAFE_RANGES = {
   turbidity: { min: 0, max: 5, unit: "NTU" },
 };
 
+// Validate sensor data before analysis — rejects out-of-range or null values
+export function validateSensorData(data) {
+  const errors = {};
+  if (data.ph == null || isNaN(data.ph) || data.ph < 0 || data.ph > 14) {
+    errors.ph = "Invalid pH reading — must be between 0 and 14";
+  }
+  if (data.tds == null || isNaN(data.tds) || data.tds < 0) {
+    errors.tds = "Invalid TDS reading — must be ≥ 0 ppm";
+  }
+  if (data.temperature == null || isNaN(data.temperature) || data.temperature < -10 || data.temperature > 100) {
+    errors.temperature = "Invalid temperature reading — out of range";
+  }
+  if (data.turbidity == null || isNaN(data.turbidity) || data.turbidity < 0) {
+    errors.turbidity = "Invalid turbidity reading — must be ≥ 0 NTU";
+  }
+  return { valid: Object.keys(errors).length === 0, errors };
+}
+
 // Generate simulated sensor data (realistic IoT readings)
 export function generateSensorData() {
   // Randomly bias toward different scenarios for variety

@@ -18,8 +18,10 @@ const COLOR_MAP = {
 export default function SensorCard({ type, value, label, delay = 0, explanation }) {
   const Icon = ICONS[type] || TdsIcon;
 
-  // Handle disconnected pH sensor (ESP32 sends -1 when sensor is not connected)
-  if (type === "ph" && (value === -1 || value === "-1")) {
+  // Handle invalid/disconnected sensor readings (ESP32 sends -1 when sensor is not connected)
+  const numValue = Number(value);
+  const isInvalid = value == null || value === -1 || value === "-1" || isNaN(numValue);
+  if (isInvalid) {
     return (
       <div
         className="premium-card p-5 border border-muted animate-fade-in-up"
@@ -30,13 +32,13 @@ export default function SensorCard({ type, value, label, delay = 0, explanation 
             <Icon className="w-7 h-7" />
           </div>
           <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-muted/20 text-muted-foreground">
-            Offline
+            Sensor Error
           </span>
         </div>
         <p className="text-sm text-muted-foreground mb-1">{label}</p>
-        <p className="text-sm font-semibold text-muted-foreground">pH Sensor Not Connected</p>
+        <p className="text-sm font-semibold text-muted-foreground">Invalid Reading</p>
         <div className="mt-3 pt-3 border-t border-border/50">
-          <p className="text-xs text-muted-foreground">Check sensor wiring</p>
+          <p className="text-xs text-muted-foreground">Please repeat the scan — sensor may be disconnected</p>
         </div>
       </div>
     );

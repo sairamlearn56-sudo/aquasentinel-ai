@@ -11,6 +11,7 @@ import ResultTrendGraph from "@/components/livescan/ResultTrendGraph";
 import PrimaryRecommendation from "@/components/livescan/PrimaryRecommendation";
 import ResultIllustration from "@/components/livescan/ResultIllustration";
 import AIWaterReport from "@/components/livescan/AIWaterReport";
+import SensorErrorState from "@/components/livescan/SensorErrorState";
 
 function formatSensorValue(type, value) {
   if (type === "tds" || type === "turbidity") return Math.round(value);
@@ -50,6 +51,10 @@ export default function ScanResults({ result, familyMember, t, isSpeaking, onRep
 
   if (!result) return null;
 
+  if (result.sensorErrors) {
+    return <SensorErrorState errors={result.sensorErrors} onNewScan={onNewScan} />;
+  }
+
   const riskConfig = {
     safe: {
       gradient: "from-emerald-500 via-teal-500 to-cyan-500",
@@ -85,7 +90,7 @@ export default function ScanResults({ result, familyMember, t, isSpeaking, onRep
     return "All Parameters Normal";
   })();
 
-  const aiConfidence = Math.min(98, 82 + Math.round((100 - result.health_score) * 0.15));
+  const aiConfidence = result.ai_confidence != null ? result.ai_confidence : null;
   const primaryRec = result.recommendations?.waterTreatment?.[0] || result.recommendations?.immediatePrecautions?.[0] || "";
 
   const createRipple = (e) => {
@@ -163,7 +168,7 @@ export default function ScanResults({ result, familyMember, t, isSpeaking, onRep
                 <div className="flex items-center gap-1.5 px-3 py-1 rounded-full glass border border-border/40">
                   <Sparkles className="w-3 h-3 text-purple-400" />
                   <span className="text-xs text-muted-foreground">AI Confidence</span>
-                  <span className="text-xs font-bold text-foreground">{aiConfidence}%</span>
+                  <span className="text-xs font-bold text-foreground">{aiConfidence != null ? `${aiConfidence}%` : "Unavailable"}</span>
                 </div>
               </div>
 
@@ -241,7 +246,7 @@ export default function ScanResults({ result, familyMember, t, isSpeaking, onRep
         className="premium-card p-6"
       >
         <h2 className="font-heading font-semibold text-lg mb-4">{t("diseaseRisk")}</h2>
-        <ResultDiseaseCards diseaseRisks={result.disease_risks} waterData={result} t={t} />
+        <ResultDiseaseCards diseaseRisks={result.disease_risks} t={t} />
       </motion.div>
 
       {/* ===== Recommendations ===== */}

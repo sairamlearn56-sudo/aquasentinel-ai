@@ -4,7 +4,7 @@ import { base44 } from "@/api/base44Client";
 import { useLanguage } from "@/lib/LanguageContext";
 import { useVoice } from "@/lib/VoiceContext";
 import { useAqua } from "@/lib/AquaContext";
-import { analyzeWater } from "@/lib/waterAnalysis";
+import { analyzeWater, validateSensorData } from "@/lib/waterAnalysis";
 import { useWaterData } from "@/hooks/useWaterData";
 import ScanWelcome from "@/components/livescan/ScanWelcome";
 import LiveScanSequence from "@/components/LiveScanSequence";
@@ -131,25 +131,25 @@ export default function LiveMonitor() {
       turbidity: readings.reduce((s, r) => s + (r.turbidity || 0), 0) / readings.length,
     };
 
+    // Validate sensor data before analysis — reject invalid readings
+    const validation = validateSensorData(avg);
+    if (!validation.valid) {
+      setResult({ sensorErrors: validation.errors, ...avg });
+      return;
+    }
+
     const analysis = analyzeWater(avg, familyMember);
-    setResult(analysis); // Set immediately so it's ready when timeline finishes
+    setResult(analysis);
 
-    // Save to database in the background
-    const aiConfidence = Math.min(98, 82 + Math.round((100 - analysis.health_score) * 0.15));
-    const voiceSummary = `Water health score: ${analysis.health_score} out of 100. Risk level: ${analysis.risk_level}. ${analysis.ai_analysis.split("\n\n").pop()}`;
-
+    // Save to database — only real computed values, no fabricated confidence or location
     base44.entities.Scan.create({
       ...analysis,
       disease_risks: analysis.disease_risks,
       recommendations: analysis.recommendations,
       language: lang,
-      location_name: "Community Zone A",
-      latitude: 17.385 + (Math.random() - 0.5) * 0.05,
-      longitude: 78.4867 + (Math.random() - 0.5) * 0.05,
       sensor_status: "connected",
       sample_name: sampleName || `Scan ${new Date().toLocaleString()}`,
-      ai_confidence: aiConfidence,
-      aqua_voice_summary: voiceSummary,
+      aqua_voice_summary: analysis.ai_analysis,
     }).then((saved) => {
       setResult((prev) => (prev ? { ...prev, id: saved.id } : prev));
     }).catch(() => {});
