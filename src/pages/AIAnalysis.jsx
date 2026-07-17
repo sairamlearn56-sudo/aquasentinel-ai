@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, FileSearch, Radio, ArrowUpDown, FileText, ChevronDown, Sparkles, Activity, Download } from "lucide-react";
+import { Search, FileSearch, Radio, ArrowUpDown, FileText, ChevronDown, Sparkles, Activity, Download, MapPin, Calendar } from "lucide-react";
 import { jsPDF } from "jspdf";
 import { base44 } from "@/api/base44Client";
 import { useLanguage } from "@/lib/LanguageContext";
@@ -12,7 +12,8 @@ import WaterGradeBadge, { getWaterGrade } from "@/components/report/WaterGradeBa
 import RiskTimeline from "@/components/report/RiskTimeline";
 import ReportCompare from "@/components/report/ReportCompare";
 import StatCardGrid from "@/components/report/StatCardGrid";
-import AISummary from "@/components/report/AISummary";
+import HeroAISummary from "@/components/report/HeroAISummary";
+import ExplainableAI from "@/components/report/ExplainableAI";
 import { classifyParameter } from "@/lib/waterAnalysis";
 import moment from "moment";
 
@@ -21,6 +22,13 @@ const FILTERS = [
   { key: "safe", label: "Safe", color: "from-emerald-500 to-teal-500" },
   { key: "moderate", label: "Moderate", color: "from-amber-500 to-orange-500" },
   { key: "danger", label: "Unsafe", color: "from-rose-500 to-red-500" },
+];
+
+const DATE_RANGES = [
+  { key: "all", label: "All Time", days: 0 },
+  { key: "today", label: "Today", days: 1 },
+  { key: "7d", label: "7 Days", days: 7 },
+  { key: "30d", label: "30 Days", days: 30 },
 ];
 
 function formatSensorValue(type, value) {
@@ -111,6 +119,8 @@ export default function AIAnalysis() {
   const [sortBy, setSortBy] = useState("newest");
   const [expandedId, setExpandedId] = useState(null);
   const [timeRange, setTimeRange] = useState("30d");
+  const [locationFilter, setLocationFilter] = useState("all");
+  const [dateRange, setDateRange] = useState("all");
 
   useEffect(() => {
     async function loadData() {
@@ -137,6 +147,11 @@ export default function AIAnalysis() {
     }
   }, [scanId]);
 
+  const locations = useMemo(() => {
+    const locs = [...new Set(scans.map((s) => s.location_name).filter(Boolean))];
+    return locs;
+  }, [scans]);
+
   const filteredScans = useMemo(() => {
     let result = scans;
     if (searchQuery.trim()) {
@@ -150,11 +165,21 @@ export default function AIAnalysis() {
     if (filter !== "all") {
       result = result.filter((s) => s.risk_level === filter);
     }
+    if (locationFilter !== "all") {
+      result = result.filter((s) => s.location_name === locationFilter);
+    }
+    if (dateRange !== "all") {
+      const dr = DATE_RANGES.find((d) => d.key === dateRange);
+      if (dr && dr.days > 0) {
+        const cutoff = Date.now() - dr.days * 24 * 60 * 60 * 1000;
+        result = result.filter((s) => new Date(s.created_date).getTime() >= cutoff);
+      }
+    }
     if (sortBy === "oldest") {
       result = [...result].reverse();
     }
     return result;
-  }, [scans, searchQuery, filter, sortBy]);
+  }, [scans, searchQuery, filter, locationFilter, dateRange, sortBy]);
 
   // ===== Loading state =====
   if (loading) {
@@ -233,14 +258,17 @@ export default function AIAnalysis() {
         </div>
       </motion.div>
 
-      {/* Summary Cards */}
+      {/* Hero AI Summary */}
+      <HeroAISummary scans={scans} t={t} />
+
+      {/* KPI Cards */}
       <StatCardGrid scans={scans} timeRange={timeRange} />
 
       {/* AI Risk Trend Chart */}
       <RiskTimeline scans={scans} timeRange={timeRange} onTimeRangeChange={setTimeRange} />
 
-      {/* AI Summary */}
-      <AISummary scans={scans} timeRange={timeRange} />
+      {/* AI Insights Panel */}
+      <ExplainableAI scan={scans[0]} />
 
       {/* Search + Sort */}
       <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }} className="flex items-center gap-3">
@@ -263,8 +291,8 @@ export default function AIAnalysis() {
         </button>
       </motion.div>
 
-      {/* Filter tabs */}
-      <div className="flex gap-2 flex-wrap">
+      {/* Filters: Risk Level + Location + Date Range */}
+      <div className="flex items-center gap-2 flex-wrap">
         {FILTERS.map((f) => (
           <button
             key={f.key}
@@ -276,13 +304,40 @@ export default function AIAnalysis() {
             {f.label}
           </button>
         ))}
+        {locations.length > 0 && (
+          <div className="relative inline-flex items-center">
+            <MapPin className="absolute left-2.5 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+            <select
+              value={locationFilter}
+              onChange={(e) => setLocationFilter(e.target.value)}
+              className="pl-8 pr-8 py-2 rounded-xl glass border border-border text-sm font-medium appearance-none cursor-pointer focus:outline-none focus:border-primary/40"
+            >
+              <option value="all">All Locations</option>
+              {locations.map((loc) => (
+                <option key={loc} value={loc}>{loc}</option>
+              ))}
+            </select>
+          </div>
+        )}
+        <div className="relative inline-flex items-center">
+          <Calendar className="absolute left-2.5 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+          <select
+            value={dateRange}
+            onChange={(e) => setDateRange(e.target.value)}
+            className="pl-8 pr-8 py-2 rounded-xl glass border border-border text-sm font-medium appearance-none cursor-pointer focus:outline-none focus:border-primary/40"
+          >
+            {DATE_RANGES.map((dr) => (
+              <option key={dr.key} value={dr.key}>{dr.label}</option>
+            ))}
+          </select>
+        </div>
       </div>
 
       {/* Report list */}
       {filteredScans.length === 0 ? (
         <div className="glass rounded-3xl p-12 text-center">
           <FileText className="w-12 h-12 text-muted-foreground mx-auto mb-3" />
-          <p className="text-muted-foreground">No reports found matching your search.</p>
+          <p className="text-muted-foreground">No reports found matching your filters.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-4">
@@ -322,7 +377,6 @@ export default function AIAnalysis() {
                     </div>
                   </div>
 
-                  {/* Key sensor values */}
                   <div className="flex items-center gap-4 text-xs flex-wrap mb-2">
                     <span className="text-muted-foreground">Score: <span className="font-bold text-foreground">{scan.health_score}/100</span></span>
                     <span className="text-muted-foreground">Grade: <span className={`font-bold ${grade.color}`}>{grade.letter}</span></span>
@@ -331,7 +385,6 @@ export default function AIAnalysis() {
                     {scan.water_source_name && <span className="text-muted-foreground truncate">{scan.water_source_name}</span>}
                   </div>
 
-                  {/* Top predicted diseases */}
                   {topDiseases.length > 0 && (
                     <div className="flex items-center gap-2 flex-wrap">
                       {topDiseases.map(([disease, risk]) => {
@@ -347,7 +400,6 @@ export default function AIAnalysis() {
                   )}
                 </div>
 
-                {/* Expandable details */}
                 <AnimatePresence>
                   {isExpanded && (
                     <motion.div
@@ -358,7 +410,6 @@ export default function AIAnalysis() {
                       className="overflow-hidden"
                     >
                       <div className="px-5 pb-5 pt-1 border-t border-border/50">
-                        {/* Sensor grid */}
                         <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-4">
                           {[
                             { key: "ph", label: "pH", unit: "" },
@@ -378,14 +429,12 @@ export default function AIAnalysis() {
                           })}
                         </div>
 
-                        {/* AI analysis excerpt */}
                         {scan.ai_analysis && (
                           <p className="text-sm text-muted-foreground leading-relaxed mt-3 line-clamp-3">
                             {scan.ai_analysis.split("\n\n")[0]}
                           </p>
                         )}
 
-                        {/* Action buttons */}
                         <div className="flex items-center gap-3 mt-4">
                           <button
                             onClick={() => navigate(`/analysis/${scan.id}`)}
