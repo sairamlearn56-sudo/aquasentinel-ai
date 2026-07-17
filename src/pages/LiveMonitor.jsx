@@ -178,13 +178,11 @@ export default function LiveMonitor() {
   if (phase === "welcome") {
     return (
       <>
-        {status === "disconnected" && (
-          <div className="max-w-3xl mx-auto pt-4 px-4">
-            <ConnectionStatusBanner />
-          </div>
-        )}
+        <div className="max-w-3xl mx-auto pt-4 px-4">
+          <ConnectionStatusBanner />
+        </div>
         <ScanWelcome
-          isConnected={isConnected}
+          status={status}
           onStart={handleStartMonitoring}
           sampleName={sampleName}
           onSampleNameChange={setSampleName}
