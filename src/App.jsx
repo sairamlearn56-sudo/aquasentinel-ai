@@ -14,18 +14,12 @@ import History from '@/pages/History';
 import CommunityMap from '@/pages/CommunityMap';
 import Settings from '@/pages/Settings';
 import Profile from '@/pages/Profile';
-import PersonalInfo from '@/pages/settings/PersonalInfo';
-import AccountPrivacy from '@/pages/settings/AccountPrivacy';
-import LanguageRegion from '@/pages/settings/LanguageRegion';
-import NotificationsSettings from '@/pages/settings/NotificationsSettings';
-import AppSettingsPage from '@/pages/settings/AppSettingsPage';
 import WaterTracker from '@/pages/WaterTracker';
 import WaterSourceDetail from '@/pages/WaterSourceDetail';
 import { LanguageProvider } from '@/lib/LanguageContext';
 import { VoiceProvider } from '@/lib/VoiceContext';
 import VoiceIndicator from '@/components/VoiceIndicator';
 import { AquaProvider } from '@/lib/AquaContext';
-import { HardwareStatusProvider } from '@/lib/HardwareStatusContext';
 import { ThemeProvider } from '@/lib/ThemeContext';
 import AquaContainer from '@/components/aqua/AquaContainer';
 import PageLoader from '@/components/PageLoader';
@@ -65,11 +59,6 @@ const AuthenticatedApp = () => {
         <Route path="/history" element={<History />} />
         <Route path="/map" element={<CommunityMap />} />
         <Route path="/settings" element={<Settings />} />
-        <Route path="/settings/personal" element={<PersonalInfo />} />
-        <Route path="/settings/account" element={<AccountPrivacy />} />
-        <Route path="/settings/language" element={<LanguageRegion />} />
-        <Route path="/settings/notifications" element={<NotificationsSettings />} />
-        <Route path="/settings/app" element={<AppSettingsPage />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/tracker" element={<WaterTracker />} />
         <Route path="/tracker/:id" element={<WaterSourceDetail />} />
@@ -93,10 +82,8 @@ function App() {
             <LanguageProvider>
               <VoiceProvider>
                 <AquaProvider>
-                  <HardwareStatusProvider>
-                    <AuthenticatedApp />
-                    <VoiceIndicator />
-                  </HardwareStatusProvider>
+                  <AuthenticatedApp />
+                  <VoiceIndicator />
                 </AquaProvider>
               </VoiceProvider>
             </LanguageProvider>

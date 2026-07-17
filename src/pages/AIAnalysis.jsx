@@ -8,8 +8,7 @@ import EmptyState from "@/components/EmptyState";
 import ReportView from "@/components/report/ReportView";
 import RiskBadge from "@/components/RiskBadge";
 import WaterGradeBadge, { getWaterGrade } from "@/components/report/WaterGradeBadge";
-import ReportSummaryCards from "@/components/report/ReportSummaryCards";
-import ConnectionStatusBadge from "@/components/ConnectionStatusBadge";
+import SummaryStats from "@/components/report/SummaryStats";
 import RiskTimeline from "@/components/report/RiskTimeline";
 import AISummary from "@/components/report/AISummary";
 import ReportCompare from "@/components/report/ReportCompare";
@@ -262,7 +261,6 @@ export default function AIAnalysis() {
             <div>
               <h1 className="text-[38px] font-bold leading-tight tracking-tight">AI Diagnostic Center</h1>
               <p className="text-[14px] text-muted-foreground mt-0.5">{scans.length} report{scans.length !== 1 ? "s" : ""} on record · Real-time water quality intelligence</p>
-              <div className="mt-2"><ConnectionStatusBadge /></div>
             </div>
           </div>
           <ReportCompare scans={scans} onNavigate={(id) => navigate(`/analysis/${id}`)} t={t} />
@@ -270,7 +268,7 @@ export default function AIAnalysis() {
       </motion.div>
 
       {/* Summary Stats */}
-      <ReportSummaryCards scans={scans} />
+      <SummaryStats scans={scans} timeFilter={timeFilter} />
 
       {/* AI Risk Trend Chart */}
       <RiskTimeline scans={scans} timeFilter={timeFilter} onTimeFilterChange={setTimeFilter} />

@@ -1,47 +1,17 @@
 {
-  "name": "User",
-  "type": "object",
   "properties": {
-    "username": {
+    "role": {
       "type": "string",
-      "description": "Unique username"
-    },
-    "phone": {
-      "type": "string",
-      "description": "Phone number"
-    },
-    "organization": {
-      "type": "string",
-      "description": "Organization name"
-    },
-    "department": {
-      "type": "string",
-      "description": "Department"
-    },
-    "designation": {
-      "type": "string",
-      "description": "Job designation"
-    },
-    "country": {
-      "type": "string",
-      "description": "Country"
-    },
-    "state": {
-      "type": "string",
-      "description": "State"
-    },
-    "city": {
-      "type": "string",
-      "description": "City"
-    },
-    "bio": {
-      "type": "string",
-      "description": "About me"
-    },
-    "profile_photo_url": {
-      "type": "string",
-      "description": "Profile photo URL"
+      "description": "The role of the user in the app",
+      "enum": [
+        "admin",
+        "user"
+      ]
     }
   },
-  "required": []
+  "required": [
+    "role"
+  ],
+  "name": "User",
+  "type": "object"
 }
