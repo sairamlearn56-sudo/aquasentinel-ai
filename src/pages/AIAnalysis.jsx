@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { Search, FileSearch, Radio, ArrowUpDown, FileText, ChevronDown, Sparkles, Activity, Download } from "lucide-react";
+import { Search, FileSearch, Radio, ArrowUpDown, FileText, ChevronDown, Sparkles, Download, Wifi } from "lucide-react";
 import { jsPDF } from "jspdf";
 import { base44 } from "@/api/base44Client";
 import { useLanguage } from "@/lib/LanguageContext";
@@ -13,6 +13,15 @@ import RiskTimeline from "@/components/report/RiskTimeline";
 import ReportCompare from "@/components/report/ReportCompare";
 import StatCardGrid from "@/components/report/StatCardGrid";
 import AISummary from "@/components/report/AISummary";
+import RealTimeStatus from "@/components/report/RealTimeStatus";
+import StatusOverview from "@/components/report/StatusOverview";
+import AIInsightsPanel from "@/components/report/AIInsightsPanel";
+import DiseasePredictionPanel from "@/components/report/DiseasePredictionPanel";
+import ExplainableAISection from "@/components/report/ExplainableAISection";
+import AIForecast from "@/components/report/AIForecast";
+import AnomalyDetection from "@/components/report/AnomalyDetection";
+import SmartRecommendations from "@/components/report/SmartRecommendations";
+import AIChatSummary from "@/components/report/AIChatSummary";
 import { classifyParameter } from "@/lib/waterAnalysis";
 import moment from "moment";
 
@@ -21,6 +30,13 @@ const FILTERS = [
   { key: "safe", label: "Safe", color: "from-emerald-500 to-teal-500" },
   { key: "moderate", label: "Moderate", color: "from-amber-500 to-orange-500" },
   { key: "danger", label: "Unsafe", color: "from-rose-500 to-red-500" },
+];
+
+const SMART_SUGGESTIONS = [
+  { label: "Unsafe reports", query: "unsafe" },
+  { label: "High turbidity", query: "high turbidity" },
+  { label: "Cholera predictions", query: "cholera" },
+  { label: "This week", query: "this week" },
 ];
 
 function formatSensorValue(type, value) {
@@ -36,6 +52,87 @@ function getTopDiseases(diseaseRisks, limit = 2) {
   return Object.entries(risks || {})
     .sort(([, a], [, b]) => b - a)
     .slice(0, limit);
+}
+
+function getSensorStatus(scan) {
+  const sensors = ["ph", "tds", "temperature", "turbidity"];
+  let online = 0;
+  let abnormal = 0;
+  sensors.forEach((s) => {
+    if (scan[s] !== null && scan[s] !== undefined && scan[s] >= 0) {
+      online++;
+      if (classifyParameter(s, scan[s]) !== "safe") abnormal++;
+    }
+  });
+  return { online, abnormal, total: sensors.length };
+}
+
+function smartFilter(scans, query) {
+  if (!query.trim()) return scans;
+  const q = query.toLowerCase();
+  let result = [...scans];
+  let appliedFilter = false;
+
+  // Risk level filters
+  if (q.includes("unsafe") || q.includes("danger")) {
+    result = result.filter((s) => s.risk_level === "danger");
+    appliedFilter = true;
+  } else if (q.includes("safe")) {
+    result = result.filter((s) => s.risk_level === "safe");
+    appliedFilter = true;
+  } else if (q.includes("moderate") || q.includes("caution")) {
+    result = result.filter((s) => s.risk_level === "moderate");
+    appliedFilter = true;
+  }
+
+  // Parameter filters
+  if (q.includes("turbid")) {
+    result = result.filter((s) => s.turbidity > 5);
+    appliedFilter = true;
+  }
+  if (q.includes("tds")) {
+    result = result.filter((s) => s.tds > 500);
+    appliedFilter = true;
+  }
+  if (q.includes("ph")) {
+    result = result.filter((s) => s.ph < 6.5 || s.ph > 8.5);
+    appliedFilter = true;
+  }
+
+  // Disease filters
+  const diseaseNames = ["cholera", "typhoid", "diarrhea", "dysentery", "hepatitis"];
+  diseaseNames.forEach((disease) => {
+    if (q.includes(disease)) {
+      result = result.filter((s) => {
+        const risks = typeof s.disease_risks === "string" ? JSON.parse(s.disease_risks) : s.disease_risks;
+        const key = disease === "hepatitis" ? "hepatitisA" : disease;
+        return risks?.[key] > 15;
+      });
+      appliedFilter = true;
+    }
+  });
+
+  // Time filters
+  if (q.includes("today")) {
+    const todayStart = new Date().setHours(0, 0, 0, 0);
+    result = result.filter((s) => new Date(s.created_date).getTime() >= todayStart);
+    appliedFilter = true;
+  }
+  if (q.includes("week")) {
+    const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    result = result.filter((s) => new Date(s.created_date).getTime() >= weekAgo);
+    appliedFilter = true;
+  }
+
+  // Text search on remaining results
+  const textMatch = result.filter((s) =>
+    (s.sample_name || "").toLowerCase().includes(q) ||
+    (s.water_source_name || "").toLowerCase().includes(q) ||
+    (s.location_name || "").toLowerCase().includes(q)
+  );
+
+  if (textMatch.length > 0 && !appliedFilter) return textMatch;
+  return result;
 }
 
 function downloadScanPDF(scan) {
@@ -138,15 +235,7 @@ export default function AIAnalysis() {
   }, [scanId]);
 
   const filteredScans = useMemo(() => {
-    let result = scans;
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      result = result.filter((s) =>
-        (s.sample_name || "").toLowerCase().includes(q) ||
-        (s.water_source_name || "").toLowerCase().includes(q) ||
-        (s.location_name || "").toLowerCase().includes(q)
-      );
-    }
+    let result = smartFilter(scans, searchQuery);
     if (filter !== "all") {
       result = result.filter((s) => s.risk_level === filter);
     }
@@ -225,42 +314,92 @@ export default function AIAnalysis() {
               <FileSearch className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-4xl font-extrabold leading-tight">AI Diagnostic Center</h1>
-              <p className="text-sm text-muted-foreground mt-1">{scans.length} report{scans.length !== 1 ? "s" : ""} on record</p>
+              <h1 className="text-4xl font-extrabold leading-tight">AI Intelligence Center</h1>
+              <p className="text-sm text-muted-foreground mt-1">Enterprise water quality decision-support system</p>
             </div>
           </div>
           <ReportCompare scans={scans} onNavigate={(id) => navigate(`/analysis/${id}`)} t={t} />
         </div>
       </motion.div>
 
+      {/* Real-time Status */}
+      <RealTimeStatus scans={scans} />
+
+      {/* AI Executive Summary */}
+      <AISummary scans={scans} timeRange={timeRange} />
+
+      {/* Status Overview: Heat Index + Confidence + Grade */}
+      <StatusOverview scans={scans} />
+
+      {/* AI Insights Panel */}
+      <AIInsightsPanel scans={scans} />
+
       {/* Summary Cards */}
       <StatCardGrid scans={scans} timeRange={timeRange} />
 
-      {/* AI Risk Trend Chart */}
+      {/* Risk Timeline */}
       <RiskTimeline scans={scans} timeRange={timeRange} onTimeRangeChange={setTimeRange} />
 
-      {/* AI Summary */}
-      <AISummary scans={scans} timeRange={timeRange} />
+      {/* Disease Prediction Panel */}
+      <DiseasePredictionPanel scans={scans} />
 
-      {/* Search + Sort */}
-      <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }} className="flex items-center gap-3">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <input
-            type="text"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search by sample name, source, or location..."
-            className="w-full pl-10 pr-4 py-2.5 rounded-2xl glass border border-border text-sm focus:outline-none focus:border-purple-500/40"
-          />
+      {/* AI Forecast */}
+      <AIForecast scans={scans} />
+
+      {/* Explainable AI */}
+      <ExplainableAISection scans={scans} />
+
+      {/* Anomaly Detection */}
+      <AnomalyDetection scans={scans} />
+
+      {/* Smart Recommendations */}
+      <SmartRecommendations scans={scans} />
+
+      {/* AI Chat Summary */}
+      <AIChatSummary scans={scans} />
+
+      {/* Smart Search + Sort */}
+      <motion.div initial={{ opacity: 0, y: 5 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }} className="space-y-3">
+        <div className="flex items-center gap-3">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search reports, or try: 'unsafe', 'high turbidity', 'cholera'..."
+              className="w-full pl-10 pr-4 py-2.5 rounded-2xl glass border border-border text-sm focus:outline-none focus:border-purple-500/40"
+            />
+          </div>
+          <button
+            onClick={() => setSortBy(sortBy === "newest" ? "oldest" : "newest")}
+            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-2xl glass border border-border text-sm font-medium hover:bg-muted/50 transition-colors whitespace-nowrap"
+          >
+            <ArrowUpDown className="w-4 h-4" />
+            {sortBy === "newest" ? "Newest" : "Oldest"}
+          </button>
         </div>
-        <button
-          onClick={() => setSortBy(sortBy === "newest" ? "oldest" : "newest")}
-          className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-2xl glass border border-border text-sm font-medium hover:bg-muted/50 transition-colors whitespace-nowrap"
-        >
-          <ArrowUpDown className="w-4 h-4" />
-          {sortBy === "newest" ? "Newest" : "Oldest"}
-        </button>
+        {/* Smart search suggestions */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-xs text-muted-foreground">Quick filters:</span>
+          {SMART_SUGGESTIONS.map((s) => (
+            <button
+              key={s.query}
+              onClick={() => setSearchQuery(s.query)}
+              className="px-2.5 py-1 rounded-lg glass border border-border text-xs font-medium text-muted-foreground hover:text-foreground hover:border-primary/30 transition-all"
+            >
+              {s.label}
+            </button>
+          ))}
+          {searchQuery && (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="px-2.5 py-1 rounded-lg bg-muted/50 text-xs font-medium hover:bg-muted transition-colors"
+            >
+              Clear
+            </button>
+          )}
+        </div>
       </motion.div>
 
       {/* Filter tabs */}
@@ -291,6 +430,7 @@ export default function AIAnalysis() {
             const aiConfidence = scan.ai_confidence || Math.min(98, 82 + Math.round((100 - scan.health_score) * 0.15));
             const topDiseases = getTopDiseases(scan.disease_risks, 2);
             const grade = getWaterGrade(scan.health_score);
+            const sensorStatus = getSensorStatus(scan);
 
             return (
               <motion.div
@@ -322,12 +462,16 @@ export default function AIAnalysis() {
                     </div>
                   </div>
 
-                  {/* Key sensor values */}
+                  {/* Key metrics + sensor status */}
                   <div className="flex items-center gap-4 text-xs flex-wrap mb-2">
                     <span className="text-muted-foreground">Score: <span className="font-bold text-foreground">{scan.health_score}/100</span></span>
                     <span className="text-muted-foreground">Grade: <span className={`font-bold ${grade.color}`}>{grade.letter}</span></span>
                     <span className="text-muted-foreground">pH: <span className="font-semibold text-foreground">{formatSensorValue("ph", scan.ph)}</span></span>
                     <span className="text-muted-foreground">TDS: <span className="font-semibold text-foreground">{formatSensorValue("tds", scan.tds)} ppm</span></span>
+                    <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md text-[10px] font-medium ${sensorStatus.abnormal > 0 ? "bg-warning/10 text-warning" : "bg-safe/10 text-safe"}`}>
+                      <Wifi className="w-2.5 h-2.5" />
+                      {sensorStatus.online}/{sensorStatus.total} sensors{sensorStatus.abnormal > 0 ? ` · ${sensorStatus.abnormal} abnormal` : ""}
+                    </span>
                     {scan.water_source_name && <span className="text-muted-foreground truncate">{scan.water_source_name}</span>}
                   </div>
 
@@ -335,7 +479,7 @@ export default function AIAnalysis() {
                   {topDiseases.length > 0 && (
                     <div className="flex items-center gap-2 flex-wrap">
                       {topDiseases.map(([disease, risk]) => {
-                        const name = disease === "hepatitisA" ? "Hepatitis A" : disease.charAt(0).toUpperCase() + disease.slice(1);
+                        const name = disease === "hepatitisA" ? "Hepatitis A" : disease === "hepatitisE" ? "Hepatitis E" : disease.charAt(0).toUpperCase() + disease.slice(1);
                         return (
                           <span key={disease} className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md glass border border-border text-[10px]">
                             <span className="text-muted-foreground">{name}</span>
