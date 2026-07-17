@@ -6,9 +6,9 @@ import { getDatabase, ref, onValue } from "firebase/database";
 const HardwareStatusContext = createContext(null);
 
 const STALE_TIMEOUT = 10000; // 10s without data → disconnected
-const CHECK_INTERVAL = 3000; // Check every 3s
-const RECONNECT_DELAY = 10000; // Auto-retry after 10s
-const TIMESTAMP_MAX_AGE = 60000; // 60s — sensor timestamp must be recent
+const CHECK_INTERVAL = 3000;
+const RECONNECT_DELAY = 10000;
+const TIMESTAMP_MAX_AGE = 120000; // 2 min — generous to handle clock drift
 
 function validateSensorData(raw) {
   if (!raw) return { valid: false, reason: "No data received" };
@@ -18,43 +18,61 @@ function validateSensorData(raw) {
   const temp = Number(raw.temperature ?? raw.temp ?? raw.Temperature);
   const turb = Number(raw.turbidity ?? raw.Turbidity ?? raw.ntu ?? raw.NTU);
 
-  const checks = [
-    { field: "pH", value: ph, min: 0, max: 14 },
-    { field: "Temperature", value: temp, min: -10, max: 100 },
-    { field: "TDS", value: tds, min: 0, max: 5000 },
-    { field: "Turbidity", value: turb, min: 0, max: 1000 },
+  const sensors = [
+    { field: "pH", value: ph, min: -2, max: 16 },
+    { field: "Temperature", value: temp, min: -50, max: 200 },
+    { field: "TDS", value: tds, min: -100, max: 10000 },
+    { field: "Turbidity", value: turb, min: -100, max: 5000 },
   ];
 
-  for (const c of checks) {
-    if (isNaN(c.value)) return { valid: false, reason: `${c.field} is missing or invalid` };
-    if (c.value < c.min || c.value > c.max) return { valid: false, reason: `${c.field} (${c.value}) out of valid range` };
+  // At least 1 of the 4 core sensors must have a valid numeric value
+  const validSensors = sensors.filter((s) => !isNaN(s.value));
+  if (validSensors.length === 0) {
+    return { valid: false, reason: "No valid sensor values in packet" };
   }
 
-  // Water level — optional but validate if present
+  // Only reject truly impossible values
+  for (const s of sensors) {
+    if (isNaN(s.value)) continue;
+    if (s.value < s.min || s.value > s.max) {
+      return { valid: false, reason: `${s.field} (${s.value}) out of physical range` };
+    }
+  }
+
+  // Water level — optional
   const waterLevel = raw.water_level ?? raw.waterLevel ?? raw.wlevel;
   if (waterLevel !== undefined && waterLevel !== null && waterLevel !== "") {
     const wl = Number(waterLevel);
-    if (isNaN(wl) || wl < 0 || wl > 100) return { valid: false, reason: "Water Level is invalid" };
+    if (!isNaN(wl) && (wl < -100 || wl > 1000)) {
+      return { valid: false, reason: "Water Level out of physical range" };
+    }
   }
 
   return {
     valid: true,
     data: {
-      ph, tds, temperature: temp, turbidity: turb,
-      ...(waterLevel !== undefined && waterLevel !== null && waterLevel !== "" ? { water_level: Number(waterLevel) } : {}),
+      ph: isNaN(ph) ? null : ph,
+      tds: isNaN(tds) ? null : tds,
+      temperature: isNaN(temp) ? null : temp,
+      turbidity: isNaN(turb) ? null : turb,
+      ...(waterLevel !== undefined && waterLevel !== null && waterLevel !== "" && !isNaN(Number(waterLevel))
+        ? { water_level: Number(waterLevel) }
+        : {}),
     },
   };
 }
 
 function isTimestampRecent(timestamp) {
-  if (!timestamp) return true; // No timestamp → assume fresh (just received via onValue)
-  const ts = typeof timestamp === "number" ? timestamp : Date.parse(timestamp);
+  if (!timestamp) return true; // No timestamp → assume fresh
+  let ts = typeof timestamp === "number" ? timestamp : Date.parse(timestamp);
   if (isNaN(ts)) return true;
+  // Handle epoch seconds (10 digits) vs milliseconds (13 digits)
+  if (ts < 1e12) ts = ts * 1000;
   return Date.now() - ts < TIMESTAMP_MAX_AGE;
 }
 
 export function HardwareStatusProvider({ children }) {
-  const [status, setStatus] = useState("connecting"); // connecting | connected | disconnected
+  const [status, setStatus] = useState("connecting");
   const [waterData, setWaterData] = useState(null);
   const [lastUpdate, setLastUpdate] = useState(null);
   const [deviceId, setDeviceId] = useState(null);
@@ -66,7 +84,6 @@ export function HardwareStatusProvider({ children }) {
   const lastDataTimeRef = useRef(null);
   const connectingStartRef = useRef(Date.now());
 
-  // Set up / re-setup Firebase listener
   useEffect(() => {
     let cancelled = false;
     connectingStartRef.current = Date.now();
@@ -77,6 +94,7 @@ export function HardwareStatusProvider({ children }) {
         if (cancelled) return;
         const { databaseURL } = response.data;
         if (!databaseURL) {
+          console.error("[HardwareStatus] No databaseURL in response");
           setStatus("disconnected");
           setFirebaseStatus("error");
           return;
@@ -97,27 +115,27 @@ export function HardwareStatusProvider({ children }) {
           (snapshot) => {
             if (cancelled) return;
             const raw = snapshot.val();
-            lastDataTimeRef.current = Date.now(); // Any Firebase event = data activity
+            lastDataTimeRef.current = Date.now();
 
             if (!raw) return; // Path exists but no data yet
 
-            // Validate sensor data
             const validation = validateSensorData(raw);
             if (!validation.valid) {
+              console.warn("[HardwareStatus] Validation failed:", validation.reason, raw);
               setValidationError(validation.reason);
               setStatus((prev) => (prev === "connected" ? "connecting" : prev));
               return;
             }
 
-            // Check timestamp freshness
             const timestamp = raw.timestamp ?? raw.time ?? raw.Timestamp;
             if (!isTimestampRecent(timestamp)) {
+              console.warn("[HardwareStatus] Timestamp stale:", timestamp);
               setValidationError("Sensor timestamp is stale");
               setStatus((prev) => (prev === "connected" ? "connecting" : prev));
               return;
             }
 
-            // ALL checks passed — mark connected
+            // All checks passed
             setWaterData({ ...validation.data, timestamp: timestamp || Date.now() });
             setStatus("connected");
             setLastUpdate(new Date());
@@ -125,13 +143,13 @@ export function HardwareStatusProvider({ children }) {
             setDeviceId(raw.device_id ?? raw.deviceId ?? raw.chip_id ?? "ESP32");
           },
           (err) => {
-            console.error("Firebase listener error:", err);
+            console.error("[HardwareStatus] Firebase listener error:", err);
             setFirebaseStatus("error");
             setStatus("disconnected");
           }
         );
       } catch (e) {
-        console.error("Firebase init error:", e);
+        console.error("[HardwareStatus] Setup error:", e);
         if (!cancelled) {
           setStatus("disconnected");
           setFirebaseStatus("error");
@@ -150,7 +168,7 @@ export function HardwareStatusProvider({ children }) {
     };
   }, [retryTrigger]);
 
-  // Stale check — mark disconnected if no data for STALE_TIMEOUT
+  // Stale check
   useEffect(() => {
     const interval = setInterval(() => {
       const now = Date.now();
