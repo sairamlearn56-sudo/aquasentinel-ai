@@ -5,10 +5,10 @@ import { getDatabase, ref, onValue } from "firebase/database";
 
 const HardwareStatusContext = createContext(null);
 
-const STALE_TIMEOUT = 10000; // 10s without data → disconnected
-const CHECK_INTERVAL = 3000;
+const STALE_TIMEOUT = 30000; // 30s without data → disconnected
+const CHECK_INTERVAL = 5000;
 const RECONNECT_DELAY = 10000;
-const TIMESTAMP_MAX_AGE = 120000; // 2 min — generous to handle clock drift
+const TIMESTAMP_MAX_AGE = 300000; // 5 min — generous to handle clock drift
 
 function validateSensorData(raw) {
   if (!raw) return { valid: false, reason: "No data received" };
