@@ -1,15 +1,18 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowLeft, Download, Share2, Trash2, Pencil, Check, X, Activity, Sparkles, CheckCircle2, Volume2, FileText, MapPin } from "lucide-react";
+import { ArrowLeft, Download, Share2, Trash2, Pencil, Check, X, Activity, Sparkles, CheckCircle2, Volume2, FileText, MapPin, Printer, GitCompare } from "lucide-react";
 import { base44 } from "@/api/base44Client";
 import { useLanguage } from "@/lib/LanguageContext";
 import { classifyParameter } from "@/lib/waterAnalysis";
 import HealthScoreRing from "@/components/HealthScoreRing";
 import RiskBadge from "@/components/RiskBadge";
-import SensorCard from "@/components/SensorCard";
 import ResultIllustration from "@/components/livescan/ResultIllustration";
 import ResultDiseaseCards from "@/components/livescan/ResultDiseaseCards";
 import ResultChecklist from "@/components/livescan/ResultChecklist";
+import ExecutiveSummary from "@/components/report/ExecutiveSummary";
+import ExplainableAI from "@/components/report/ExplainableAI";
+import SensorStatusGrid from "@/components/report/SensorStatusGrid";
+import ReportCompare from "@/components/report/ReportCompare";
 import moment from "moment";
 
 function normalizeRecommendations(recs) {
@@ -36,20 +39,13 @@ function getMainReason(scan) {
   return "All Parameters Normal";
 }
 
-function getSensorExplanation(type, value) {
-  const status = classifyParameter(type, value);
-  if (status === "safe") return "Within WHO safe limits";
-  if (status === "moderate") return "Slightly outside safe range";
-  return "Dangerously outside safe range";
-}
-
 const riskConfig = {
   safe: { gradient: "from-emerald-500 via-teal-500 to-cyan-500", border: "border-emerald-500/20", bg: "bg-emerald-500/5" },
   moderate: { gradient: "from-amber-400 via-orange-500 to-yellow-500", border: "border-amber-500/20", bg: "bg-amber-500/5" },
-  danger: { gradient: "from-rose-500 via-red-500 to-coral-600", border: "border-rose-500/20", bg: "bg-rose-500/5" },
+  danger: { gradient: "from-rose-500 via-red-500 to-rose-600", border: "border-rose-500/20", bg: "bg-rose-500/5" },
 };
 
-export default function ReportView({ scan, onBack, onDeleted }) {
+export default function ReportView({ scan, allScans = [], onBack, onDeleted, onNavigate }) {
   const { t } = useLanguage();
   const [isEditingName, setIsEditingName] = useState(false);
   const [editedName, setEditedName] = useState(scan.sample_name || "");
@@ -58,7 +54,6 @@ export default function ReportView({ scan, onBack, onDeleted }) {
   const [savingName, setSavingName] = useState(false);
 
   const recommendations = normalizeRecommendations(scan.recommendations);
-  const mainReason = getMainReason(scan);
   const aiConfidence = scan.ai_confidence || Math.min(98, 82 + Math.round((100 - scan.health_score) * 0.15));
   const primaryRec = recommendations.waterTreatment?.[0] || recommendations.immediatePrecautions?.[0] || "";
   const rc = riskConfig[scan.risk_level] || riskConfig.safe;
@@ -94,6 +89,7 @@ export default function ReportView({ scan, onBack, onDeleted }) {
   };
 
   const handleExportPDF = () => { window.print(); };
+  const handlePrint = () => { window.print(); };
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
@@ -140,14 +136,20 @@ export default function ReportView({ scan, onBack, onDeleted }) {
             </div>
           </div>
 
-          {/* Action buttons */}
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <button onClick={handleExportPDF} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl glass border border-border text-xs font-medium hover:bg-muted/50 transition-colors" title="Export as PDF">
+          {/* Quick action buttons */}
+          <div className="flex items-center gap-2 flex-shrink-0 flex-wrap">
+            <button onClick={handleExportPDF} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl glass border border-border text-xs font-medium hover:bg-muted/50 transition-colors" title="Download PDF">
               <Download className="w-3.5 h-3.5" /> PDF
+            </button>
+            <button onClick={handlePrint} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl glass border border-border text-xs font-medium hover:bg-muted/50 transition-colors" title="Print Report">
+              <Printer className="w-3.5 h-3.5" /> Print
             </button>
             <button onClick={handleShare} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl glass border border-border text-xs font-medium hover:bg-muted/50 transition-colors" title="Share Report">
               <Share2 className="w-3.5 h-3.5" /> {shared ? "Copied!" : "Share"}
             </button>
+            {allScans.length > 1 && onNavigate && (
+              <ReportCompare scans={allScans} onNavigate={onNavigate} t={t} />
+            )}
             {confirmDelete ? (
               <>
                 <button onClick={handleDelete} className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-500/15 text-rose-400 border border-rose-500/20 text-xs font-medium hover:bg-rose-500/25 transition-colors">
@@ -165,6 +167,9 @@ export default function ReportView({ scan, onBack, onDeleted }) {
           </div>
         </div>
       </motion.div>
+
+      {/* ===== AI Executive Summary ===== */}
+      <ExecutiveSummary scan={scan} t={t} />
 
       {/* ===== Hero Section ===== */}
       <motion.div initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5, delay: 0.05 }} className={`relative overflow-hidden rounded-[2rem] border ${rc.border}`}>
@@ -203,16 +208,6 @@ export default function ReportView({ scan, onBack, onDeleted }) {
                   </p>
                 </div>
               </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl glass border border-border/40">
-                  <Activity className="w-3 h-3 text-primary" />
-                  <span className="text-xs text-muted-foreground">Main Reason:</span>
-                  <span className="text-xs font-semibold text-foreground">{mainReason}</span>
-                </div>
-                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl glass border border-border/40">
-                  <span className="text-xs text-muted-foreground">{moment(scan.created_date).format("lll")}</span>
-                </div>
-              </div>
               {primaryRec && (
                 <div className="flex items-start gap-2 p-3 rounded-xl bg-primary/5 border border-primary/10">
                   <CheckCircle2 className="w-4 h-4 text-primary flex-shrink-0 mt-0.5" />
@@ -224,22 +219,27 @@ export default function ReportView({ scan, onBack, onDeleted }) {
         </div>
       </motion.div>
 
-      {/* ===== Sensor Readings ===== */}
+      {/* ===== Sensor Status Grid ===== */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.1 }}>
-        <h2 className="text-sm font-heading font-semibold text-muted-foreground uppercase tracking-wide mb-4 px-1">Sensor Readings</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <SensorCard type="ph" value={scan.ph} label={t("pH")} delay={0} explanation={getSensorExplanation("ph", scan.ph)} />
-          <SensorCard type="tds" value={scan.tds} label={t("tds")} delay={0} explanation={getSensorExplanation("tds", scan.tds)} />
-          <SensorCard type="temperature" value={scan.temperature} label={t("temperature")} delay={0} explanation={getSensorExplanation("temperature", scan.temperature)} />
-          <SensorCard type="turbidity" value={scan.turbidity} label={t("turbidity")} delay={0} explanation={getSensorExplanation("turbidity", scan.turbidity)} />
-        </div>
+        <SensorStatusGrid scan={scan} t={t} />
       </motion.div>
 
       {/* ===== Disease Predictions ===== */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.15 }} className="premium-card p-6">
-        <h2 className="font-heading font-semibold text-lg mb-4">{t("diseaseRisk")}</h2>
+        <div className="flex items-center gap-2 mb-4">
+          <div className="w-9 h-9 rounded-xl bg-rose-500/15 flex items-center justify-center">
+            <Activity className="w-5 h-5 text-rose-400" />
+          </div>
+          <div>
+            <h2 className="font-heading font-semibold text-lg">{t("diseaseRisk")}</h2>
+            <p className="text-xs text-muted-foreground">Probability, severity, and AI confidence</p>
+          </div>
+        </div>
         <ResultDiseaseCards diseaseRisks={diseaseRisks} waterData={scan} t={t} />
       </motion.div>
+
+      {/* ===== Explainable AI ===== */}
+      <ExplainableAI scan={scan} />
 
       {/* ===== AI Medical Explanation ===== */}
       <motion.div initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4, delay: 0.2 }} className="premium-card p-6">
