@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mic, Square, MessageCircle, Loader2, CheckCircle2, Brain, Volume2, AlertCircle } from "lucide-react";
+import { Mic, Square, MessageCircle, Loader2, CheckCircle2, Brain, Volume2 } from "lucide-react";
 import { useAqua } from "@/lib/AquaContext";
 import AquaMascot from "@/components/aqua/AquaMascot";
 import AquaChat from "@/components/aqua/AquaChat";
@@ -20,8 +20,6 @@ export default function AquaContainer() {
     isSpeaking,
     isLoading,
     lang,
-    voiceError,
-    retry,
   } = useAqua();
 
   const [listening, setListening] = useState(false);
@@ -90,13 +88,9 @@ export default function AquaContainer() {
     StateIcon = Loader2;
     stateColor = "text-purple-400";
   } else if (isSpeaking) {
-    stateLabel = "Playing Voice...";
+    stateLabel = "Speaking...";
     StateIcon = Volume2;
     stateColor = "text-cyan-400";
-  } else if (voiceError) {
-    stateLabel = voiceError;
-    StateIcon = voiceError === "Tap to enable audio" ? Volume2 : AlertCircle;
-    stateColor = "text-warning";
   }
 
   return (
@@ -112,12 +106,7 @@ export default function AquaContainer() {
           initial={{ opacity: 0, y: -4 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.25 }}
-          onClick={voiceError ? retry : undefined}
-          className={`px-2.5 py-1 rounded-full glass border text-[10px] font-medium flex items-center gap-1 whitespace-nowrap ${
-            voiceError
-              ? "cursor-pointer border-warning/30 hover:bg-warning/10 text-warning"
-              : "border-border/40 text-muted-foreground"
-          }`}
+          className="px-2.5 py-1 rounded-full glass border border-border/40 text-[10px] font-medium text-muted-foreground flex items-center gap-1 whitespace-nowrap"
         >
           <StateIcon className={`w-2.5 h-2.5 ${stateColor} ${thinking || isGeneratingVoice ? "animate-spin" : ""}`} />
           {stateLabel}

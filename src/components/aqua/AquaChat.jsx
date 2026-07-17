@@ -17,7 +17,6 @@ export default function AquaChat({ onClose }) {
     stopSpeaking,
     startListening,
     stopListening,
-    voiceError,
   } = useAqua();
   const [input, setInput] = useState("");
   const [listening, setListening] = useState(false);
@@ -107,7 +106,7 @@ export default function AquaChat({ onClose }) {
             <div>
               <p className="font-semibold text-sm leading-tight">Aqua</p>
               <p className="text-xs text-muted-foreground leading-tight">
-                {thinking ? "Thinking..." : isLoading ? "Generating voice..." : isSpeaking ? "Playing voice..." : voiceError ? voiceError : listening ? "Listening..." : "AI Health Guide"}
+                {thinking ? "Thinking..." : isLoading ? "Generating voice..." : isSpeaking ? "Speaking..." : listening ? "Listening..." : "AI Health Guide"}
               </p>
             </div>
           </div>
