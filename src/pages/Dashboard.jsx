@@ -7,6 +7,7 @@ import WaterDrop3D from "@/components/WaterDrop3D";
 import FeatureGrid from "@/components/landing/FeatureGrid";
 import WhyAquaSentinel from "@/components/landing/WhyAquaSentinel";
 import WorkflowSection from "@/components/landing/WorkflowSection";
+import ConnectionStatusBadge from "@/components/ConnectionStatusBadge";
 
 export default function Dashboard() {
   const { t } = useLanguage();
@@ -68,6 +69,16 @@ export default function Dashboard() {
               <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
             </span>
             <span className="text-xs font-medium text-muted-foreground">AI-Powered Water Health Platform</span>
+          </motion.div>
+
+          {/* Hardware Status */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="mb-2"
+          >
+            <ConnectionStatusBadge />
           </motion.div>
 
           {/* Title */}

@@ -4,6 +4,7 @@ import { LayoutDashboard, Radio, BrainCircuit, TrendingUp, MapPin, Settings, Dro
 import { useLanguage } from "@/lib/LanguageContext";
 import { useAuth } from "@/lib/AuthContext";
 import ThemeToggle from "@/components/ThemeToggle";
+import ConnectionStatusBadge from "@/components/ConnectionStatusBadge";
 
 export default function Sidebar() {
   const { t } = useLanguage();
@@ -36,6 +37,9 @@ export default function Sidebar() {
               <h1 className="font-heading font-bold text-sm leading-tight tracking-tight">AquaSentinel</h1>
               <p className="text-[10px] text-cyan-500 font-semibold tracking-widest uppercase">AI Healthcare</p>
             </div>
+          </div>
+          <div className="mt-2 flex justify-center">
+            <ConnectionStatusBadge compact />
           </div>
         </div>
 
@@ -94,6 +98,7 @@ export default function Sidebar() {
               <Droplets className="w-4 h-4 text-white" />
             </div>
             <span className="font-heading font-bold text-sm tracking-tight">AquaSentinel AI</span>
+            <ConnectionStatusBadge compact />
           </div>
           <div className="flex items-center gap-1">
             <NavLink to="/settings/language" className="p-2 rounded-lg hover:bg-muted/50 transition-colors text-muted-foreground" title="Language"><Languages className="w-4 h-4" /></NavLink>

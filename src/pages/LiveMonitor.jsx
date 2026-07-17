@@ -6,6 +6,8 @@ import { useVoice } from "@/lib/VoiceContext";
 import { useAqua } from "@/lib/AquaContext";
 import { analyzeWater } from "@/lib/waterAnalysis";
 import { useWaterData } from "@/hooks/useWaterData";
+import { useHardwareStatus } from "@/lib/HardwareStatusContext";
+import ConnectionStatusBanner from "@/components/ConnectionStatusBanner";
 import ScanWelcome from "@/components/livescan/ScanWelcome";
 import LiveScanSequence from "@/components/LiveScanSequence";
 import AIProcessingTimeline from "@/components/livescan/AIProcessingTimeline";
@@ -20,7 +22,8 @@ export default function LiveMonitor() {
   const [result, setResult] = useState(null);
   const voicePlayedRef = useRef(false);
   const welcomeVoiceRef = useRef(false);
-  const { waterData, isConnected } = useWaterData();
+  const { waterData, status, retry } = useHardwareStatus();
+  const isConnected = status === "connected";
 
   // Scan state
   const readingsRef = useRef([]);
@@ -174,12 +177,19 @@ export default function LiveMonitor() {
   // ===== Render phases =====
   if (phase === "welcome") {
     return (
-      <ScanWelcome
-        isConnected={isConnected}
-        onStart={handleStartMonitoring}
-        sampleName={sampleName}
-        onSampleNameChange={setSampleName}
-      />
+      <>
+        {status === "disconnected" && (
+          <div className="max-w-3xl mx-auto pt-4 px-4">
+            <ConnectionStatusBanner />
+          </div>
+        )}
+        <ScanWelcome
+          isConnected={isConnected}
+          onStart={handleStartMonitoring}
+          sampleName={sampleName}
+          onSampleNameChange={setSampleName}
+        />
+      </>
     );
   }
 

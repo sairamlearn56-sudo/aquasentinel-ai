@@ -25,6 +25,7 @@ import { LanguageProvider } from '@/lib/LanguageContext';
 import { VoiceProvider } from '@/lib/VoiceContext';
 import VoiceIndicator from '@/components/VoiceIndicator';
 import { AquaProvider } from '@/lib/AquaContext';
+import { HardwareStatusProvider } from '@/lib/HardwareStatusContext';
 import { ThemeProvider } from '@/lib/ThemeContext';
 import AquaContainer from '@/components/aqua/AquaContainer';
 import PageLoader from '@/components/PageLoader';
@@ -92,8 +93,10 @@ function App() {
             <LanguageProvider>
               <VoiceProvider>
                 <AquaProvider>
-                  <AuthenticatedApp />
-                  <VoiceIndicator />
+                  <HardwareStatusProvider>
+                    <AuthenticatedApp />
+                    <VoiceIndicator />
+                  </HardwareStatusProvider>
                 </AquaProvider>
               </VoiceProvider>
             </LanguageProvider>
