@@ -1,11 +1,10 @@
 import React from "react";
 import { NavLink, useLocation } from "react-router-dom";
-import { LayoutDashboard, Radio, BrainCircuit, TrendingUp, MapPin, Settings, Droplets, User, LogOut, Waves, Bell, HeartPulse, BarChart3, Bot, Megaphone, FileText, Cpu } from "lucide-react";
+import { LayoutDashboard, Radio, BrainCircuit, TrendingUp, MapPin, Settings, Droplets, User, LogOut, Waves } from "lucide-react";
 import { useLanguage } from "@/lib/LanguageContext";
 import { useAuth } from "@/lib/AuthContext";
 import LanguageSelector from "@/components/LanguageSelector";
 import ThemeToggle from "@/components/ThemeToggle";
-import NotificationBell from "@/components/NotificationBell";
 
 export default function Sidebar() {
   const { t } = useLanguage();
@@ -19,14 +18,6 @@ export default function Sidebar() {
     { to: "/history", icon: TrendingUp, label: t("history") },
     { to: "/tracker", icon: Waves, label: "Water Tracker" },
     { to: "/map", icon: MapPin, label: t("communityMap") },
-    { to: "/alerts", icon: Bell, label: "Alert Center" },
-    { to: "/community-health", icon: HeartPulse, label: "Community Health" },
-    { to: "/analytics", icon: BarChart3, label: "Analytics" },
-    { to: "/ai-assistant", icon: Bot, label: "AI Assistant" },
-    { to: "/notifications", icon: Megaphone, label: "Notifications" },
-    { to: "/community-reporting", icon: FileText, label: "Community Reports" },
-    { to: "/reports", icon: FileText, label: "Reports" },
-    { to: "/sensors", icon: Cpu, label: "Sensor Management" },
     { to: "/settings", icon: Settings, label: t("settings") },
     { to: "/profile", icon: User, label: "Profile" },
   ];
@@ -87,7 +78,6 @@ export default function Sidebar() {
           </div>
           <div className="flex items-center justify-between gap-2 px-1">
             <LanguageSelector compact />
-            <NotificationBell compact />
             <ThemeToggle compact />
           </div>
         </div>
@@ -104,7 +94,6 @@ export default function Sidebar() {
           </div>
           <div className="flex items-center gap-2">
             <LanguageSelector compact />
-            <NotificationBell compact />
             <ThemeToggle compact />
           </div>
         </div>
